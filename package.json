@@ -1,5 +1,5 @@
 {
-  "name": "unobtainium",
+  "name": "unobtainium-enc",
   "version": "1.0.0",
   "description": "Recursive Three Dimensional Encryption",
   "main": "index.js",

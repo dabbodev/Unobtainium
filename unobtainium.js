@@ -6,10 +6,24 @@ class Unobtainium {
         this.data = null
     }
     triangulate(index, i2, i3) {
-            var a = Math.sqrt(Math.pow((this.key.poly[i2][0] - this.key.poly[index][0]), 2) + Math.pow((this.key.poly[i2][1] - this.key.poly[index][1]), 2) + Math.pow((this.key.poly[i2][2] - this.key.poly[index][2]), 2))
-            var c = Math.sqrt(Math.pow((this.key.poly[i3][0] - this.key.poly[i2][0]), 2) + Math.pow((this.key.poly[i3][1] - this.key.poly[i2][1]), 2) + Math.pow((this.key.poly[i3][2] - this.key.poly[i2][2]), 2))
-            var b = Math.sqrt(Math.pow((this.key.poly[index][0] - this.key.poly[i3][0]), 2) + Math.pow((this.key.poly[index][1] - this.key.poly[i3][1]), 2) + Math.pow((this.key.poly[index][2] - this.key.poly[i3][2]), 2))
-            
+            var a = 0
+            for (var i = 0; i < this.key.poly[index].length; i++) {
+                a += Math.pow((this.key.poly[i2][i] - this.key.poly[index][i]), 2)
+            }
+            a = Math.sqrt(a)
+
+            var b = 0
+            for (var i = 0; i < this.key.poly[index].length; i++) {
+                b += Math.pow((this.key.poly[index][i] - this.key.poly[i3][i]), 2)
+            }
+            b = Math.sqrt(b)
+
+            var c = 0
+            for (var i = 0; i < this.key.poly[index].length; i++) {
+                c += Math.pow((this.key.poly[i3][i] - this.key.poly[i2][i]), 2)
+            }
+            c = Math.sqrt(c)
+
             var cosC = (Math.pow(a, 2) + Math.pow(b, 2) - Math.pow(c, 2)) / (2 * a * b)
             var pi = Math.PI
             var deg = Math.acos(cosC) * (180/pi)
