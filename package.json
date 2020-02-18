@@ -1,11 +1,16 @@
 {
   "name": "unobtainium-enc",
-  "version": "1.0.0",
-  "description": "Recursive Three Dimensional Encryption",
+  "version": "1.1.0",
+  "description": "Data encyption using 3-dimensional geometry",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "david giles",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "mustache": "^4.0.0",
+    "stljs": "^0.1.5",
+    "yargs": "^15.1.0"
+  }
 }

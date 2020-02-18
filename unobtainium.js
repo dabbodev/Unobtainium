@@ -1,9 +1,32 @@
 var fs = require('fs')
+stljs = require('stljs')
 
 class Unobtainium {
-    constructor(key) {
+    constructor(key = {poly: []}) {
         this.key = key
         this.data = null
+    }
+    consume(atlfile) {
+        return new Promise((resolve, reject) => {
+            stljs.readFile(atlfile, (err, solid, name) => {
+                //console.log(solid)
+                var newkey = {poly: []}
+                solid.forEach((poly) => {
+                    poly.verticies.forEach((point) => {
+                        newkey.poly.push(point)
+                    })
+                })
+                //console.log(newkey)
+                this.key = newkey
+                resolve()
+            }
+            , (err, polygon, name) => {
+          //console.log(polygon)     
+            }
+
+        )
+        })        
+
     }
     triangulate(index, i2, i3) {
             var a = 0
@@ -49,36 +72,36 @@ class Unobtainium {
 
             
             if (angle < 15) {
-                var e = (d1 + d2 + d3) % 15
-                console.log(e)
+                var e = Math.floor((d1 + d2 + d3)) % 15
+                //console.log(e)
                 this.data[i] = (this.data[i] + e)
             } else if (angle < 30) {
-                var e = (d1 + d2 - d3) % 15
-                console.log(e)
+                var e = Math.floor((d1 + d2 - d3)) % 15
+                //console.log(e)
                 this.data[i] = (this.data[i] + e)
             } else if (angle < 45) {
-                var e = (d1 - d2 - d3) % 15
-                console.log(e)
+                var e = Math.floor((d1 - d2 - d3)) % 15
+                //console.log(e)
                 this.data[i] = (this.data[i] + e)
             } else if (angle < 60) {
-                var e = (d1 - d2 + d3) % 15
-                console.log(e)
+                var e = Math.floor((d1 - d2 + d3)) % 15
+                //console.log(e)
                 this.data[i] = (this.data[i] + e)
             } else if (angle < 75) {
-                var e = (d1 + d2 + d3) % 15
-                console.log(e)
+                var e = Math.ceil((d1 + d2 + d3)) % 15
+                //console.log(e)
                 this.data[i] = (this.data[i] - e)
             } else if (angle < 90) {
-                var e = (d1 + d2 - d3) % 15
-                console.log(e)
+                var e = Math.ceil((d1 + d2 - d3)) % 15
+                //console.log(e)
                 this.data[i] = (this.data[i] - e)
             } else if (angle < 105) {
-                var e = (d1 - d2 - d3) % 15
-                console.log(e)
+                var e = Math.ceil((d1 - d2 - d3)) % 15
+                //console.log(e)
                 this.data[i] = (this.data[i] - e)
             } else {
-                var e = (d1 - d2 + d3) % 15
-                console.log(e)
+                var e = Math.ceil((d1 - d2 + d3)) % 15
+                //console.log(e)
                 this.data[i] = (this.data[i] - e)
             }
             if (point == (this.key.poly.length - 1)) {
@@ -108,36 +131,36 @@ class Unobtainium {
 
             
             if (angle < 15) {
-                var e = (d1 + d2 + d3) % 15
-                console.log(e)
+                var e = Math.floor((d1 + d2 + d3)) % 15
+                //console.log(e)
                 this.data[i] = (this.data[i] - e)
             } else if (angle < 30) {
-                var e = (d1 + d2 - d3) % 15
-                console.log(e)
+                var e = Math.floor((d1 + d2 - d3)) % 15
+                //console.log(e)
                 this.data[i] = (this.data[i] - e)
             } else if (angle < 45) {
-                var e = (d1 - d2 - d3) % 15
-                console.log(e)
+                var e = Math.floor((d1 - d2 - d3)) % 15
+                //console.log(e)
                 this.data[i] = (this.data[i] - e)
             } else if (angle < 60) {
-                var e = (d1 - d2 + d3) % 15
-                console.log(e)
+                var e = Math.floor((d1 - d2 + d3)) % 15
+                //console.log(e)
                 this.data[i] = (this.data[i] - e)
             } else if (angle < 75) {
-                var e = (d1 + d2 + d3) % 15
-                console.log(e)
+                var e = Math.ceil((d1 + d2 + d3)) % 15
+                //console.log(e)
                 this.data[i] = (this.data[i] + e)
             } else if (angle < 90) {
-                var e = (d1 + d2 - d3) % 15
-                console.log(e)
+                var e = Math.ceil((d1 + d2 - d3)) % 15
+                //console.log(e)
                 this.data[i] = (this.data[i] + e)
             } else if (angle < 105) {
-                var e = (d1 - d2 - d3) % 15
-                console.log(e)
+                var e = Math.ceil((d1 - d2 - d3)) % 15
+                //console.log(e)
                 this.data[i] = (this.data[i] + e)
             } else {
-                var e = (d1 - d2 + d3) % 15
-                console.log(e)
+                var e = Math.ceil((d1 - d2 + d3)) % 15
+                //console.log(e)
                 this.data[i] = (this.data[i] + e)
             }
             if (point == (this.key.poly.length - 1)) {

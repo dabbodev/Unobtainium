@@ -1,0 +1,30 @@
+
+=== 0.1.0
+
+- initial public release
+- rid of dependency on stl2pov
+- can read binary files
+
+=== 0.1.1
+
+- bugfix: handedness of axis was wrong in pov mesh conversion
+
+=== 0.1.2
+
+- bugfix: the chunking of binary data is now fixed
+
+=== 0.1.3
+
+- bugfix: viewing angle was too low. model not shown if offset
+- bugfix: running multiple image conversions at the same time tramped each
+other
+
+=== 0.1.4
+
+- bugfix: model name needs to be escaped in case it happens to be a povray
+command
+- bugfix: change the viewing angle a bit
+
+=== 0.1.5
+
+- bugfix: imageify not reporting error correctly
