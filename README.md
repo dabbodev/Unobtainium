@@ -10,15 +10,17 @@ Live Demo: https://undemo-builder.web.app/
 
 Demo Instructions:
 1) Fill the list on the left with at least 3 or more (You will see 1, 2, 3 under #) points of data, using
-non-negative numbers.
+non-negative numbers. (Or use the I'm Feelin Lucky button to add a random point)
 2) Click import to add a file from your device to the demo. This does not upload anything; it
 simply grabs the first chunk of hex data that represents that file to display on the page.
 3) Click generate mask to generate an example of what the shift mask looks like when using the
 points you've added to the list on the left
 4) Click Up to shift the data Up using the mask (it is now encrypted)
 5) Click copy to copy the output back to the input
+6) Click Down to shift the data Down using the mask (it is now unencrypted)
 
 [BEGIN OLD DRUNK README (I APOLOGIZE)]
+
 Unobtainium uses 3-dimensional polygonal greometry to encrypt your data
 
 Currently implemented CLI file encrypting
