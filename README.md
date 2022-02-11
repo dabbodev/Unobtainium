@@ -6,9 +6,11 @@ character and shifting it according to instructions derived from the matrix. Bas
 it aligns 3 possible points, and then chooses a method of combining the x, y, and z point values
 based on the central angle of a line drawn between the three points.
 
-Live Demo: https://undemo-builder.web.app/
+Live Encryptor Demo: https://undemo-encryptor.web.app/
 
-Demo Instructions:
+Visual Demo: https://undemo-builder.web.app/
+
+Visual Demo Instructions:
 1) Fill the list on the left with at least 3 or more (You will see 1, 2, 3 under #) points of data, using
 non-negative numbers. (Or use the I'm Feelin Lucky button to add a random point)
 2) Click import to add a file from your device to the demo. This does not upload anything; it
