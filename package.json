@@ -10,7 +10,6 @@
   "license": "ISC",
   "dependencies": {
     "mustache": "^4.0.0",
-    "stljs": "^0.1.5",
     "yargs": "^15.1.0"
   }
 }

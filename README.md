@@ -21,25 +21,74 @@ points you've added to the list on the left
 5) Click copy to copy the output back to the input
 6) Click Down to shift the data Down using the mask (it is now unencrypted)
 
-[BEGIN OLD DRUNK README (I APOLOGIZE)]
+Unobtainium now supports being imported as a package!
 
-Unobtainium uses 3-dimensional polygonal greometry to encrypt your data
+to use unobtainium simply install it from npm using "npm install unobtainium-enc" and import it into your project 
 
-Currently implemented CLI file encrypting
-Currently working on package usage to encrypt any buffer within nodejs
+```javascript
+const unobtainium = require('unobtainium-enc')
+```
 
-How to use it:
-npm install unobtainium-enc
+to create a new instance of it to use in your project you will need to create a new encryptor object:
 
-then cd to its folder or install it globally to call from the CLI
+```javascript
+var encryptor = new unobtainium(key, options)
+```
 
-Arguemnts:
+the constructor for the object takes 2 variables, key and options.
+
+for the key parameter, you must provide one of the following: a string path to a .stl file (3D model), a string path to a .json file containing a json object where the key "poly" is an array of 3D points, or a javascript object where the key "poly" is an array of 3D points
+
+The options paramater is optional, but accepts an object containing the following possible options:
+
+keepPosition: default - false, if set to true the encryptor will retain it's position in the mask between obscuring/obtaining actions, this option is only best suited to live communications as it allows the continuous use of a large masking set over many small masking operations adding an extra layer of obfuscation. Not suited for masking files, as the starting position must then be remembered for proper unmasking
+
+floor: default - 0, under normal circumstances, unobtainium allows for a possible discrepancy of 0 in it's cipher mask, meaning that it is sometimes possible that a hex character in the set is actually the original unciphered character. if you set this to 1, it will boost each cipher character by 1, eliminating any possible original data from coming through
+
+point, shift, and gap: default - 0, these are the internal positional trackers unobtainium uses to define where it is currently reading from in the key. You can access these values by calling encryptor.point etc, and if you need to store those positions for later use, you can start an instance of the encryptor at that position by setting these options at creation
+
+
+to use unobtainium, simply place an ArrayBuffer of data into it's memory by calling
+
+```javascript
+encryptor.read(data)
+```
+
+to encrypt the data in unobtainium's memory, we can shift the sequence up by 1 mask factor by calling
+
+```javascript
+encryptor.obscure()
+```
+
+you can await this in async mode or use .then() to operate after the action, and the obscured data can be obtained from 
+
+```javascript
+encryptor.data
+```
+
+to decrypt the data in unobtainium's memory, we can shift the sequence down by 1 mask factor by calling
+
+```javascript
+encryptor.obtain()
+```
+
+you can await this in async mode or use .then() to operate after the action, and the data can be obtained from encryptor.data
+
+you can also have unobtainium write the currently stored data to the disk by calling
+
+```javascript
+encryptor.writeTo(filename)
+```
+
+unobtainium also functions from the CLI for basic file use
+
+Arguments:
 --encrypt [PATH]
 
-Sets the directory or file to encrypt, if a directory is chosen it will run through every file in the directory. The default value for this arguments is ./encrypt/
+Sets the directory or file to encrypt, if a directory is chosen it will run through every file in the directory. The default value for this argument is ./encrypt/
 
 --decrypt [PATH]
-Sets the directory or file to decrypt, if a directory is chosen it will run through every file in the directory. The default value for this arguments is ./decrypt/
+Sets the directory or file to decrypt, if a directory is chosen it will run through every file in the directory. The default value for this argument is ./decrypt/
 
 --out [PATH]
 Sets the output of the file to be saved. By default this argument is set to './out/' and appends .un to the file name if encrypting

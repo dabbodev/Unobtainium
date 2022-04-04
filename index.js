@@ -1,12 +1,12 @@
-var fs = require('fs')
-var path = require('path')
-var unobtainium = require('./unobtainium.js')
+const fs = require('fs')
+const path = require('path')
+const unobtainium = require('./unobtainium.js')
 
 var yargs = require('yargs').argv
 //console.log(yargs)
 
 var ENCRYPT = false
-var DECRYPT = true
+var DECRYPT = false
 var en_path = "./encrypt/"
 var de_path = "./decrypt/"
 var key = "sample.stl"
@@ -22,16 +22,8 @@ class Shell {
         key = yargs.key
       }
       
-      //Check for STL parsing
-      if (key.substr(key.length - 3, 3).toLowerCase() == "stl") {
-        this.unobtainable = new unobtainium()
-        this.unobtainable.consume(key).then(() => {
-           this.go()
-        })
-      } else {
-        this.unobtainable = new unobtainium(require(key))
+        this.unobtainable = new unobtainium(key)
         this.go()
-      }
     }
   }
 
@@ -172,4 +164,4 @@ if (yargs) {
   var shell = new Shell(yargs)
 }
 
-module.exports = Shell
+module.exports = unobtainium
