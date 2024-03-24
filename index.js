@@ -9,6 +9,7 @@ var ENCRYPT = false
 var DECRYPT = false
 var en_path = "./encrypt/"
 var de_path = "./decrypt/"
+var hash_path = "./hash/"
 var key = "sample.stl"
 var output = "./out/"
 
@@ -28,6 +29,33 @@ class Shell {
   }
 
   go() {
+    //Check if getting signature
+    if (yargs.gensig) {
+      if (typeof(yargs.gensig) == "string") {
+        hash_path = yargs.gensig
+      }
+      //Check if Directory
+      if (hash_path[hash_path.length - 1] == "/") {
+        fs.readdir(hash_path, (err, files) => {
+          if (err) {
+            console.error("Could not list the directory.", err);
+            process.exit(1);
+          }
+          files.forEach((file, index) => {
+            var fromPath = path.join(hash_path, file);
+            console.log(fromPath)
+            var contents = Buffer.from(fs.readFileSync(fromPath))
+            this.unobtainable.read(contents)
+            this.unobtainable.getSignature(yargs.sigpoints ? parseInt(yargs.sigpoints) : 5, yargs.out ? yargs.out : undefined) 
+          })
+        })
+      } else {
+        console.log(hash_path)
+        var contents = Buffer.from(fs.readFileSync(hash_path))
+        this.unobtainable.read(contents)
+        this.unobtainable.getSignature(yargs.sigpoints ? parseInt(yargs.sigpoints) : 5, yargs.out ? yargs.out : undefined) 
+      } 
+    }
     //Check if Encrypting
     if (yargs.encrypt) {
       //Check for Target
