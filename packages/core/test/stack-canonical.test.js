@@ -36,6 +36,19 @@ function layer(overrides = {}) {
   };
 }
 
+function swapLayer(overrides = {}) {
+  return {
+    id: 'swap-layer-1',
+    type: 'UN-SWAP',
+    mesh: mesh(),
+    state: { point: 0, shift: 1, gap: 1 },
+    swapCount: 3,
+    minShift: 1,
+    walkMode: 'permissive',
+    ...overrides,
+  };
+}
+
 function stack(overrides = {}) {
   return {
     format: 'UNSTACK',
@@ -117,6 +130,30 @@ test('changing turns changes commitment', () => {
   assert.notEqual(
     stackCommitment(stack({ layers: [layer({ turns: 1 })] })),
     stackCommitment(stack({ layers: [layer({ turns: 2 })] })),
+  );
+});
+
+test('changing layer type from UN-ROTATE to UN-SWAP changes commitment', () => {
+  assert.notEqual(
+    stackCommitment(stack({ layers: [layer({ id: 'same-layer' })] })),
+    stackCommitment(stack({ layers: [swapLayer({ id: 'same-layer' })] })),
+  );
+});
+
+test('changing UN-SWAP swapCount changes commitment', () => {
+  assert.notEqual(
+    stackCommitment(stack({ layers: [swapLayer({ swapCount: 3 })] })),
+    stackCommitment(stack({ layers: [swapLayer({ swapCount: 4 })] })),
+  );
+});
+
+test('reordering mixed UN-ROTATE and UN-SWAP layers changes commitment', () => {
+  const rotate = layer({ id: 'rotate-a', turns: 2 });
+  const swap = swapLayer({ id: 'swap-b', swapCount: 4 });
+
+  assert.notEqual(
+    stackCommitment(stack({ layers: [rotate, swap] })),
+    stackCommitment(stack({ layers: [swap, rotate] })),
   );
 });
 

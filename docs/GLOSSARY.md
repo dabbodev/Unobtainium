@@ -60,9 +60,9 @@ anchored walk state: A deterministic `{ point, shift, gap }` state derived from 
 
 UN-GWM: Unobtainium Geometric Walk Mask, the raw family of modes that derive mask values from an ordered 3D point-cloud walk.
 
-UNSTACK: The v3 unsigned stack recipe format for composing multiple ordered transform layers. Sprint 6 supports `format: "UNSTACK"`, `version: 1`, a shared window size, stack metadata, and `UN-ROTATE` layers only.
+UNSTACK: The v3 unsigned stack recipe format for composing multiple ordered transform layers. The current runtime supports `format: "UNSTACK"`, `version: 1`, a shared window size, stack metadata, and ordered `UN-ROTATE` and `UN-SWAP` layers.
 
-stack layer: One ordered entry in a stack recipe. A Sprint 6 layer declares an `UN-ROTATE` transform, mesh, optional packet graft, walk state mode, direction, turns, minimum shift, and walk mode.
+stack layer: One ordered entry in a stack recipe. A layer declares a supported transform type, mesh, optional packet graft, walk state mode, minimum shift, and walk mode. `UN-ROTATE` layers add direction and turns. `UN-SWAP` layers add swap count.
 
 stack recipe: The deterministic plain-data description of an unsigned stack. Recipe fields are intended to be inspectable and hashable; runtime-only fields and random source functions are not part of the recipe.
 
@@ -70,7 +70,7 @@ stack canonicalization: The deterministic serialization of a stack recipe for ha
 
 stack commitment: A stable SHA-256 hex digest over a canonical stack recipe. It changes when recipe metadata, layer order, layer parameters, or packet commitments change. It is not a signature and does not create secrecy by itself.
 
-layer order: The declared order in which stack layers apply. Reversal uses the same recipes in reverse order. Layer order is part of stack canonicalization and changes the stack commitment.
+layer order: The declared order in which stack layers apply. Reversal uses the same recipes in reverse order. Layer order is part of stack canonicalization and changes the stack commitment. Mixed `UN-ROTATE` and `UN-SWAP` stacks also make layer order payload-relevant because rotate changes values at positions while swap changes positions of values.
 
 stack reversal: The operation that undoes a stack by applying each supported layer's reverse transform in reverse layer order.
 
@@ -82,9 +82,9 @@ UN-GATE: A proposed policy gate that rejects unsafe modes, weak geometry, unknow
 
 UNPATCH: A proposed patch format for explicit, controlled malleability or delta workflows.
 
-UN-PERMUTE: The broader v3 position-permutation family. Sprint 7 implements only the standalone pair-swap subset through UN-SWAP. Block-local shuffle, Fisher-Yates shuffle, interleave, and braid modes remain future scope.
+UN-PERMUTE: The broader v3 position-permutation family. The current runtime implements only the pair-swap subset through UN-SWAP. Block-local shuffle, Fisher-Yates shuffle, interleave, and braid modes remain future scope.
 
-UN-SWAP: The Sprint 7 standalone position-permutation primitive. UN-SWAP consumes a swap plan and exchanges payload positions according to ordered swap pairs. It is not integrated into UNSTACK yet.
+UN-SWAP: The pair-swap position-permutation primitive. UN-SWAP consumes a swap plan and exchanges payload positions according to ordered swap pairs. It is supported as a standalone transform and as an unsigned UNSTACK layer.
 
 swap plan: A deterministic `UN-SWAP-PLAN` object generated from a mesh, walk state, payload length, swap count, window size, minimum shift, and walk mode. It records metadata, ordered swap pairs, and before/after walk states.
 

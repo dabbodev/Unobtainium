@@ -5,15 +5,22 @@ const {
   applyRotateTransform,
   reverseRotateTransform,
 } = require('./rotate-transform');
+const { generateSwapPlan } = require('./swap-plan');
+const {
+  applySwapTransform,
+  reverseSwapTransform,
+} = require('./swap-transform');
 const { applyPacketGraft } = require('./packet-graft');
 const { deriveAnchoredStateFromPacket } = require('./point-packet');
 
 const STACK_FORMAT = 'UNSTACK';
 const STACK_VERSION = 1;
 const LAYER_TYPE_ROTATE = 'UN-ROTATE';
+const LAYER_TYPE_SWAP = 'UN-SWAP';
 const GRAFT_MODES = new Set(['append', 'prepend', 'sandwich', 'none']);
 const WALK_MODES = new Set(['permissive', 'distinct']);
 const STATE_MODES = new Set(['explicit', 'anchored']);
+const LAYER_TYPES = new Set([LAYER_TYPE_ROTATE, LAYER_TYPE_SWAP]);
 
 function isPlainObject(value) {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
@@ -94,6 +101,15 @@ function assertTurns(turns) {
   }
 }
 
+function assertSwapCount(swapCount) {
+  if (!Number.isInteger(swapCount)) {
+    throw new TypeError('swapCount must be an integer');
+  }
+  if (swapCount < 0) {
+    throw new RangeError('swapCount must be a non-negative integer');
+  }
+}
+
 function assertMinShift(minShift, windowSize) {
   if (!Number.isInteger(minShift)) {
     throw new TypeError('minShift must be an integer');
@@ -142,11 +158,26 @@ function cloneMesh(mesh) {
   });
 }
 
+function layerWindowSizeForValidation(layer, stackWindowSize, layerIndex) {
+  if (layer.windowSize === undefined) {
+    return stackWindowSize;
+  }
+
+  try {
+    assertWindowSize(layer.windowSize);
+  } catch (error) {
+    error.message = `layer ${layerIndex} ${error.message}`;
+    throw error;
+  }
+
+  return layer.windowSize;
+}
+
 function validateLayer(layer, layerIndex, windowSize) {
   if (!isPlainObject(layer)) {
     throw new TypeError(`layer ${layerIndex} must be an object`);
   }
-  if (layer.type !== LAYER_TYPE_ROTATE) {
+  if (!LAYER_TYPES.has(layer.type)) {
     throw new RangeError(`layer ${layerIndex} type is not supported`);
   }
   if (layer.mesh === undefined) {
@@ -166,13 +197,19 @@ function validateLayer(layer, layerIndex, windowSize) {
   normalized.stateMode = normalized.stateMode === undefined ? 'explicit' : normalized.stateMode;
   normalized.minShift = normalized.minShift === undefined ? 0 : normalized.minShift;
   normalized.walkMode = normalized.walkMode === undefined ? 'permissive' : normalized.walkMode;
+  const effectiveWindowSize = layerWindowSizeForValidation(normalized, windowSize, layerIndex);
 
   assertMode('graftMode', normalized.graftMode, GRAFT_MODES);
   assertMode('stateMode', normalized.stateMode, STATE_MODES);
   assertMode('walkMode', normalized.walkMode, WALK_MODES);
-  assertDirection(normalized.direction);
-  assertTurns(normalized.turns);
-  assertMinShift(normalized.minShift, windowSize);
+  assertMinShift(normalized.minShift, effectiveWindowSize);
+
+  if (normalized.type === LAYER_TYPE_ROTATE) {
+    assertDirection(normalized.direction);
+    assertTurns(normalized.turns);
+  } else {
+    assertSwapCount(normalized.swapCount);
+  }
 
   if (normalized.stateMode === 'anchored') {
     if (normalized.packet === undefined) {
@@ -188,8 +225,8 @@ function validateLayer(layer, layerIndex, windowSize) {
   }
 
   if (normalized.packet !== undefined) {
-    applyPacketGraft(normalized.mesh, normalized.packet, normalized.graftMode);
-    deriveAnchoredStateFromPacket(normalized.packet, normalized.mesh.length);
+    const effectiveMesh = applyPacketGraft(normalized.mesh, normalized.packet, normalized.graftMode);
+    deriveAnchoredStateFromPacket(normalized.packet, effectiveMesh.length);
   }
 
   return normalized;
@@ -241,9 +278,14 @@ function stateForLayer(layer, effectiveMesh) {
   };
 }
 
-function instructionsForLayer(layer, dataLength, windowSize) {
+function windowSizeForLayer(layer, stackWindowSize) {
+  return layer.windowSize === undefined ? stackWindowSize : layer.windowSize;
+}
+
+function instructionsForLayer(layer, dataLength, stackWindowSize) {
   const effectiveMesh = effectiveMeshForLayer(layer);
   const state = stateForLayer(layer, effectiveMesh);
+  const windowSize = windowSizeForLayer(layer, stackWindowSize);
 
   return generateInstructionStream({
     mesh: effectiveMesh,
@@ -255,7 +297,23 @@ function instructionsForLayer(layer, dataLength, windowSize) {
   }).instructions;
 }
 
-function applyLayer(data, layer, windowSize, mutate, reverse) {
+function swapPlanForLayer(layer, dataLength, stackWindowSize) {
+  const effectiveMesh = effectiveMeshForLayer(layer);
+  const state = stateForLayer(layer, effectiveMesh);
+  const windowSize = windowSizeForLayer(layer, stackWindowSize);
+
+  return generateSwapPlan({
+    mesh: effectiveMesh,
+    state,
+    length: dataLength,
+    swapCount: layer.swapCount,
+    windowSize,
+    minShift: layer.minShift,
+    mode: layer.walkMode,
+  });
+}
+
+function applyRotateLayer(data, layer, windowSize, mutate, reverse) {
   const instructions = instructionsForLayer(layer, data.length, windowSize);
   const transformOptions = {
     direction: layer.direction,
@@ -266,6 +324,27 @@ function applyLayer(data, layer, windowSize, mutate, reverse) {
   return reverse
     ? reverseRotateTransform(data, instructions, transformOptions)
     : applyRotateTransform(data, instructions, transformOptions);
+}
+
+function applySwapLayer(data, layer, windowSize, mutate, reverse) {
+  const swapPlan = swapPlanForLayer(layer, data.length, windowSize);
+  const transformOptions = { mutate };
+
+  return reverse
+    ? reverseSwapTransform(data, swapPlan, transformOptions)
+    : applySwapTransform(data, swapPlan, transformOptions);
+}
+
+function applyLayer(data, layer, windowSize, mutate, reverse) {
+  if (layer.type === LAYER_TYPE_ROTATE) {
+    return applyRotateLayer(data, layer, windowSize, mutate, reverse);
+  }
+
+  if (layer.type === LAYER_TYPE_SWAP) {
+    return applySwapLayer(data, layer, windowSize, mutate, reverse);
+  }
+
+  throw new RangeError(`layer type ${layer.type} is not supported`);
 }
 
 function applyStack(data, stack, options = {}) {

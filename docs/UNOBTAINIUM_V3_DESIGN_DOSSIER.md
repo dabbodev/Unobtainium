@@ -46,6 +46,14 @@ Sprint 7 adds first-pass v3 `UN-SWAP` positional permutation support beside the 
 
 This sprint does not integrate `UN-SWAP` into `UNSTACK`. Direct function composition with `UN-ROTATE` is supported for tests and experiments, but stack recipes still accept `UN-ROTATE` layers only. Broader `UN-PERMUTE` modes such as block-local shuffle, Fisher-Yates shuffle, interleave, and braid remain future scope. Sprint 7 does not change `unobtainium.js`, the root package import, the legacy API, CLI behavior, filesystem transforms, STL parsing, signatures, signed stacks, gates, patching, generative geometry, fitting, steganography, or cryptographic security claims.
 
+## Sprint 8 Mixed UNSTACK Rotate and Swap Layers
+
+Sprint 8 integrates standalone `UN-SWAP` pair-swap layers into unsigned `UNSTACK` beside the existing `UN-ROTATE` stack runtime. Stack recipes can now contain ordered `UN-ROTATE` and `UN-SWAP` layers. Application runs layers in listed order, and reversal regenerates each layer's deterministic instruction stream or swap plan while undoing layers in reverse order.
+
+`UN-ROTATE` changes payload values at their current positions. `UN-SWAP` changes the positions of payload values. Mixed stacks therefore make layer order payload-relevant, not only commitment-relevant: rotating before swapping can produce different output than swapping before rotating when per-position rotate instructions differ.
+
+`UN-SWAP` stack layers support explicit or packet-anchored walk state, optional point-packet grafting, layer-level or stack-level window size, minimum shift, permissive or distinct walk mode, and a non-negative integer swap count. This remains the pair-swap subset only. Broader `UN-PERMUTE` modes such as block-local shuffle, Fisher-Yates shuffle, interleave, and braid remain future scope. Sprint 8 does not add signatures, `UNSTACK-SIGNED`, filesystem transforms, CLI behavior, STL parsing, gates, patching, generative geometry, fitting, steganography, or cryptographic security claims.
+
 ## Purpose
 
 Unobtainium v3 is intended to explore geometry-driven masking systems built around ordered 3D point-cloud keys. The current v2 code walks a list of points and derives byte shifts from triangle geometry. v3 keeps that creative center but treats the project as a lab for packet formats, stackable transforms, authentication boundaries, and controlled malleability experiments.
@@ -107,7 +115,7 @@ Current first-pass point packet fields include:
 
 ## Composable and Signed Stacks
 
-UNSTACK is the working name for a sequence of ordered transform layers. The current first-pass runtime supports unsigned recipes with `UN-ROTATE` layers only. `UN-SWAP` exists as a standalone transform but is not integrated into `UNSTACK` yet. Future stacks may combine geometric masking with compression, padding, permutation, patching, or steganographic placement.
+UNSTACK is the working name for a sequence of ordered transform layers. The current first-pass runtime supports unsigned recipes with `UN-ROTATE` and `UN-SWAP` layers. Future stacks may combine geometric masking with compression, padding, permutation, patching, or steganographic placement.
 
 UNSTACK-SIGNED is a future stack variant where the stack manifest and selected packet fields are signed. It is not implemented yet. The signature goal is provenance and tamper evidence, not secrecy.
 
