@@ -17,4 +17,5 @@ module.exports = {
   ...require('./src/packet-graft'),
   ...require('./src/stack-canonical'),
   ...require('./src/stack'),
+  ...require('./src/signed-stack'),
 };

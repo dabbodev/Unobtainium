@@ -54,6 +54,16 @@ Sprint 8 integrates standalone `UN-SWAP` pair-swap layers into unsigned `UNSTACK
 
 `UN-SWAP` stack layers support explicit or packet-anchored walk state, optional point-packet grafting, layer-level or stack-level window size, minimum shift, permissive or distinct walk mode, and a non-negative integer swap count. This remains the pair-swap subset only. Broader `UN-PERMUTE` modes such as block-local shuffle, Fisher-Yates shuffle, interleave, and braid remain future scope. Sprint 8 does not add signatures, `UNSTACK-SIGNED`, filesystem transforms, CLI behavior, STL parsing, gates, patching, generative geometry, fitting, steganography, or cryptographic security claims.
 
+## Sprint 9 UNSTACK-SIGNED Recipe Envelopes
+
+Sprint 9 adds first-pass v3 `UNSTACK-SIGNED` envelopes beside the legacy runtime. A signed stack envelope binds a normalized unsigned `UNSTACK` recipe to a signer ID, purpose, metadata, public key, signature algorithm, stack commitment, and payload commitment. The initial implementation supports Ed25519 signatures using Node's built-in `crypto` module.
+
+The signature payload covers signed-stack format/version context, the canonical stack commitment, signer ID, purpose, metadata, and algorithm. The stack commitment still protects stack meaning: layer order, layer parameters such as turns and swap count, packet commitments, and stack metadata all affect the unsigned recipe commitment. The payload commitment is a SHA-256 digest of the canonical signature payload for diagnostics and reproducibility checks.
+
+Sprint 9 signs stack recipes only. It does not implement scoped gates, patches, identity PKI, external certificate handling, trust policy, authorization semantics, layer signatures, gate signatures, patch signatures, filesystem transforms, CLI behavior, STL parsing, `UN-GATE`, `UNPATCH`, `UN-GEN`, `UN-FIT`, or `UN-STEG`.
+
+Signed stacks protect recipe integrity and signer intent for the envelope. They do not make raw UN-GWM modes cryptographically secure by themselves, and they do not prove that a signer is trusted unless a future policy layer says so.
+
 ## Purpose
 
 Unobtainium v3 is intended to explore geometry-driven masking systems built around ordered 3D point-cloud keys. The current v2 code walks a list of points and derives byte shifts from triangle geometry. v3 keeps that creative center but treats the project as a lab for packet formats, stackable transforms, authentication boundaries, and controlled malleability experiments.
@@ -117,7 +127,7 @@ Current first-pass point packet fields include:
 
 UNSTACK is the working name for a sequence of ordered transform layers. The current first-pass runtime supports unsigned recipes with `UN-ROTATE` and `UN-SWAP` layers. Future stacks may combine geometric masking with compression, padding, permutation, patching, or steganographic placement.
 
-UNSTACK-SIGNED is a future stack variant where the stack manifest and selected packet fields are signed. It is not implemented yet. The signature goal is provenance and tamper evidence, not secrecy.
+UNSTACK-SIGNED is a signed envelope around an unsigned stack recipe. The current first-pass form signs the canonical stack commitment plus signer ID, purpose, metadata, algorithm, and signed-stack format/version context. The signature goal is recipe integrity, provenance, and tamper evidence, not secrecy or authorization.
 
 Composable stacks should be explicit, inspectable, canonical, and hashable. Hidden transform order creates fragile behavior and makes security review harder.
 

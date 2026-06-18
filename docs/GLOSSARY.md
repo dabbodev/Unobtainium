@@ -76,7 +76,25 @@ stack reversal: The operation that undoes a stack by applying each supported lay
 
 unsigned stack: A stack recipe with no signature material. Sprint 6 implements unsigned stacks only.
 
-UNSTACK-SIGNED: A proposed signed stack manifest that provides provenance or tamper evidence for stack metadata. It is future scope and is not implemented yet.
+UNSTACK-SIGNED: The v3 signed stack envelope format. Sprint 9 supports a first-pass envelope around an unsigned `UNSTACK` recipe, with format/version context, stack commitment, signer ID, purpose, metadata, Ed25519 public key, signature algorithm, signature value, and payload commitment.
+
+signed stack envelope: A plain-data object that carries a normalized unsigned stack plus the signature fields needed to verify that stack commitment and related intent metadata. It protects recipe integrity and intent, not raw-mode cryptographic security by itself.
+
+stack signature: The Ed25519 signature over the canonical signature payload for a signed stack envelope. The signature does not include its own signature value.
+
+signer ID: A stable string naming the signer within the envelope, such as `owner:test`. Sprint 9 treats it as signed metadata only; it does not resolve identities, certificates, trust roots, or authorization.
+
+signature payload: The canonical signed data for `UNSTACK-SIGNED`: signed-stack format/version context, stack commitment, signer ID, purpose, metadata, and algorithm. It intentionally signs the stack commitment rather than raw runtime objects or functions.
+
+payload commitment: A SHA-256 hex digest over the canonical signature payload. It aids diagnostics and reproducibility checks, but it is not a substitute for signature verification.
+
+owner-signed stack: A signed stack whose purpose marks the recipe as intended by an owner or controlling signer. Sprint 9 uses `owner-signed-stack` as the default purpose string without adding trust policy or authorization semantics.
+
+layer-signed stack: A future-scope design direction where individual stack layers may carry signatures. It is not implemented in Sprint 9.
+
+gate-signed stack: A future-scope design direction where policy gates or gate decisions may carry signatures. It is not implemented in Sprint 9.
+
+patch-signed stack: A future-scope design direction where patch or delta material may carry signatures. It is not implemented in Sprint 9.
 
 UN-GATE: A proposed policy gate that rejects unsafe modes, weak geometry, unknown stack versions, or missing sealed-mode requirements.
 
