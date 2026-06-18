@@ -74,6 +74,16 @@ Gate verification answers whether the gate metadata is intact, whether an option
 
 Sprint 10 supports validation-only gates. Gates do not grant decryption, mutation rights, patch rights, or authorization beyond the literal `"validate"` permission. Merkle inclusion proofs, `UNPATCH`, mutation rights, decryption grants, external PKI, trust policy, and production authorization semantics remain future scope. Gate verification depends on the commitments supplied and does not make raw UN-GWM modes production-secure.
 
+## Sprint 11 UNPATCH Additive Patch Objects
+
+Sprint 11 adds first-pass v3 `UNPATCH` objects beside the legacy runtime. A patch is a committed additive delta over an exact byte/index range of ciphertext-like data. The current implementation supports only `operation: "add"` and records format/version context, object ID, range, deltas, ring window size, base object commitment, base slice commitment, optional signed-stack commitments, metadata, and a patch commitment.
+
+Patch commitments are domain-separated SHA-256 hex digests over the canonical patch payload, excluding the `patchCommitment` field itself. Changing the object ID, operation, range, deltas, window size, base commitments, signed-stack bindings, or metadata invalidates the patch commitment. Base object and slice commitments bind the patch to the exact transformed object bytes used when the patch was created.
+
+`UNPATCH` apply and reverse helpers operate in memory on arrays, `Uint8Array` instances, and Node `Buffer` instances. Applying an add patch adds each delta modulo the declared window size inside the bounded range. Reversing the patch subtracts the same deltas modulo the same window and should restore the pre-patch transformed data when the matching object and patch are used.
+
+Sprint 11 is not an authorization system. Patches do not grant mutation rights, decryption rights, or policy approval by themselves. Patch signatures, patch gates or external authorization policy, Merkle inclusion proofs, filesystem or CLI patching, decryption grants, and non-add operations such as replace, delete, or move remain future scope. Controlled malleability is dangerous unless it is explicitly authorized and bounded by a higher-level policy.
+
 ## Purpose
 
 Unobtainium v3 is intended to explore geometry-driven masking systems built around ordered 3D point-cloud keys. The current v2 code walks a list of points and derives byte shifts from triangle geometry. v3 keeps that creative center but treats the project as a lab for packet formats, stackable transforms, authentication boundaries, and controlled malleability experiments.
@@ -149,7 +159,7 @@ Future gates may grow into broader policy objects that enforce key fingerprints,
 
 ## Controlled Malleability
 
-Raw v2-style byte shifting is malleable: changing masked bytes can predictably affect obtained bytes. v3 should treat malleability as an explicit mode decision.
+Raw v2-style byte shifting is malleable: changing masked bytes can predictably affect obtained bytes. v3 should treat malleability as an explicit mode decision. Sprint 11 exposes only a committed, bounded add-patch form for experiments; it does not make malleability safe or authorized by itself.
 
 Sealed mode should reject tampered packets through authentication. Malleable mode may intentionally allow local edits, patches, or reversible deltas for research workflows. UNPATCH is the working name for patch packets that intentionally describe changes against a masked or unmasked stream.
 
@@ -162,6 +172,20 @@ These modes are future research directions. They should not be exposed as securi
 ## Glossary
 
 `UN-GATE`: A v3 validation-only capability object that binds an object ID, byte range, object commitment, slice commitment, signed stack commitments, metadata, and a canonical gate commitment.
+
+`UNPATCH`: A v3 committed patch object for explicit, bounded malleability experiments. Sprint 11 supports only additive `"add"` patches over an exact range.
+
+Add patch: The Sprint 11 `UNPATCH` operation that adds declared integer deltas to corresponding data positions modulo the patch window size.
+
+Patch commitment: A domain-separated SHA-256 hex digest over the canonical patch payload. It covers format/version, object ID, operation, range, deltas, window size, base commitments, signed-stack bindings, and metadata, but not the `patchCommitment` field itself.
+
+Base object commitment: The full-object commitment for the data bytes that a patch was created against.
+
+Base slice commitment: The slice commitment for the exact patch range in the data bytes that a patch was created against.
+
+Controlled malleability: An explicitly bounded mode where changes are represented as committed patch objects. It is dangerous unless authorized by a higher-level policy and is not a security claim.
+
+Patch reversal: The in-memory inverse of an add patch. It subtracts the committed deltas modulo the same window size to restore the pre-patch data when the matching object and patch are used.
 
 Validation gate: The Sprint 10 `UN-GATE` form whose only supported permission is `"validate"`. It can confirm scoped commitment matches but does not grant decryption, mutation, patching, or broader authorization.
 

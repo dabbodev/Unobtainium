@@ -98,7 +98,19 @@ patch-signed stack: A future-scope design direction where patch or delta materia
 
 UN-GATE: A proposed policy gate that rejects unsafe modes, weak geometry, unknown stack versions, or missing sealed-mode requirements.
 
-UNPATCH: A proposed patch format for explicit, controlled malleability or delta workflows.
+UNPATCH: A v3 committed patch format for explicit, controlled malleability or delta workflows. Sprint 11 supports only bounded `"add"` patches and does not grant authorization by itself.
+
+add patch: The Sprint 11 UNPATCH operation that adds declared integer deltas to corresponding data positions modulo the patch window size.
+
+patch commitment: A domain-separated SHA-256 hex digest over a canonical patch payload. It covers format/version, object ID, operation, range, deltas, window size, base object commitment, base slice commitment, signed-stack bindings, and metadata, but not the `patchCommitment` field itself.
+
+base object commitment: The full-object commitment for the exact bytes a patch was created against.
+
+base slice commitment: The slice commitment for the exact bounded range a patch was created against.
+
+controlled malleability: An explicitly bounded workflow where changes are represented by committed patch objects. It is dangerous unless authorized by a higher-level policy and is not a cryptographic security claim.
+
+patch reversal: The inverse of an add patch. It subtracts the committed deltas modulo the same window size to restore the pre-patch data when the matching object and patch are used.
 
 UN-PERMUTE: The broader v3 position-permutation family. The current runtime implements only the pair-swap subset through UN-SWAP. Block-local shuffle, Fisher-Yates shuffle, interleave, and braid modes remain future scope.
 
