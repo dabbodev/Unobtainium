@@ -2,6 +2,10 @@
 
 Status: design groundwork. This document describes a future experimental cipher lab and does not describe production-grade encryption.
 
+## Sprint 2 Core Skeleton
+
+Sprint 2 adds a small v3 core skeleton beside the legacy implementation under `packages/core`. It introduces deterministic helpers for finite ring rotation, integer fixed-point point normalization and serialization, triple-horizon estimates, and a minimal point/shift/gap walk state. This skeleton is intentionally separate from `unobtainium.js` and does not replace the legacy API, implement angle math, add packet formats, or make new security claims.
+
 ## Purpose
 
 Unobtainium v3 is intended to explore geometry-driven masking systems built around ordered 3D point-cloud keys. The current v2 code walks a list of points and derives byte shifts from triangle geometry. v3 keeps that creative center but treats the project as a lab for packet formats, stackable transforms, authentication boundaries, and controlled malleability experiments.
@@ -92,4 +96,3 @@ These modes are future research directions. They should not be exposed as securi
 - No claim that raw UN-GWM is production-grade encryption.
 - No attempt to hide the known legacy weaknesses.
 - No new packet runtime until the legacy behavior is covered by tests.
-

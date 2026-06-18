@@ -30,6 +30,10 @@ UN-GATE: A proposed policy gate that rejects unsafe modes, weak geometry, unknow
 
 UNPATCH: A proposed patch format for explicit, controlled malleability or delta workflows.
 
+UN-PERMUTE: A future optional position-permutation layer that would reorder payload positions separately from byte or packet mask values. UN-PERMUTE is not implemented yet.
+
+UN-SWAP: A future optional position-permutation primitive that would swap payload positions under declared walk or packet rules. UN-SWAP is not implemented yet.
+
 UN-GEN: A proposed deterministic generative geometry mode for creating ordered point clouds from reproducible parameters.
 
 UN-FIT: A proposed mode for fitting or adapting point clouds to target constraints.
@@ -45,4 +49,3 @@ sealed mode: A future mode that authenticates data and metadata before returning
 malleable mode: A mode that intentionally allows controlled changes or patches and does not promise tamper rejection.
 
 mask horizon: The number of mask steps before the walk state and mask pattern repeat for a given point cloud and parameter set.
-
