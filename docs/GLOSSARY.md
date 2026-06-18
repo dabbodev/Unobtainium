@@ -82,9 +82,19 @@ UN-GATE: A proposed policy gate that rejects unsafe modes, weak geometry, unknow
 
 UNPATCH: A proposed patch format for explicit, controlled malleability or delta workflows.
 
-UN-PERMUTE: A future optional position-permutation layer that would reorder payload positions separately from byte or packet mask values. UN-PERMUTE is not implemented yet.
+UN-PERMUTE: The broader v3 position-permutation family. Sprint 7 implements only the standalone pair-swap subset through UN-SWAP. Block-local shuffle, Fisher-Yates shuffle, interleave, and braid modes remain future scope.
 
-UN-SWAP: A future optional position-permutation primitive that would swap payload positions under declared walk or packet rules. UN-SWAP is not implemented yet.
+UN-SWAP: The Sprint 7 standalone position-permutation primitive. UN-SWAP consumes a swap plan and exchanges payload positions according to ordered swap pairs. It is not integrated into UNSTACK yet.
+
+swap plan: A deterministic `UN-SWAP-PLAN` object generated from a mesh, walk state, payload length, swap count, window size, minimum shift, and walk mode. It records metadata, ordered swap pairs, and before/after walk states.
+
+swap pair: A two-integer position pair `[a, b]` inside a swap plan. Applying the pair exchanges payload positions `a` and `b`. A self-swap such as `[3, 3]` is a valid no-op.
+
+swap plan commitment: A stable SHA-256 hex digest over the canonical plain-data representation of a swap plan. Ordered swaps and plan metadata affect the commitment. It is not a signature and does not create secrecy by itself.
+
+positional permutation: A transform that changes where payload values sit while preserving the values themselves. UN-SWAP provides first-pass positional permutation through ordered pair swaps.
+
+reverse swap transform: The inverse UN-SWAP operation. It applies the same swap pairs in reverse order to restore data that was transformed by the matching forward swap plan.
 
 UN-GEN: A proposed deterministic generative geometry mode for creating ordered point clouds from reproducible parameters.
 

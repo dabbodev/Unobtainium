@@ -11,6 +11,8 @@ module.exports = {
   ...require('./src/instruction'),
   ...require('./src/instruction-stream'),
   ...require('./src/rotate-transform'),
+  ...require('./src/swap-plan'),
+  ...require('./src/swap-transform'),
   ...require('./src/point-packet'),
   ...require('./src/packet-graft'),
   ...require('./src/stack-canonical'),

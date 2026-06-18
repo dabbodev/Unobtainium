@@ -38,6 +38,14 @@ Sprint 6 also defines stack canonicalization and stack commitments. Canonicaliza
 
 This sprint implements unsigned stacks only. `UNSTACK-SIGNED`, signatures, `UN-PERMUTE`, `UN-SWAP`, filesystem transforms, CLI support, STL parsing, gates, patching, generative geometry, fitting, steganography, and new cryptographic security claims remain future scope.
 
+## Sprint 7 UN-SWAP Pair-Swap Permutation
+
+Sprint 7 adds first-pass v3 `UN-SWAP` positional permutation support beside the legacy runtime. A swap plan is generated deterministically from the existing mask instruction stream by producing two instructions per requested swap and mapping each instruction's raw shift value into a payload position. The result is an ordered list of swap pairs such as `[0, 3]`, where each pair exchanges payload positions while leaving payload values unchanged.
+
+`UN-SWAP` is currently implemented as a standalone in-memory pair-swap transform for Array, `Uint8Array`, and Node `Buffer` inputs. Applying a swap plan runs pairs in listed order. Reversing a swap plan runs the same pairs in reverse order. Self-swaps are valid deterministic no-ops. Swap plans also have stable SHA-256 commitments over their canonical plain-data representation, including metadata and ordered swaps.
+
+This sprint does not integrate `UN-SWAP` into `UNSTACK`. Direct function composition with `UN-ROTATE` is supported for tests and experiments, but stack recipes still accept `UN-ROTATE` layers only. Broader `UN-PERMUTE` modes such as block-local shuffle, Fisher-Yates shuffle, interleave, and braid remain future scope. Sprint 7 does not change `unobtainium.js`, the root package import, the legacy API, CLI behavior, filesystem transforms, STL parsing, signatures, signed stacks, gates, patching, generative geometry, fitting, steganography, or cryptographic security claims.
+
 ## Purpose
 
 Unobtainium v3 is intended to explore geometry-driven masking systems built around ordered 3D point-cloud keys. The current v2 code walks a list of points and derives byte shifts from triangle geometry. v3 keeps that creative center but treats the project as a lab for packet formats, stackable transforms, authentication boundaries, and controlled malleability experiments.
@@ -99,7 +107,7 @@ Current first-pass point packet fields include:
 
 ## Composable and Signed Stacks
 
-UNSTACK is the working name for a sequence of ordered transform layers. The current first-pass runtime supports unsigned recipes with `UN-ROTATE` layers only. Future stacks may combine geometric masking with compression, padding, permutation, patching, or steganographic placement.
+UNSTACK is the working name for a sequence of ordered transform layers. The current first-pass runtime supports unsigned recipes with `UN-ROTATE` layers only. `UN-SWAP` exists as a standalone transform but is not integrated into `UNSTACK` yet. Future stacks may combine geometric masking with compression, padding, permutation, patching, or steganographic placement.
 
 UNSTACK-SIGNED is a future stack variant where the stack manifest and selected packet fields are signed. It is not implemented yet. The signature goal is provenance and tamper evidence, not secrecy.
 
