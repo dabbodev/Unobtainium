@@ -16,15 +16,67 @@ turns/rotation depth: The number of completed advances through the point ring or
 
 minShift: A proposed v3 name for the minimum nonzero mask shift. The v2 option `floor` plays this role for byte shifts.
 
-point packet: A proposed packet envelope that records payload bytes plus the geometry, walk, and mode metadata needed to reproduce or verify a transform.
+geometry oracle: The deterministic geometry layer that converts a selected point triple into measured properties such as side lengths, angle, and degeneracy status. It is an oracle in the design sense only; it is not a security boundary.
+
+angle bucket: A stable named range for a triangle angle. Sprint 3 preserves the legacy-inspired angle boundaries while adding an explicit `degenerate` bucket for triples that should not produce ordinary angle-derived rules.
+
+coordinate rule: A data-driven formula that maps a primary point's coordinates to a raw integer shift value, such as `floor(x + y + z)` or `ceil(x - y - z)`, before ring and minShift adjustment.
+
+degenerate triple: A selected three-point sample that cannot form a useful triangle because points repeat, an edge has zero length, coordinates are non-finite, or the geometry collapses into an impossible or zero-area triangle.
+
+mask instruction: A deterministic v3 object describing one UN-GWM mask step: selected indices and points, angle or degeneracy status, bucket and rule IDs, raw shift, adjusted shift, window parameters, mode, and before/after walk states. A mask instruction describes what a later transform should do; it does not mutate payload data by itself.
+
+instruction stream: An ordered list of mask instructions generated from an initial mesh, walk state, window, minimum shift, bucket table, and rule table. The stream records the starting walk state and final walk state so a transform can be reproduced without hidden mutable runtime state.
+
+UN-ROTATE: The first v3 in-memory data transform. UN-ROTATE consumes a mask instruction stream and applies reversible ring rotations to payload values. It is experimental and is not a security claim.
+
+rotate transform: The Sprint 4 transform layer that applies each instruction's `shift` and `windowSize` to the corresponding data position. It consumes instructions and ring helpers, not triangle geometry internals.
+
+transform direction: The declared direction for a rotate transform. `up` applies a positive ring rotation and `down` applies the inverse rotation.
+
+transform turns: The integer rotation multiplier applied to each instruction shift before ring rotation. Turns normalize through the instruction window, so a full ring of turns is identity for that window.
+
+point packet: An ordered 3D coordinate packet derived from context, nonce, or random material. Point packets may be public. They perturb, bind, diversify, and contextualize a private mesh, but they do not provide secrecy by themselves.
+
+UNPKT: The v3 working packet family for ordered point packets. Current first-pass UNPKT packets contain packet metadata, ordered fixed-point integer point triples, and a stable commitment over canonical packet fields.
+
+UNPKT-CONTEXT: A deterministic point packet derived from supplied context material, such as public session or application context.
+
+UNPKT-NONCE: A deterministic point packet derived from supplied nonce bytes or a nonce string.
+
+UNPKT-RANDOM: A point packet derived from cryptographic random bytes by default. It can accept an injected random-byte source for deterministic tests.
+
+point packet commitment: A stable SHA-256 digest over canonical packet fields: packet type, version, point count, scale, coordinate range, and ordered point triples. The commitment excludes source functions and does not create secrecy by itself.
+
+packet graft: The process of combining a base mesh with a point packet's ordered points to produce an effective mesh for instruction generation.
+
+append graft: A packet graft mode that places base mesh points first and packet points after them.
+
+prepend graft: A packet graft mode that places packet points first and base mesh points after them.
+
+sandwich graft: A packet graft mode that splits packet points into two ordered halves, places the first half before the base mesh, and places the second half after the base mesh.
+
+anchored walk state: A deterministic `{ point, shift, gap }` state derived from a point packet commitment and a target mesh point count. It anchors instruction-stream generation to packet material without mutating the packet.
 
 UN-GWM: Unobtainium Geometric Walk Mask, the raw family of modes that derive mask values from an ordered 3D point-cloud walk.
 
-UNPKT: A proposed packet format for carrying masked data and explicit walk metadata.
+UNSTACK: The v3 unsigned stack recipe format for composing multiple ordered transform layers. Sprint 6 supports `format: "UNSTACK"`, `version: 1`, a shared window size, stack metadata, and `UN-ROTATE` layers only.
 
-UNSTACK: A proposed manifest for composing multiple transforms or packets in a declared order.
+stack layer: One ordered entry in a stack recipe. A Sprint 6 layer declares an `UN-ROTATE` transform, mesh, optional packet graft, walk state mode, direction, turns, minimum shift, and walk mode.
 
-UNSTACK-SIGNED: A proposed signed stack manifest that provides provenance or tamper evidence for stack metadata.
+stack recipe: The deterministic plain-data description of an unsigned stack. Recipe fields are intended to be inspectable and hashable; runtime-only fields and random source functions are not part of the recipe.
+
+stack canonicalization: The deterministic serialization of a stack recipe for hashing. Object keys are sorted, array order is preserved, unsupported values are rejected, and known runtime-only fields are excluded.
+
+stack commitment: A stable SHA-256 hex digest over a canonical stack recipe. It changes when recipe metadata, layer order, layer parameters, or packet commitments change. It is not a signature and does not create secrecy by itself.
+
+layer order: The declared order in which stack layers apply. Reversal uses the same recipes in reverse order. Layer order is part of stack canonicalization and changes the stack commitment.
+
+stack reversal: The operation that undoes a stack by applying each supported layer's reverse transform in reverse layer order.
+
+unsigned stack: A stack recipe with no signature material. Sprint 6 implements unsigned stacks only.
+
+UNSTACK-SIGNED: A proposed signed stack manifest that provides provenance or tamper evidence for stack metadata. It is future scope and is not implemented yet.
 
 UN-GATE: A proposed policy gate that rejects unsafe modes, weak geometry, unknown stack versions, or missing sealed-mode requirements.
 
