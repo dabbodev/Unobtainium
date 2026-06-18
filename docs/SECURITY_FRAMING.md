@@ -1,0 +1,27 @@
+# Security Framing
+
+Unobtainium raw UN-GWM mode is experimental. It is a geometry-driven masking experiment, not production-grade encryption. Do not use the current raw mode to protect secrets, credentials, private files, regulated data, or adversarial communications.
+
+This project should avoid security claims until a future sealed mode has a precise construction, tests, misuse-resistant defaults, authentication, stable serialization, and independent review.
+
+## Current Raw Mode Risks
+
+- Mask reuse: using the same point cloud and walk start for multiple messages can expose relationships between plaintexts.
+- Weak key misuse: small, repeated, hand-picked, or predictable point clouds can produce weak or short mask patterns.
+- Unauthenticated malleability: the current byte-shift transform has no integrity check. Modified masked bytes can produce modified obtained bytes without detection.
+- Float instability: STL parsing and geometric calculations use floating-point values. Platform, parser, precision, or normalization differences can change derived masks.
+- Biased masks: geometric angle buckets and coordinate arithmetic may produce non-uniform shift distributions.
+- Degenerate points: duplicate points, collinear samples, zero-length triangle edges, too few points, or NaN angles can create invalid or weak mask values.
+- Known plaintext: if an attacker knows or guesses plaintext and masked output at the same position, they can infer the mask value for that position.
+- License mismatch: `package.json` currently declares `ISC`, while `LICENSE` contains GPL-3.0 text. This should be resolved before publishing or depending on the package.
+
+## Language Guidance
+
+Use terms like experimental, masking, obfuscation, research mode, and legacy behavior for the current raw mode.
+
+Avoid terms like secure encryption, military grade, unbreakable, production safe, authenticated, tamper-proof, or cryptographically proven for the current raw mode.
+
+## Future Safety Direction
+
+A future sealed mode should authenticate packets or stacks before exposing obtained data. It should also define canonical key serialization, reject degenerate geometry, require nonces or unique walk domains, and document exactly what security property it attempts to provide.
+

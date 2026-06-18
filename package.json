@@ -4,7 +4,7 @@
   "description": "Data encyption using 3-dimensional geometry",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test"
   },
   "author": "david giles",
   "license": "ISC",
