@@ -84,6 +84,16 @@ Patch commitments are domain-separated SHA-256 hex digests over the canonical pa
 
 Sprint 11 is not an authorization system. Patches do not grant mutation rights, decryption rights, or policy approval by themselves. Patch signatures, patch gates or external authorization policy, Merkle inclusion proofs, filesystem or CLI patching, decryption grants, and non-add operations such as replace, delete, or move remain future scope. Controlled malleability is dangerous unless it is explicitly authorized and bounded by a higher-level policy.
 
+## Sprint 12 UNPATCH-SIGNED Intent Envelopes
+
+Sprint 12 adds first-pass v3 `UNPATCH-SIGNED` envelopes beside the legacy runtime. A signed patch envelope binds a committed `UNPATCH` object to a signer ID, purpose, metadata, public key, signature algorithm, patch commitment, and payload commitment. The initial implementation supports Ed25519 signatures using Node's built-in `crypto` module and reuses the same key style as signed stacks.
+
+The signed patch payload covers signed-patch format/version context, explicit `UNPATCH-SIGNED:v1` domain separation, the patch commitment, signer ID, purpose, metadata, and algorithm. The signature signs the patch commitment rather than raw runtime objects or functions, so the existing `UNPATCH` commitment remains responsible for binding range, deltas, window size, base object commitment, base slice commitment, signed-stack bindings, operation, object ID, and patch metadata.
+
+Sprint 12 signs patch intent only. Signed patches do not implement full authorization policy, patch gates, capability checks, decryption grants, external trust policy, Merkle inclusion proofs, filesystem patching, CLI patching, STL parsing, or non-add patch operations. A patch signature can show that a signer endorsed an exact committed patch for a stated purpose, but it does not prove that the signer is trusted or allowed to mutate an object unless a future policy layer says so.
+
+Controlled malleability remains dangerous unless explicitly authorized and bounded by higher-level policy. Patch gates and capability checks are future scope. Patch signatures do not grant decryption. Merkle inclusion proofs and filesystem/CLI patching are future scope.
+
 ## Purpose
 
 Unobtainium v3 is intended to explore geometry-driven masking systems built around ordered 3D point-cloud keys. The current v2 code walks a list of points and derives byte shifts from triangle geometry. v3 keeps that creative center but treats the project as a lab for packet formats, stackable transforms, authentication boundaries, and controlled malleability experiments.
@@ -149,6 +159,8 @@ UNSTACK is the working name for a sequence of ordered transform layers. The curr
 
 UNSTACK-SIGNED is a signed envelope around an unsigned stack recipe. The current first-pass form signs the canonical stack commitment plus signer ID, purpose, metadata, algorithm, and signed-stack format/version context. The signature goal is recipe integrity, provenance, and tamper evidence, not secrecy or authorization.
 
+UNPATCH-SIGNED is a signed envelope around a committed patch object. The current first-pass form signs the canonical patch commitment plus signer ID, purpose, metadata, algorithm, signed-patch format/version context, and explicit `UNPATCH-SIGNED:v1` domain separation. The signature goal is patch intent and integrity, not authorization, decryption, or filesystem mutation rights.
+
 Composable stacks should be explicit, inspectable, canonical, and hashable. Hidden transform order creates fragile behavior and makes security review harder.
 
 ## Gates
@@ -159,7 +171,7 @@ Future gates may grow into broader policy objects that enforce key fingerprints,
 
 ## Controlled Malleability
 
-Raw v2-style byte shifting is malleable: changing masked bytes can predictably affect obtained bytes. v3 should treat malleability as an explicit mode decision. Sprint 11 exposes only a committed, bounded add-patch form for experiments; it does not make malleability safe or authorized by itself.
+Raw v2-style byte shifting is malleable: changing masked bytes can predictably affect obtained bytes. v3 should treat malleability as an explicit mode decision. Sprint 11 exposes only a committed, bounded add-patch form for experiments; Sprint 12 can sign the intent for that committed patch. Neither form makes malleability safe or authorized by itself.
 
 Sealed mode should reject tampered packets through authentication. Malleable mode may intentionally allow local edits, patches, or reversible deltas for research workflows. UNPATCH is the working name for patch packets that intentionally describe changes against a masked or unmasked stream.
 
@@ -175,9 +187,23 @@ These modes are future research directions. They should not be exposed as securi
 
 `UNPATCH`: A v3 committed patch object for explicit, bounded malleability experiments. Sprint 11 supports only additive `"add"` patches over an exact range.
 
+`UNPATCH-SIGNED`: A v3 signed patch intent envelope that binds a committed `UNPATCH` object to a signer ID, purpose, metadata, public key, signature algorithm, signature value, and payload commitment.
+
+Signed patch envelope: A plain-data object that carries a committed patch plus signature fields needed to verify the patch commitment and signed intent metadata.
+
 Add patch: The Sprint 11 `UNPATCH` operation that adds declared integer deltas to corresponding data positions modulo the patch window size.
 
 Patch commitment: A domain-separated SHA-256 hex digest over the canonical patch payload. It covers format/version, object ID, operation, range, deltas, window size, base commitments, signed-stack bindings, and metadata, but not the `patchCommitment` field itself.
+
+Patch signature: The Ed25519 signature over the canonical signed patch payload. It does not include its own signature value and does not grant authorization or decryption.
+
+Signed patch payload: The canonical signed data for `UNPATCH-SIGNED`: signed-patch domain and format/version context, patch commitment, signer ID, purpose, metadata, and algorithm.
+
+Patch payload commitment: A SHA-256 hex digest over the canonical signed patch payload. It aids diagnostics and reproducibility checks, but it is not a substitute for signature verification.
+
+Owner-signed patch: A signed patch whose purpose marks the committed patch as intended by an owner or controlling signer. Sprint 12 uses `owner-signed-patch` as the default purpose string without adding trust policy or authorization semantics.
+
+Patch authorization intent: The signed statement that a signer endorsed an exact committed patch for a purpose. It is intent metadata only; full authorization policy, patch gates, and capability checks are future scope.
 
 Base object commitment: The full-object commitment for the data bytes that a patch was created against.
 

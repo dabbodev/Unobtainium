@@ -94,11 +94,25 @@ layer-signed stack: A future-scope design direction where individual stack layer
 
 gate-signed stack: A future-scope design direction where policy gates or gate decisions may carry signatures. It is not implemented in Sprint 9.
 
-patch-signed stack: A future-scope design direction where patch or delta material may carry signatures. It is not implemented in Sprint 9.
+patch-signed stack: A future-scope design direction where patch or delta material may influence stack policy. It is not implemented in Sprint 12.
 
 UN-GATE: A proposed policy gate that rejects unsafe modes, weak geometry, unknown stack versions, or missing sealed-mode requirements.
 
 UNPATCH: A v3 committed patch format for explicit, controlled malleability or delta workflows. Sprint 11 supports only bounded `"add"` patches and does not grant authorization by itself.
+
+UNPATCH-SIGNED: The v3 signed patch envelope format. Sprint 12 supports a first-pass envelope around a committed `UNPATCH` object, with format/version context, patch commitment, signer ID, purpose, metadata, Ed25519 public key, signature algorithm, signature value, and payload commitment.
+
+signed patch envelope: A plain-data object that carries a committed patch plus the signature fields needed to verify that patch commitment and related intent metadata. It protects signed patch intent and integrity, not authorization, decryption, or filesystem mutation rights.
+
+patch signature: The Ed25519 signature over the canonical signed patch payload for a signed patch envelope. The signature does not include its own signature value.
+
+signed patch payload: The canonical signed data for `UNPATCH-SIGNED`: signed-patch format/version context, explicit `UNPATCH-SIGNED:v1` domain separation, patch commitment, signer ID, purpose, metadata, and algorithm. It intentionally signs the patch commitment rather than raw runtime objects or functions.
+
+patch payload commitment: A SHA-256 hex digest over the canonical signed patch payload. It aids diagnostics and reproducibility checks, but it is not a substitute for signature verification.
+
+owner-signed patch: A signed patch whose purpose marks the committed patch as intended by an owner or controlling signer. Sprint 12 uses `owner-signed-patch` as the default purpose string without adding trust policy or authorization semantics.
+
+patch authorization intent: The signed statement that a signer endorsed an exact committed patch for a purpose. It is not a full authorization policy; patch gates, capability checks, external trust policy, and production authorization semantics remain future scope.
 
 add patch: The Sprint 11 UNPATCH operation that adds declared integer deltas to corresponding data positions modulo the patch window size.
 
@@ -109,6 +123,14 @@ base object commitment: The full-object commitment for the exact bytes a patch w
 base slice commitment: The slice commitment for the exact bounded range a patch was created against.
 
 controlled malleability: An explicitly bounded workflow where changes are represented by committed patch objects. It is dangerous unless authorized by a higher-level policy and is not a cryptographic security claim.
+
+patch gates/capability checks: Future-scope policy mechanisms that may decide whether a patch is allowed. Sprint 12 signed patches do not implement these checks.
+
+patch decryption grant: A capability that would grant decryption or plaintext access. `UNPATCH-SIGNED` does not provide decryption grants.
+
+patch inclusion proof: A future-scope Merkle or similar inclusion proof for patch sets or logs. Sprint 12 does not implement Merkle trees or inclusion proofs.
+
+filesystem patching: Future-scope patch application against files or CLI workflows. Sprint 12 patch helpers operate in memory only.
 
 patch reversal: The inverse of an add patch. It subtracts the committed deltas modulo the same window size to restore the pre-patch data when the matching object and patch are used.
 

@@ -20,4 +20,5 @@ module.exports = {
   ...require('./src/signed-stack'),
   ...require('./src/gate'),
   ...require('./src/patch'),
+  ...require('./src/signed-patch'),
 };
