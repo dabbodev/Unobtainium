@@ -18,4 +18,5 @@ module.exports = {
   ...require('./src/stack-canonical'),
   ...require('./src/stack'),
   ...require('./src/signed-stack'),
+  ...require('./src/gate'),
 };

@@ -64,6 +64,16 @@ Sprint 9 signs stack recipes only. It does not implement scoped gates, patches, 
 
 Signed stacks protect recipe integrity and signer intent for the envelope. They do not make raw UN-GWM modes cryptographically secure by themselves, and they do not prove that a signer is trusted unless a future policy layer says so.
 
+## Sprint 10 UN-GATE Scoped Validation
+
+Sprint 10 adds first-pass v3 `UN-GATE` validation-only capability objects beside the legacy runtime. A validation gate binds an object ID, full object commitment, byte range, slice commitment, signed stack commitment, signed stack payload commitment, metadata, and gate commitment. The only supported permission is `"validate"`.
+
+Object commitments and slice commitments are domain-separated SHA-256 hex digests over byte data plus explicit length or range metadata. The gate commitment is a SHA-256 hex digest over a canonical gate payload using the same stable object serialization used by stack commitments, excluding the `gateCommitment` field itself. Changing the object ID, range, object commitment, slice commitment, signed stack commitments, permission, or metadata invalidates the gate commitment.
+
+Gate verification answers whether the gate metadata is intact, whether an optional supplied `UNSTACK-SIGNED` envelope matches the bound stack commitments, and whether optional supplied object bytes match the full object and scoped slice commitments. Full-data verification checks both the selected range and the whole object, so tampering outside the gated range still fails when full data is supplied.
+
+Sprint 10 supports validation-only gates. Gates do not grant decryption, mutation rights, patch rights, or authorization beyond the literal `"validate"` permission. Merkle inclusion proofs, `UNPATCH`, mutation rights, decryption grants, external PKI, trust policy, and production authorization semantics remain future scope. Gate verification depends on the commitments supplied and does not make raw UN-GWM modes production-secure.
+
 ## Purpose
 
 Unobtainium v3 is intended to explore geometry-driven masking systems built around ordered 3D point-cloud keys. The current v2 code walks a list of points and derives byte shifts from triangle geometry. v3 keeps that creative center but treats the project as a lab for packet formats, stackable transforms, authentication boundaries, and controlled malleability experiments.
@@ -133,9 +143,9 @@ Composable stacks should be explicit, inspectable, canonical, and hashable. Hidd
 
 ## Gates
 
-UN-GATE is a proposed policy layer that decides whether a transform may run. Gates can enforce key fingerprints, minimum point counts, mask horizon limits, sealed-mode requirements, accepted stack versions, or known-bad geometry rejection.
+UN-GATE is currently a validation-only scoped commitment object. The first-pass form does not decide whether transforms may run, grant decryption, or grant mutation. It records enough canonical commitment material to validate that a supplied object, byte range, and signed stack envelope match the values the gate was created for.
 
-Gates are meant to prevent accidental misuse. They are not a substitute for cryptographic authentication.
+Future gates may grow into broader policy objects that enforce key fingerprints, minimum point counts, mask horizon limits, sealed-mode requirements, accepted stack versions, or known-bad geometry rejection. That broader authorization layer is not part of Sprint 10. Gates are meant to prevent accidental misuse and support scoped validation. They are not a substitute for a production authenticated encryption design, external trust policy, or cryptographic review.
 
 ## Controlled Malleability
 
@@ -148,6 +158,22 @@ Sealed mode should reject tampered packets through authentication. Malleable mod
 UN-GEN is the working name for deterministic point-cloud generation from seeds, prompts, parameters, or procedural geometry. UN-FIT is the working name for fitting or adapting point clouds to target constraints. UN-CASCADE is the working name for chaining multiple point-cloud masks. UN-STEG is the working name for carrying point packets inside another medium.
 
 These modes are future research directions. They should not be exposed as security claims. The first requirement is reproducibility: identical inputs must produce identical ordered point clouds across supported runtimes.
+
+## Glossary
+
+`UN-GATE`: A v3 validation-only capability object that binds an object ID, byte range, object commitment, slice commitment, signed stack commitments, metadata, and a canonical gate commitment.
+
+Validation gate: The Sprint 10 `UN-GATE` form whose only supported permission is `"validate"`. It can confirm scoped commitment matches but does not grant decryption, mutation, patching, or broader authorization.
+
+Gate commitment: A SHA-256 hex digest over the canonical gate payload. It covers format/version, permission, object ID, range, object commitment, slice commitment, signed stack commitment, signed stack payload commitment, and metadata, but not the `gateCommitment` field itself.
+
+Object commitment: A domain-separated SHA-256 hex digest over the full supplied object bytes plus object length metadata.
+
+Slice commitment: A domain-separated SHA-256 hex digest over the selected byte range plus object length and range metadata. Including the range prevents identical bytes at different offsets from implying the same scoped commitment.
+
+Scoped validation: Verification that a gate applies to a specific object, exact byte range, exact signed stack envelope commitments, and expected data slice.
+
+Validation-only permission: The literal `"validate"` permission supported by Sprint 10 gates. It is not a decryption grant, mutation grant, patch right, or production authorization decision.
 
 ## Non-Goals for Sprint 0 and Sprint 1
 
