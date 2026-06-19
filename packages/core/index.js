@@ -21,4 +21,5 @@ module.exports = {
   ...require('./src/gate'),
   ...require('./src/patch'),
   ...require('./src/signed-patch'),
+  ...require('./src/keyfile'),
 };

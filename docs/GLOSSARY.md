@@ -148,6 +148,22 @@ positional permutation: A transform that changes where payload values sit while 
 
 reverse swap transform: The inverse UN-SWAP operation. It applies the same swap pairs in reverse order to restore data that was transformed by the matching forward swap plan.
 
+UN-KEYFILE: A v3 in-memory key material derivation format that turns normalized bytes, strings, buffers, typed arrays, or byte arrays plus optional passphrase, context, salt, and label into an ordered fixed-point 3D point cloud and descriptor commitment.
+
+keyfile-derived mesh: The ordered point array produced by UN-KEYFILE. It can be used directly as mesh input for instruction streams, UN-ROTATE, UN-SWAP, packet grafts, and stack layers.
+
+key mesh descriptor: A plain-data descriptor for a keyfile-derived mesh. It records format/version, derivation parameters, source type, input and optional material commitments, ordered points, and a mesh commitment.
+
+input commitment: A SHA-256 hex digest over the normalized input bytes used by a key mesh descriptor.
+
+mesh commitment: A SHA-256 hex digest over the canonical key mesh descriptor fields that define the derived mesh, excluding the `meshCommitment` field itself.
+
+context key: Public, semi-public, or application-specific material used to diversify or bind a keyfile-derived mesh without necessarily providing secrecy by itself.
+
+weak/public keyfile: Keyfile input that is public, predictable, reused, low entropy, or otherwise not secret. It can still be useful for context, demos, decoys, watermarks, puzzles, or reproducible tests, but it should not be treated as strong secret material.
+
+strong/private keyfile: Keyfile input that is secret or difficult to predict, usually strengthened by appropriate passphrase, salt, or context choices. Sprint 13 records deterministic material only and does not certify strength.
+
 UN-GEN: A proposed deterministic generative geometry mode for creating ordered point clouds from reproducible parameters.
 
 UN-FIT: A proposed mode for fitting or adapting point clouds to target constraints.
@@ -155,8 +171,6 @@ UN-FIT: A proposed mode for fitting or adapting point clouds to target constrain
 UN-CASCADE: A proposed mode for chaining multiple point-cloud masks.
 
 UN-STEG: A proposed mode for embedding point packets or stack data into a carrier medium.
-
-UN-KEYFILE: A proposed canonical key file format for ordered point clouds, normalization rules, metadata, and fingerprints.
 
 sealed mode: A future mode that authenticates data and metadata before returning obtained data.
 
