@@ -22,4 +22,5 @@ module.exports = {
   ...require('./src/patch'),
   ...require('./src/signed-patch'),
   ...require('./src/keyfile'),
+  ...require('./src/generation'),
 };

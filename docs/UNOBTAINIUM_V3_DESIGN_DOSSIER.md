@@ -104,6 +104,14 @@ Derived points are ordinary mesh arrays and can feed existing `generateInstructi
 
 `UN-KEYFILE` does not decide whether a keyfile is strong or weak. A keyfile-derived mesh is only as strong as the secrecy, unpredictability, and context of its input bytes and optional passphrase, salt, or context. Public or weak keyfiles can still be useful as context keys, demos, decoys, watermarks, puzzle keys, or reproducible test material. Sprint 13 is in-memory only: filesystem and CLI keyfile loading, keyfile storage formats beyond the in-memory descriptor, STL parsing, compression, steganography, `UN-GEN`, `UN-FIT`, and `UN-STEG` remain future scope.
 
+## Sprint 14 UN-GEN Blank-Substrate Generation
+
+Sprint 14 adds first-pass v3 `UN-GEN` blank-substrate generation beside the legacy runtime. A caller creates an in-memory blank substrate with a declared length, ring window, data type, and fill value, then materializes generated data by applying an existing `UNSTACK` recipe to that blank substrate. This reuses the existing `UN-ROTATE`, `UN-SWAP`, packet grafting, and keyfile-derived mesh stack behavior rather than adding a new transform family.
+
+Sprint 14 also adds residual reconstruction helpers. Given generated data and target data in the same ring, the residual is computed position by position as `target - generated mod window`. Applying that residual reconstructs the target as `generated + residual = target mod window`. This is a reconstruction relation, not a compression claim.
+
+`UN-GEN` is in-memory only. It does not read or write files, add CLI behavior, parse STL data, or change the legacy runtime. It does not implement fitting, optimization, search, compression, steganography, filesystem support, `UN-FIT`, `UN-CASCADE`, or `UN-STEG`. A residual may be the same size as the target and should not be described as compressed data.
+
 ## Purpose
 
 Unobtainium v3 is intended to explore geometry-driven masking systems built around ordered 3D point-cloud keys. The current v2 code walks a list of points and derives byte shifts from triangle geometry. v3 keeps that creative center but treats the project as a lab for packet formats, stackable transforms, authentication boundaries, and controlled malleability experiments.
@@ -189,11 +197,25 @@ Sealed mode should reject tampered packets through authentication. Malleable mod
 
 ## Future Generative Geometry Modes
 
-UN-GEN is the working name for deterministic point-cloud generation from seeds, prompts, parameters, or procedural geometry. UN-FIT is the working name for fitting or adapting point clouds to target constraints. UN-CASCADE is the working name for chaining multiple point-cloud masks. UN-STEG is the working name for carrying point packets inside another medium.
+Sprint 14 uses `UN-GEN` for blank-substrate materialization through existing stacks. Broader deterministic point-cloud generation from seeds, prompts, parameters, or procedural geometry remains future scope. UN-FIT is the working name for fitting or adapting point clouds to target constraints. UN-CASCADE is the working name for chaining multiple point-cloud masks. UN-STEG is the working name for carrying point packets inside another medium.
 
 These modes are future research directions. They should not be exposed as security claims. The first requirement is reproducibility: identical inputs must produce identical ordered point clouds across supported runtimes.
 
 ## Glossary
+
+`UN-GEN`: The Sprint 14 v3 in-memory generation primitive that creates a blank substrate and materializes generated data by applying an existing `UNSTACK` recipe. It is not compression, steganography, fitting, optimization, filesystem support, or CLI support.
+
+Blank substrate: A newly created in-memory Array, `Uint8Array`, or `Buffer` of a declared length whose fill value is normalized into the active ring/window before stack materialization.
+
+Generated data: The output produced by applying a `UNSTACK` recipe to a blank substrate. Generated data preserves the requested substrate type where practical.
+
+Geometry materialization: The process of turning a blank substrate into generated data by running geometry-derived stack layers such as `UN-ROTATE` and `UN-SWAP`.
+
+Residual: The per-position ring difference between target data and generated data, computed as `target - generated mod window`.
+
+Residual reconstruction: Rebuilding target data by applying a residual to generated data, position by position, as `generated + residual mod window`.
+
+Target reconstruction: The deterministic check that `generated + residual = target mod window` for all positions. It is a reconstruction relation and must not be treated as a compression claim.
 
 `UN-KEYFILE`: A v3 in-memory key material derivation format that turns normalized bytes, strings, buffers, typed arrays, or byte arrays plus optional passphrase, context, salt, and label into an ordered fixed-point 3D point cloud and descriptor commitment.
 
