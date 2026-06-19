@@ -164,7 +164,21 @@ weak/public keyfile: Keyfile input that is public, predictable, reused, low entr
 
 strong/private keyfile: Keyfile input that is secret or difficult to predict, usually strengthened by appropriate passphrase, salt, or context choices. Sprint 13 records deterministic material only and does not certify strength.
 
-UN-GEN: A proposed deterministic generative geometry mode for creating ordered point clouds from reproducible parameters.
+UN-GEN: The v3 in-memory generation primitive that creates a blank substrate and materializes generated data by applying an existing UNSTACK recipe. It is not compression, steganography, fitting, optimization, filesystem support, or CLI support.
+
+UN-GEN-DESCRIPTOR: The v3 generation manifest format for blank-substrate generation and residual reconstruction checks. It records generation settings, stack or signed-stack bindings, generated/target/residual commitments, metadata, and a descriptor commitment.
+
+generation descriptor: A plain-data manifest for reproducing and checking `blank + stack -> generated` and, when residual material is supplied externally, `generated + residual -> target`.
+
+generation manifest: A descriptive synonym for generation descriptor. It records committed settings and commitments, not compressed payload data or steganographic carrier data.
+
+descriptor commitment: A domain-separated SHA-256 hex digest over the canonical generation descriptor payload, excluding the `descriptorCommitment` field itself. It validates recipe/materialization metadata and is not a production cryptographic security claim.
+
+generated commitment: A SHA-256 hex digest over generated data values under the descriptor window.
+
+residual commitment: A SHA-256 hex digest over normalized residual values under the descriptor window. A residual may be the same size as the target and is not a compression claim.
+
+target commitment: A SHA-256 hex digest over target data values under the descriptor window.
 
 UN-FIT: A proposed mode for fitting or adapting point clouds to target constraints.
 
