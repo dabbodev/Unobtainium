@@ -196,7 +196,17 @@ exact zero residual: A residual whose entries are all zero, meaning the candidat
 
 estimated JSON size: The UTF-8 byte length of JSON.stringify over residual values. It is only a diagnostic size estimate and is not a compression claim.
 
-UN-CASCADE: A proposed mode for chaining multiple point-cloud masks.
+UN-CASCADE: The Sprint 18 v3 deterministic residual layering mode. It evaluates caller-supplied generation candidates in order, carries each residual forward to the next layer, and records committed layer/report metadata. It does not search, optimize, compress, or hide data.
+
+cascade layer: One ordered `UN-CASCADE` evaluation step. A layer binds its index, candidate ID, candidate commitment, input target commitment, generated commitment, residual commitment, residual score, descriptor commitment, candidate metadata, and optional signed stack payload commitment.
+
+cascade report: A committed `UN-CASCADE-REPORT` object containing the run settings, original target commitment, final residual commitment, layer count, ordered layer records, final score, metadata, and report commitment.
+
+final residual: The residual vector left after the last supplied cascade candidate has been evaluated. If no candidates are supplied, the final residual is the original target under the declared ring. It is not compressed data.
+
+residual layering: The deterministic process of repeatedly computing `current target - generated candidate mod window` and using that residual as the next layer's current target.
+
+cascade report commitment: A domain-separated SHA-256 hex digest over the canonical cascade report payload, excluding `reportCommitment` itself. Changing target commitments, layer order, candidate bindings, generated or residual commitments, scores, layer count, settings, or metadata changes the commitment.
 
 UN-STEG: A proposed mode for embedding point packets or stack data into a carrier medium.
 

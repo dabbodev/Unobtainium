@@ -22,6 +22,7 @@ Status: planning document for an experimental cipher lab. Raw v3 modes are not p
 - Sprint 15: added first-pass `UN-GEN-DESCRIPTOR` generation manifests.
 - Sprint 16: added first-pass `UN-FIT-NAIVE` candidate evaluation.
 - Sprint 17: consolidates roadmap/spec documentation, legacy demo archaeology, and future design branches before adding more implementation.
+- Sprint 18: added first-pass `UN-CASCADE` deterministic residual layering for caller-supplied candidates.
 
 ## Current Module Map
 
@@ -38,12 +39,13 @@ Status: planning document for an experimental cipher lab. Raw v3 modes are not p
 - `UN-GEN`: blank-substrate generation by applying existing stack recipes.
 - `UN-GEN-DESCRIPTOR`: committed manifest for generation settings and reconstruction relations.
 - `UN-FIT-NAIVE`: deterministic evaluator for caller-supplied generation candidates and residual scores.
+- `UN-CASCADE`: deterministic residual layering over caller-supplied generation candidates in declared order.
 
 ## Near-Term Recommended Sprints
 
 - Demo archaeology docs complete: finish documenting side demos as reference material and keep the authority boundary clear.
 - v3 browser playground planning: design a browser-only playground that rebuilds old demo affordances using v3 abstractions.
-- `UN-CASCADE` candidate descriptor layering: sketch how generation descriptors and residuals could chain across layers.
+- `UN-CASCADE` descriptor/reconstruction follow-up: sketch how external generated data, descriptors, and final residual material could support reconstruction workflows without turning cascade reports into compression or carrier formats.
 - `UN-MATRIX` docs-only design: define matrix-shaped key material, mutation vocabulary, commitments, and safety rules before implementation.
 - `UN-ND` docs-only design: define N-dimensional point support and angle derivation without changing existing 3D helpers.
 
@@ -57,7 +59,7 @@ Status: planning document for an experimental cipher lab. Raw v3 modes are not p
 
 ## Long-Term / Experimental
 
-- `UN-CASCADE`: repeat generation, residual fitting, and validation across multiple layers.
+- `UN-CASCADE`: candidate search, optimization, and richer reconstruction descriptor workflows remain future scope.
 - `UN-STEG`: geometric steganography branch for carrying packet, stack, or descriptor material in carrier media.
 - Matrix ratchets: deterministic key-state evolution over matrix material with signed or committed transition records.
 - Stream/session mode: explicit session state, packet commitments, frame counters, and replay/misuse boundaries.

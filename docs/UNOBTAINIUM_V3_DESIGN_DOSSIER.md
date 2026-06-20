@@ -143,6 +143,14 @@ New references:
 
 Future branches now explicitly include `UN-ND`, `UN-MATRIX`, `UN-MATRIX-COMBINE`, `UN-CERT`, and `UN-STENCIL`. These branches are design notes only and do not alter current v3 behavior.
 
+## Sprint 18 UN-CASCADE Deterministic Residual Layering
+
+Sprint 18 adds first-pass v3 `UN-CASCADE` support beside the legacy runtime. A cascade starts with an original target, evaluates caller-supplied generation candidates in their exact supplied order, computes the residual between the current target and each candidate's blank-substrate generated output, scores that residual, and carries the residual forward as the next layer's current target.
+
+The implementation records deterministic layer summaries with candidate IDs, candidate commitments, input target commitments, generated commitments, residual commitments, residual scores, generation descriptor commitments, candidate metadata, and signed stack payload commitments when a candidate uses `UNSTACK-SIGNED`. The cascade report wraps the run in a domain-separated SHA-256 report commitment over canonical payload fields and excludes the `reportCommitment` field itself.
+
+`UN-CASCADE` does not search for candidates, optimize candidate order, compress data, hide data, read files, add CLI behavior, or implement `UN-STEG`. Residual improvement is diagnostic only. A better residual score says only that a supplied candidate left a smaller residual under the current scoring rules; it is not a compression claim, security claim, or steganography claim.
+
 ## Purpose
 
 Unobtainium v3 is intended to explore geometry-driven masking systems built around ordered 3D point-cloud keys. The current v2 code walks a list of points and derives byte shifts from triangle geometry. v3 keeps that creative center but treats the project as a lab for packet formats, stackable transforms, authentication boundaries, and controlled malleability experiments.
