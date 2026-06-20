@@ -200,6 +200,38 @@ UN-CASCADE: A proposed mode for chaining multiple point-cloud masks.
 
 UN-STEG: A proposed mode for embedding point packets or stack data into a carrier medium.
 
+UN-ND: A future branch for N-dimensional point support. It would generalize current 3D point-cloud keys while preserving deterministic geometry, explicit degeneracy handling, and stable commitments.
+
+N-dimensional point: An ordered coordinate vector with `N` numeric dimensions. Three N-dimensional points can still define an angle by using Euclidean vector differences, dot product, and vector lengths.
+
+matrix key: A future key shape where key material is represented as a matrix, commonly with rows as points and columns as dimensions. Matrix keys would need explicit shape metadata and commitments.
+
+matrix mutation: An explicit deterministic transition from one committed matrix key state to another, such as growing or pruning rows, changing dimensions, swapping axes, rotating rows or columns, or transposing shape where allowed.
+
+key-state commitment: A commitment that binds a key state, transition recipe, or post-mutation state so verifiers can detect hidden or accidental key evolution.
+
+UN-MATRIX-COMBINE: A future matrix recipe family for combining two equal-sized matrix keys into a larger tiled key, such as a 2x2 quadrant layout with declared flips, rotations, transposes, and placement policy.
+
+tiled key: A matrix key built from source matrix tiles under an explicit placement and transform recipe.
+
+public key tile: The public matrix tile in a split validation design. It may be inspected by observers but should not be enough to reconstruct the combined validation key by itself.
+
+secret key tile: The private matrix tile supplied by an authorized verifier in a split validation design.
+
+split validation certificate: A future certificate form that binds a public tile, secret tile commitment, signed combine recipe, combined key commitment, and data or gate commitments.
+
+UN-CERT: A future split validation certificate branch where public and secret matrix tiles plus a signed combine recipe reconstruct a combined validation key for stack or gate checks.
+
+UN-STENCIL: A future overlay branch where original and shifted/generated layers are related by committed region rules and context-bound stencil material.
+
+UN-CUTOUT: A future redaction or reveal branch built on selected regions/cutouts between an original layer and a shifted/generated underlayer.
+
+XOR stencil: Reversible stencil material defined by `X = P XOR S`, where `P` is an original layer and `S` is a shifted or generated layer. It must be context-bound and must not be reused across objects, ranges, certificates, recipes, or purposes.
+
+cutout region: A declared byte, element, or geometric region where a stencil/cutout recipe changes whether original or shifted/generated material is visible.
+
+shifted underlayer: The shifted or generated layer placed underneath an original layer for stencil or cutout experiments.
+
 sealed mode: A future mode that authenticates data and metadata before returning obtained data.
 
 malleable mode: A mode that intentionally allows controlled changes or patches and does not promise tamper rejection.

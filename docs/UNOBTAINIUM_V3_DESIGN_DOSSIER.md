@@ -130,6 +130,19 @@ Residual scoring is diagnostic. It records residual length, zero and nonzero cou
 
 Fit reports commit to the target, evaluation settings, ranked candidate summaries, and report metadata for reproducibility checks. These commitments are deterministic diagnostics, not cryptographic security claims about raw UN-GWM strength or candidate quality outside the supplied evaluation inputs.
 
+## Sprint 17 Roadmap and Demo Archaeology
+
+Sprint 17 is documentation-only. It consolidates the v3 roadmap, records legacy demo repository archaeology, and captures future design branches before adding more implementation. The legacy runtime, root package import, v3 core source, and tests remain untouched by this sprint.
+
+New references:
+
+- `docs/legacy/DEMO_REPOS.md` documents `UnDemo-Builder` and `undemo-encryptor` as archaeology and future playground reference material.
+- `docs/roadmap/V3_ROADMAP.md` summarizes completed sprints, current modules, and recommended future sprint sequencing.
+- `docs/specs/UN-MATRIX_IDEAS.md` captures `UN-ND`, matrix-shaped key material, matrix mutation, and `UN-MATRIX-COMBINE` ideas.
+- `docs/specs/UN-CERT_AND_STENCIL_IDEAS.md` captures split validation certificates plus `UN-STENCIL` / `UN-CUTOUT` overlay ideas.
+
+Future branches now explicitly include `UN-ND`, `UN-MATRIX`, `UN-MATRIX-COMBINE`, `UN-CERT`, and `UN-STENCIL`. These branches are design notes only and do not alter current v3 behavior.
+
 ## Purpose
 
 Unobtainium v3 is intended to explore geometry-driven masking systems built around ordered 3D point-cloud keys. The current v2 code walks a list of points and derives byte shifts from triangle geometry. v3 keeps that creative center but treats the project as a lab for packet formats, stackable transforms, authentication boundaries, and controlled malleability experiments.
@@ -216,6 +229,8 @@ Sealed mode should reject tampered packets through authentication. Malleable mod
 ## Future Generative Geometry Modes
 
 Sprint 14 uses `UN-GEN` for blank-substrate materialization through existing stacks. Broader deterministic point-cloud generation from seeds, prompts, parameters, or procedural geometry remains future scope. UN-FIT is the working name for fitting or adapting point clouds to target constraints. UN-CASCADE is the working name for chaining multiple point-cloud masks. UN-STEG is the working name for carrying point packets inside another medium.
+
+Future key-shape branches include `UN-ND` for N-dimensional point support, `UN-MATRIX` for matrix-shaped key material, `UN-MATRIX-COMBINE` for explicit tiled matrix combination, and matrix mutation or ratchet descriptors for committed key-state transitions. Future validation and overlay branches include `UN-CERT` for split validation certificates and `UN-STENCIL` / `UN-CUTOUT` for context-bound original-vs-shifted layer experiments.
 
 These modes are future research directions. They should not be exposed as security claims. The first requirement is reproducibility: identical inputs must produce identical ordered point clouds across supported runtimes.
 

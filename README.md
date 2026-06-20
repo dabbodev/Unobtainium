@@ -21,6 +21,14 @@ points you've added to the list on the left
 5) Click copy to copy the output back to the input
 6) Click Down to shift the data Down using the mask (it is now unencrypted)
 
+## v3 status
+
+This repository also contains early v3 lab work under `packages/core` and `docs/`. The v3 work is experimental and currently covers geometry instructions, in-memory rotate/swap transforms, point packets, unsigned and signed stacks, validation gates, committed patches, keyfile-derived meshes, generation descriptors, and naive fit evaluation.
+
+The root package import still returns the legacy `Unobtainium` constructor. v3 docs and core helpers are being developed beside the legacy runtime, not as a replacement for the published legacy API.
+
+See the [v3 roadmap](docs/roadmap/V3_ROADMAP.md) for current module status and future design branches. Raw v3 modes are not production encryption, and fitting/cascade/steg/matrix branches are research directions rather than compression or security claims.
+
 Unobtainium now supports being imported as a package!
 
 to use unobtainium simply install it from npm using "npm install unobtainium-enc" and import it into your project 
