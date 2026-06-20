@@ -120,6 +120,16 @@ The descriptor commitment covers the descriptor format/version, blank-substrate 
 
 Sprint 15 creates committed generation manifests only. It is not compression, steganography, fitting, optimization, search, filesystem support, or CLI support. `UN-FIT`, `UN-CASCADE`, and `UN-STEG` remain future scope. Descriptor commitments validate recipe/materialization metadata and reproducibility checks; they are not production cryptographic security claims.
 
+## Sprint 16 UN-FIT-NAIVE Candidate Evaluation
+
+Sprint 16 adds first-pass v3 `UN-FIT-NAIVE` support beside the legacy runtime. Given target data and caller-supplied candidate generation stacks, the evaluator materializes each candidate from a blank substrate with `UN-GEN`, computes the ring residual between generated output and the target, scores that residual, and ranks candidates best-first.
+
+`UN-FIT-NAIVE` evaluates supplied candidates only. It does not invent stacks, search parameter space, optimize geometry, evolve candidates, compress data, hide data, read or write files, add CLI behavior, implement `UN-CASCADE`, or implement `UN-STEG`. A candidate generation stack may be an unsigned `UNSTACK` recipe or a `UNSTACK-SIGNED` envelope; when both are supplied, their stack commitments must match.
+
+Residual scoring is diagnostic. It records residual length, zero and nonzero counts, ring-aware absolute delta totals, mean and max deltas, exact-zero status, and an estimated JSON byte size for the residual values. `estimatedJsonSize` is only the byte length of `JSON.stringify(residual)` under UTF-8 and must not be described as compressed size or compression performance.
+
+Fit reports commit to the target, evaluation settings, ranked candidate summaries, and report metadata for reproducibility checks. These commitments are deterministic diagnostics, not cryptographic security claims about raw UN-GWM strength or candidate quality outside the supplied evaluation inputs.
+
 ## Purpose
 
 Unobtainium v3 is intended to explore geometry-driven masking systems built around ordered 3D point-cloud keys. The current v2 code walks a list of points and derives byte shifts from triangle geometry. v3 keeps that creative center but treats the project as a lab for packet formats, stackable transforms, authentication boundaries, and controlled malleability experiments.
@@ -215,6 +225,10 @@ These modes are future research directions. They should not be exposed as securi
 
 `UN-GEN-DESCRIPTOR`: The Sprint 15 v3 generation manifest format. It records blank-substrate settings, stack or signed-stack bindings, generated/target/residual commitments, metadata, and a descriptor commitment.
 
+`UN-FIT`: The broader working name for fitting or adapting point-cloud generation material to target constraints. Sprint 16 implements only the supplied-candidate evaluator subset.
+
+`UN-FIT-NAIVE`: The Sprint 16 v3 deterministic evaluator that generates output from caller-supplied candidate stacks, computes residuals against a target, scores those residuals, and ranks candidates. It does not search, optimize, compress, or hide data.
+
 Generation descriptor: A plain-data manifest for reproducing and checking `blank + stack -> generated` and, when residual material is supplied externally, `generated + residual -> target`.
 
 Generation manifest: A descriptive synonym for generation descriptor. The manifest records commitments and settings, not compressed payload data or steganographic carrier data.
@@ -226,6 +240,16 @@ Generated commitment: A SHA-256 hex digest over generated data values under the 
 Residual commitment: A SHA-256 hex digest over normalized residual values under the descriptor window. It commits to external residual material without claiming that residuals are compressed.
 
 Target commitment: A SHA-256 hex digest over target data values under the descriptor window. It lets verification compare supplied target data to the descriptor.
+
+Candidate generation stack: A supplied unsigned `UNSTACK` recipe or `UNSTACK-SIGNED` envelope used by `UN-FIT-NAIVE` to materialize generated output from a blank substrate. It is an input candidate, not something Sprint 16 creates.
+
+Residual score: The diagnostic score object computed from a residual. It includes zero/nonzero counts, ring-aware absolute delta metrics, estimated JSON byte length, and exact-zero status. It is not a compression or security metric.
+
+Fit report: A deterministic `UN-FIT-NAIVE-REPORT` object containing target commitment, evaluation settings, candidate count, ranked candidate summaries, metadata, and a report commitment.
+
+Candidate ranking: The best-first order produced by `UN-FIT-NAIVE`, sorted by lowest nonzero residual count, then lowest sum of ring-aware absolute deltas, then lowest estimated JSON byte size, then candidate ID.
+
+Exact zero residual: A residual whose entries are all zero, meaning the candidate generated exactly the target under the declared ring and evaluation settings.
 
 Blank substrate: A newly created in-memory Array, `Uint8Array`, or `Buffer` of a declared length whose fill value is normalized into the active ring/window before stack materialization.
 

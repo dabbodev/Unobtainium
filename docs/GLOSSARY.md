@@ -180,7 +180,21 @@ residual commitment: A SHA-256 hex digest over normalized residual values under 
 
 target commitment: A SHA-256 hex digest over target data values under the descriptor window.
 
-UN-FIT: A proposed mode for fitting or adapting point clouds to target constraints.
+UN-FIT: The broader working name for fitting or adapting point-cloud generation material to target constraints. Sprint 16 implements only supplied-candidate evaluation, not optimization or search.
+
+UN-FIT-NAIVE: The Sprint 16 v3 deterministic evaluator that generates output from caller-supplied candidate stacks, computes residuals against a target, scores those residuals, and ranks candidates. It does not search, optimize, compress, or hide data.
+
+candidate generation stack: A supplied unsigned UNSTACK recipe or UNSTACK-SIGNED envelope used by UN-FIT-NAIVE to materialize generated output from a blank substrate. It is an input candidate, not something Sprint 16 creates.
+
+residual score: A diagnostic score object computed from residual values. It includes residual length, zero and nonzero counts, ring-aware absolute delta sum/mean/max, estimated JSON byte length, and exact-zero status. It is not a compression or security metric.
+
+fit report: A deterministic UN-FIT-NAIVE-REPORT object containing target commitment, evaluation settings, candidate count, ranked candidate summaries, metadata, and a report commitment.
+
+candidate ranking: The best-first order produced by UN-FIT-NAIVE: lowest nonzero residual count, then lowest sum of ring-aware absolute deltas, then lowest estimated JSON byte size, then candidate ID.
+
+exact zero residual: A residual whose entries are all zero, meaning the candidate generated exactly the target under the declared ring and evaluation settings.
+
+estimated JSON size: The UTF-8 byte length of JSON.stringify over residual values. It is only a diagnostic size estimate and is not a compression claim.
 
 UN-CASCADE: A proposed mode for chaining multiple point-cloud masks.
 

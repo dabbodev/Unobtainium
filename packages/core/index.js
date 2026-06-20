@@ -24,4 +24,5 @@ module.exports = {
   ...require('./src/keyfile'),
   ...require('./src/generation'),
   ...require('./src/generation-descriptor'),
+  ...require('./src/fit-naive'),
 };
