@@ -214,9 +214,23 @@ UN-ND: A future branch for N-dimensional point support. It would generalize curr
 
 N-dimensional point: An ordered coordinate vector with `N` numeric dimensions. Three N-dimensional points can still define an angle by using Euclidean vector differences, dot product, and vector lengths.
 
-matrix key: A future key shape where key material is represented as a matrix, commonly with rows as points and columns as dimensions. Matrix keys would need explicit shape metadata and commitments.
+UN-MATRIX: The Sprint 19 v3 pure utility family for rectangular safe-integer matrix key descriptors, deterministic matrix commitments, copied row/column accessors, basic matrix transforms, and row-as-point flattening. It is not production cryptography and is not integrated into GWM, stacks, cascade reports, CLI/file wrappers, or browser demos.
 
-matrix mutation: An explicit deterministic transition from one committed matrix key state to another, such as growing or pruning rows, changing dimensions, swapping axes, rotating rows or columns, or transposing shape where allowed.
+matrix key: A key shape where key material is represented as a two-dimensional rectangular matrix, commonly with rows as points and columns as dimensions. Sprint 19 matrix descriptors record explicit shape metadata, ordered values, metadata, and a matrix commitment.
+
+matrix commitment: A domain-separated SHA-256 hex digest over the canonical `UN-MATRIX` payload, excluding the `matrixCommitment` field itself. It binds deterministic descriptor material but does not prove secrecy, strength, authenticity, safe key evolution, tamper-proofing, compression, steganography, or production-safe encryption.
+
+matrix rows as points: The Sprint 19 utility view that copies each matrix row as an ordered N-dimensional point vector. It does not call the existing 3D geometry helpers and does not implement N-dimensional angle or distance math.
+
+UN-MATRIX-MUTATE: The Sprint 20 v3 pure utility family for explicit committed matrix mutation recipes. It supports deterministic bounded row/column swaps, reversals, rotations, transpose, flips, and square-only 90/270-degree rotations. It is not production cryptography and is not integrated into GWM, stacks, cascade reports, CLI/file wrappers, legacy runtime paths, or browser demos.
+
+matrix mutation: An explicit deterministic transition from one committed matrix key state to another. Sprint 20 mutation is never hidden inside matrix helpers; callers apply a visible ordered recipe.
+
+matrix mutation recipe: A deterministic `UN-MATRIX-MUTATE` object containing an ordered operation list, optional canonical metadata, source matrix commitment, target matrix commitment, and a recipe commitment. It is replayable and bounded, but it does not prove secrecy, strength, authenticity, or safe key evolution.
+
+matrix mutation recipe commitment: A domain-separated SHA-256 hex digest over the canonical mutation recipe payload, excluding the `matrixMutationRecipeCommitment` field itself. Operation order, operation type, operation parameters, declared source commitment, declared target commitment, and metadata affect it.
+
+signed mutation envelope: A future-scope envelope for signer intent or provenance around a committed matrix mutation recipe. Sprint 20 does not implement signed mutation envelopes.
 
 key-state commitment: A commitment that binds a key state, transition recipe, or post-mutation state so verifiers can detect hidden or accidental key evolution.
 

@@ -151,6 +151,24 @@ The implementation records deterministic layer summaries with candidate IDs, can
 
 `UN-CASCADE` does not search for candidates, optimize candidate order, compress data, hide data, read files, add CLI behavior, or implement `UN-STEG`. Residual improvement is diagnostic only. A better residual score says only that a supplied candidate left a smaller residual under the current scoring rules; it is not a compression claim, security claim, or steganography claim.
 
+## Sprint 19 UN-MATRIX Pure Utilities
+
+Sprint 19 adds first-pass `UN-MATRIX` pure utilities beside the legacy runtime. A matrix key descriptor records `UN-MATRIX` format/version context, row count, column count, ordered safe-integer values, canonical metadata, and a deterministic matrix commitment. Row order, column order, matrix shape, values, and metadata all affect the commitment.
+
+The helpers normalize matrix values, clone values defensively, expose copied rows and columns, transpose rectangular or square matrices, flip rows or columns, rotate rectangular matrices by 180 degrees, rotate square matrices by 90 or 270 degrees, and flatten rows as ordered N-dimensional point vectors. They do not mutate caller input or hidden key state, and they do not call the existing 3D geometry helpers or implement N-dimensional angle math.
+
+`UN-MATRIX` is not production cryptography. Matrix commitments do not prove secrecy, strength, authenticity, safe key evolution, tamper-proofing, compression, steganography, or production-safe encryption. Matrix combine, certificates, N-dimensional angle math, stack integration, cascade integration, CLI/file wrappers, and browser playground work remain future scope.
+
+## Sprint 20 UN-MATRIX-MUTATE Committed Recipes
+
+Sprint 20 adds first-pass `UN-MATRIX-MUTATE` pure utilities beside the Sprint 19 matrix helpers. A matrix mutation recipe is an explicit ordered list of supported operations: row or column swaps, row or column reversals, row or column rotations, transpose, horizontal or vertical flips, 180-degree rotation, and square-only 90/270-degree rotations.
+
+Mutation recipes record `UN-MATRIX-MUTATE` format/version context, source matrix commitment, target matrix commitment, normalized operations, canonical metadata, and a domain-separated recipe commitment. Operation order, operation type, operation parameters, declared source commitment, declared target commitment, and metadata all affect the recipe commitment.
+
+Mutation is explicit, deterministic, replayable, bounded, and commitment-backed. Bounds are checked at the time each operation is applied because earlier operations can change matrix shape. The helpers defensively clone caller data and return new matrix results; they do not mutate caller input or hidden key state.
+
+`UN-MATRIX-MUTATE` is experimental and not production cryptography. Mutation recipes do not prove secrecy, strength, authenticity, or safe key evolution. Signed mutation envelopes, matrix combine, certificates, N-dimensional angle math, GWM integration, stack integration, cascade integration, CLI/file wrappers, and browser playground work remain future scope.
+
 ## Purpose
 
 Unobtainium v3 is intended to explore geometry-driven masking systems built around ordered 3D point-cloud keys. The current v2 code walks a list of points and derives byte shifts from triangle geometry. v3 keeps that creative center but treats the project as a lab for packet formats, stackable transforms, authentication boundaries, and controlled malleability experiments.
@@ -238,7 +256,7 @@ Sealed mode should reject tampered packets through authentication. Malleable mod
 
 Sprint 14 uses `UN-GEN` for blank-substrate materialization through existing stacks. Broader deterministic point-cloud generation from seeds, prompts, parameters, or procedural geometry remains future scope. UN-FIT is the working name for fitting or adapting point clouds to target constraints. UN-CASCADE is the working name for chaining multiple point-cloud masks. UN-STEG is the working name for carrying point packets inside another medium.
 
-Future key-shape branches include `UN-ND` for N-dimensional point support, `UN-MATRIX` for matrix-shaped key material, `UN-MATRIX-COMBINE` for explicit tiled matrix combination, and matrix mutation or ratchet descriptors for committed key-state transitions. Future validation and overlay branches include `UN-CERT` for split validation certificates and `UN-STENCIL` / `UN-CUTOUT` for context-bound original-vs-shifted layer experiments.
+Future key-shape branches include `UN-ND` for broader N-dimensional geometry support and `UN-MATRIX-COMBINE` for explicit tiled matrix combination. Sprint 19 `UN-MATRIX` is limited to pure matrix descriptors and value transforms. Sprint 20 `UN-MATRIX-MUTATE` is limited to explicit committed mutation recipes. Future validation and overlay branches include `UN-CERT` for split validation certificates and `UN-STENCIL` / `UN-CUTOUT` for context-bound original-vs-shifted layer experiments.
 
 These modes are future research directions. They should not be exposed as security claims. The first requirement is reproducibility: identical inputs must produce identical ordered point clouds across supported runtimes.
 
@@ -301,6 +319,14 @@ Context key: Public, semi-public, or application-specific material used to diver
 Weak/public keyfile: Keyfile input that is public, predictable, reused, low entropy, or otherwise not secret. It can still be useful for context, demos, decoys, watermarks, puzzles, or reproducible tests, but it should not be treated as strong secret material.
 
 Strong/private keyfile: Keyfile input that is secret or difficult to predict, usually strengthened by appropriate passphrase, salt, or context choices. Sprint 13 records deterministic material only and does not certify strength.
+
+`UN-MATRIX`: The Sprint 19 v3 pure utility family for rectangular safe-integer matrix descriptors, deterministic matrix commitments, defensive copies, basic matrix transforms, and row-as-point flattening.
+
+`UN-MATRIX-MUTATE`: The Sprint 20 v3 pure utility family for explicit committed matrix mutation recipes. It is deterministic, replayable, bounded, and commitment-backed, but it does not prove secrecy, strength, authenticity, or safe key evolution.
+
+Matrix mutation recipe commitment: A domain-separated SHA-256 hex digest over the canonical mutation recipe payload. Operation order, operation type, operation parameters, declared source commitment, declared target commitment, and metadata affect it.
+
+Signed mutation envelope: A future-scope signer intent or provenance envelope around a committed matrix mutation recipe. Sprint 20 does not implement signed mutation envelopes.
 
 `UN-GATE`: A v3 validation-only capability object that binds an object ID, byte range, object commitment, slice commitment, signed stack commitments, metadata, and a canonical gate commitment.
 

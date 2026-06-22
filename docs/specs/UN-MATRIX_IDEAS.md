@@ -1,6 +1,12 @@
 # UN-MATRIX Ideas
 
-Status: future design notes only. No `UN-MATRIX`, `UN-ND`, `UN-MATRIX-MUTATE`, or `UN-MATRIX-COMBINE` implementation exists yet.
+Status: Sprint 20 adds first-pass `UN-MATRIX-MUTATE` pure committed mutation recipes beside the Sprint 19 `UN-MATRIX` utilities. `UN-ND`, `UN-MATRIX-COMBINE`, certificates, signed mutation envelopes, stack integration, cascade integration, CLI/file wrappers, and browser playground work remain future scope.
+
+Sprint 19 `UN-MATRIX` utilities normalize rectangular safe-integer matrix values, create committed matrix descriptors, clone matrix values defensively, expose row/column accessors, transpose and flip matrix values, rotate square matrices by 90 or 270 degrees, rotate any rectangular matrix by 180 degrees, and flatten rows as ordered N-dimensional point vectors. These helpers do not mutate caller input or hidden key state.
+
+`UN-MATRIX` is not production cryptography. Matrix commitments bind deterministic descriptor material for reproducibility, but they do not prove secrecy, strength, authenticity, safe key evolution, tamper-proofing, compression, steganography, or production-safe encryption.
+
+Sprint 20 `UN-MATRIX-MUTATE` recipes are experimental and are not production cryptography. Mutation recipes do not prove secrecy, strength, authenticity, or safe key evolution. They are explicit, deterministic, replayable, bounded, and commitment-backed transition records only.
 
 ## Motivation
 
@@ -30,9 +36,28 @@ Degenerate cases remain explicit. If either vector has zero length, coordinates 
 - Rectangular matrix keys: `r x c` matrices can carry non-square point sets while still preserving explicit row and dimension counts.
 - Tensor-ish future scope: higher-rank shapes may be explored later, but should not be smuggled into the first matrix format.
 
-## Matrix Mutation Ideas
+## UN-MATRIX-MUTATE
 
-`UN-MATRIX-MUTATE` would describe explicit key-state transitions. Candidate mutations include:
+Sprint 20 `UN-MATRIX-MUTATE` describes an ordered list of explicit matrix operations with source matrix commitment, target matrix commitment, canonical metadata, and a domain-separated recipe commitment. Operation order is part of recipe identity. Mutation is never hidden inside matrix helpers; callers must opt into applying a recipe.
+
+Supported Sprint 20 operations:
+
+- `swapRows`;
+- `swapColumns`;
+- `reverseRow`;
+- `reverseColumn`;
+- `rotateRows`;
+- `rotateColumns`;
+- `transpose`;
+- `flipHorizontal`;
+- `flipVertical`;
+- `rotate180`;
+- `rotate90` for square matrices only;
+- `rotate270` for square matrices only.
+
+Recipes reject unknown operations, invalid parameters, unsafe integers, out-of-bounds indexes, and rectangular 90/270-degree rotation. Bounds are checked dynamically as each operation runs because operations such as `transpose` can change the current matrix shape before later operations.
+
+Future mutation ideas include:
 
 - grow row: append or insert a deterministic row;
 - prune row: remove a declared row under a committed rule;
@@ -40,18 +65,15 @@ Degenerate cases remain explicit. If either vector has zero length, coordinates 
 - prune dimension: remove a declared column/dimension;
 - evolve row: update row coordinates by an explicit deterministic transform;
 - degenerate row: intentionally collapse or neutralize a row under a declared rule;
-- axis swap: exchange two dimensions across all rows;
-- row rotate: rotate row order;
-- column rotate: rotate dimension order;
-- transpose: swap rows and columns when shape policy permits it.
+- signed mutation envelopes for signer intent and provenance.
 
 ## Safety Rules
 
-- Mutation must be explicit. A helper that computes distance or angle must not secretly change key shape or key state.
+- Mutation must be explicit. A helper that computes distance, angle, matrix values, rows, columns, or transforms must not secretly change key shape or key state.
 - Mutation must be deterministic. The same input matrix, context, and recipe must produce the same output matrix.
-- Mutation should be signed or committed. A verifier should be able to bind pre-state, recipe, and post-state.
-- Mutation should bind to frame, layer, context, and packet commitments when used inside stacks or streams.
-- Mutation should bind to relevant object, gate, certificate, or descriptor commitments when used for validation.
+- Sprint 20 mutation is committed only. Signed mutation envelopes remain future scope.
+- Future mutation may bind to frame, layer, context, and packet commitments when used inside stacks or streams.
+- Future mutation may bind to relevant object, gate, certificate, or descriptor commitments when used for validation.
 - Geometry helpers should remain pure readers of key material. They should reject invalid shape or return degenerate geometry rather than mutating state.
 
 ## UN-MATRIX-COMBINE
@@ -93,7 +115,12 @@ Commitments should cover:
 ## Future Sprint Outline
 
 - Docs-only design: refine vocabulary, shape constraints, mutation rules, and commitment boundaries.
-- Pure matrix utilities: add validation, canonicalization, transforms, and commitments without stack integration.
+- Pure matrix utilities: Sprint 19 adds validation, canonicalization, transforms, row-as-point flattening, and commitments without stack integration.
+- Matrix mutation descriptors: Sprint 20 adds explicit committed `UN-MATRIX-MUTATE` recipes only; no helper mutates key state implicitly.
 - Flatten matrix to N-D mesh: define a deterministic conversion from matrix keys to ordered N-dimensional point meshes.
 - Combine descriptors: define committed `UN-MATRIX-COMBINE` recipe descriptors and verification helpers.
 - Stack integration: allow stacks to consume committed matrix-derived meshes only after the docs and pure utilities are stable.
+
+## Future Scope Boundaries
+
+Signed mutation envelopes, matrix combine, certificates, N-dimensional angle math, GWM integration, stack integration, cascade integration, CLI/file wrappers, and browser playground work remain future scope. `UN-MATRIX-MUTATE` does not add hidden key mutation, automatic key evolution, production-safe cryptography, compression, steganography, or homomorphic behavior.

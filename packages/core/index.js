@@ -26,4 +26,6 @@ module.exports = {
   ...require('./src/generation-descriptor'),
   ...require('./src/fit-naive'),
   ...require('./src/cascade'),
+  ...require('./src/matrix'),
+  ...require('./src/matrix-mutate'),
 };
