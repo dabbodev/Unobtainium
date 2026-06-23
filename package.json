@@ -1,13 +1,13 @@
 {
   "name": "unobtainium-enc",
   "version": "2.0.0",
-  "description": "Data encyption using 3-dimensional geometry",
+  "description": "Experimental data masking using 3-dimensional geometry",
   "main": "index.js",
   "scripts": {
     "test": "node --test"
   },
   "author": "david giles",
-  "license": "ISC",
+  "license": "GPL-3.0-only",
   "dependencies": {
     "mustache": "^4.0.0",
     "yargs": "^15.1.0"

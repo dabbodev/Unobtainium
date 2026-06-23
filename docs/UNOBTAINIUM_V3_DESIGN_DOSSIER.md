@@ -167,7 +167,15 @@ Mutation recipes record `UN-MATRIX-MUTATE` format/version context, source matrix
 
 Mutation is explicit, deterministic, replayable, bounded, and commitment-backed. Bounds are checked at the time each operation is applied because earlier operations can change matrix shape. The helpers defensively clone caller data and return new matrix results; they do not mutate caller input or hidden key state.
 
-`UN-MATRIX-MUTATE` is experimental and not production cryptography. Mutation recipes do not prove secrecy, strength, authenticity, or safe key evolution. Signed mutation envelopes, matrix combine, certificates, N-dimensional angle math, GWM integration, stack integration, cascade integration, CLI/file wrappers, and browser playground work remain future scope.
+`UN-MATRIX-MUTATE` is experimental and not production cryptography. Mutation recipes do not prove secrecy, strength, authenticity, or safe key evolution. Matrix combine, certificates, N-dimensional angle math, GWM integration, stack integration, cascade integration, CLI/file wrappers, and browser playground work remain future scope.
+
+## Sprint 21 UN-MATRIX-MUTATE-SIGNED Intent Envelopes
+
+Sprint 21 adds first-pass `UN-MATRIX-MUTATE-SIGNED` envelopes beside the Sprint 20 matrix mutation helpers. A signed matrix mutation envelope binds an explicit normalized `UN-MATRIX-MUTATE` recipe to signer ID, purpose, metadata, public key material, Ed25519 algorithm context, the mutation recipe commitment, source matrix commitment, target matrix commitment when declared, and a deterministic signed-envelope commitment.
+
+The signature proves signer intent over the committed mutation recipe only. It does not prove matrix secrecy, key strength, authenticity of a real-world identity, authorization, safe key evolution, or production-safe cryptography. Matrix mutation remains explicit, deterministic, replayable, bounded, and commitment-backed; signing does not make hidden mutation acceptable.
+
+Applying a signed matrix mutation verifies the envelope before applying the underlying recipe. The source matrix must match the signed source commitment, and the computed target matrix must match any signed target commitment. Sprint 21 does not integrate matrix mutation into GWM, stacks, cascade, CLI/file wrappers, browser paths, certificates, combine recipes, or N-dimensional angle math.
 
 ## Purpose
 
@@ -238,6 +246,8 @@ UNSTACK-SIGNED is a signed envelope around an unsigned stack recipe. The current
 
 UNPATCH-SIGNED is a signed envelope around a committed patch object. The current first-pass form signs the canonical patch commitment plus signer ID, purpose, metadata, algorithm, signed-patch format/version context, and explicit `UNPATCH-SIGNED:v1` domain separation. The signature goal is patch intent and integrity, not authorization, decryption, or filesystem mutation rights.
 
+UN-MATRIX-MUTATE-SIGNED is a signed envelope around an explicit committed matrix mutation recipe. The first-pass form signs the normalized mutation recipe payload and commitment plus signer ID, purpose, metadata, algorithm, public key material, signed-envelope format/version context, source matrix commitment, target matrix commitment when declared, and explicit domain separation. The signature goal is signer intent over that recipe only, not secrecy, key strength, real-world identity, authorization, or safe key evolution.
+
 Composable stacks should be explicit, inspectable, canonical, and hashable. Hidden transform order creates fragile behavior and makes security review harder.
 
 ## Gates
@@ -256,7 +266,7 @@ Sealed mode should reject tampered packets through authentication. Malleable mod
 
 Sprint 14 uses `UN-GEN` for blank-substrate materialization through existing stacks. Broader deterministic point-cloud generation from seeds, prompts, parameters, or procedural geometry remains future scope. UN-FIT is the working name for fitting or adapting point clouds to target constraints. UN-CASCADE is the working name for chaining multiple point-cloud masks. UN-STEG is the working name for carrying point packets inside another medium.
 
-Future key-shape branches include `UN-ND` for broader N-dimensional geometry support and `UN-MATRIX-COMBINE` for explicit tiled matrix combination. Sprint 19 `UN-MATRIX` is limited to pure matrix descriptors and value transforms. Sprint 20 `UN-MATRIX-MUTATE` is limited to explicit committed mutation recipes. Future validation and overlay branches include `UN-CERT` for split validation certificates and `UN-STENCIL` / `UN-CUTOUT` for context-bound original-vs-shifted layer experiments.
+Future key-shape branches include `UN-ND` for broader N-dimensional geometry support and `UN-MATRIX-COMBINE` for explicit tiled matrix combination. Sprint 19 `UN-MATRIX` is limited to pure matrix descriptors and value transforms. Sprint 20 `UN-MATRIX-MUTATE` is limited to explicit committed mutation recipes. Sprint 21 `UN-MATRIX-MUTATE-SIGNED` is limited to signed envelopes over those explicit committed recipes. Future validation and overlay branches include `UN-CERT` for split validation certificates and `UN-STENCIL` / `UN-CUTOUT` for context-bound original-vs-shifted layer experiments.
 
 These modes are future research directions. They should not be exposed as security claims. The first requirement is reproducibility: identical inputs must produce identical ordered point clouds across supported runtimes.
 
@@ -326,7 +336,9 @@ Strong/private keyfile: Keyfile input that is secret or difficult to predict, us
 
 Matrix mutation recipe commitment: A domain-separated SHA-256 hex digest over the canonical mutation recipe payload. Operation order, operation type, operation parameters, declared source commitment, declared target commitment, and metadata affect it.
 
-Signed mutation envelope: A future-scope signer intent or provenance envelope around a committed matrix mutation recipe. Sprint 20 does not implement signed mutation envelopes.
+`UN-MATRIX-MUTATE-SIGNED`: The Sprint 21 v3 signed envelope for explicit committed matrix mutation recipes. It proves signer intent over the committed recipe only and does not prove secrecy, strength, real-world identity, authorization, or safe key evolution.
+
+Signed matrix mutation commitment: A domain-separated SHA-256 hex digest over the canonical signed matrix mutation payload. It aids reproducibility and diagnostics for the signed envelope.
 
 `UN-GATE`: A v3 validation-only capability object that binds an object ID, byte range, object commitment, slice commitment, signed stack commitments, metadata, and a canonical gate commitment.
 

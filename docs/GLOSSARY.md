@@ -230,7 +230,17 @@ matrix mutation recipe: A deterministic `UN-MATRIX-MUTATE` object containing an 
 
 matrix mutation recipe commitment: A domain-separated SHA-256 hex digest over the canonical mutation recipe payload, excluding the `matrixMutationRecipeCommitment` field itself. Operation order, operation type, operation parameters, declared source commitment, declared target commitment, and metadata affect it.
 
-signed mutation envelope: A future-scope envelope for signer intent or provenance around a committed matrix mutation recipe. Sprint 20 does not implement signed mutation envelopes.
+UN-MATRIX-MUTATE-SIGNED: The Sprint 21 v3 signed envelope format for explicit committed matrix mutation recipes. It binds signed-envelope format/version context, Ed25519 algorithm context, public key material, signer ID, purpose, metadata, normalized recipe payload, recipe commitment, source matrix commitment, target matrix commitment when declared, signature value, and a signed matrix mutation commitment.
+
+signed matrix mutation envelope: A plain-data object that carries a normalized committed matrix mutation recipe plus signature fields needed to verify signer intent over that exact recipe. It is experimental and not production cryptography.
+
+signed matrix mutation payload: The canonical signed data for `UN-MATRIX-MUTATE-SIGNED`. It includes explicit domain separation and does not include the signature value itself.
+
+signed matrix mutation commitment: A domain-separated SHA-256 hex digest over the canonical signed matrix mutation payload. It aids reproducibility and diagnostics, but it is not a substitute for signature verification.
+
+signed matrix mutation intent: The signed statement that a signer endorsed an exact committed matrix mutation recipe for a purpose. It does not prove matrix secrecy, key strength, authenticity of a real-world identity, authorization, or safe key evolution.
+
+hidden matrix mutation: A non-goal where key state changes without an explicit mutation recipe. Sprint 21 signing does not make hidden mutation acceptable.
 
 key-state commitment: A commitment that binds a key state, transition recipe, or post-mutation state so verifiers can detect hidden or accidental key evolution.
 

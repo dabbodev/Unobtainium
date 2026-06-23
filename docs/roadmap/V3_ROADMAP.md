@@ -25,6 +25,7 @@ Status: planning document for an experimental cipher lab. Raw v3 modes are not p
 - Sprint 18: added first-pass `UN-CASCADE` deterministic residual layering for caller-supplied candidates.
 - Sprint 19: added first-pass `UN-MATRIX` pure utilities for matrix validation, descriptors, commitments, copied accessors, basic transforms, and row-as-point flattening.
 - Sprint 20: added first-pass `UN-MATRIX-MUTATE` pure committed mutation recipes for explicit deterministic bounded matrix transitions.
+- Sprint 21: added first-pass `UN-MATRIX-MUTATE-SIGNED` envelopes for signer intent over explicit committed matrix mutation recipes.
 
 ## Current Module Map
 
@@ -44,20 +45,20 @@ Status: planning document for an experimental cipher lab. Raw v3 modes are not p
 - `UN-CASCADE`: deterministic residual layering over caller-supplied generation candidates in declared order.
 - `UN-MATRIX`: pure utilities for rectangular safe-integer matrix key descriptors, deterministic commitments, defensive copies, basic matrix transforms, and row-as-point flattening.
 - `UN-MATRIX-MUTATE`: pure utilities for explicit committed matrix mutation recipes. Recipes are deterministic, replayable, bounded, and commitment-backed; they are not hidden key evolution or production cryptography.
+- `UN-MATRIX-MUTATE-SIGNED`: signed envelopes over explicit committed matrix mutation recipes. A signature proves signer intent over the committed recipe only; it does not prove secrecy, strength, real-world identity, authorization, or safe key evolution.
 
 ## Near-Term Recommended Sprints
 
 - Demo archaeology docs complete: finish documenting side demos as reference material and keep the authority boundary clear.
 - v3 browser playground planning: design a browser-only playground that rebuilds old demo affordances using v3 abstractions.
 - `UN-CASCADE` descriptor/reconstruction follow-up: sketch how external generated data, descriptors, and final residual material could support reconstruction workflows without turning cascade reports into compression or carrier formats.
-- `UN-MATRIX` follow-up design: refine combine, certificate, stack integration, signed mutation envelope, and N-dimensional geometry boundaries after the Sprint 19 and Sprint 20 pure utilities.
+- `UN-MATRIX` follow-up design: refine combine, certificate, stack integration, N-dimensional geometry, cascade, CLI/file, and browser boundaries after the Sprint 19 through Sprint 21 pure utilities.
 - `UN-ND` docs-only design: define N-dimensional point support and angle derivation without changing existing 3D helpers.
 
 ## Medium-Term Sprints
 
 - `UN-MATRIX-COMBINE`: combine equal-sized matrix keys through explicit 2x2 tiling recipes with transforms and commitments.
 - `UN-CERT`: split validation certificates that bind public and secret key tiles through signed combine recipes.
-- Signed mutation envelopes: signer intent and provenance around committed `UN-MATRIX-MUTATE` recipes.
 - `UN-STENCIL` / `UN-CUTOUT`: overlay and cutout design for original-vs-shifted layers with context-bound XOR stencil material.
 - v3 CLI/file wrappers: file and command wrappers around already specified v3 primitives, without changing legacy API behavior.
 
@@ -75,7 +76,7 @@ Unobtainium v3 is an experimental cipher lab. Raw `UN-GWM`, `UN-ROTATE`, `UN-SWA
 
 Fitting, cascade, matrix, mutation, certificate, stencil, cutout, and steganography work are research branches. They must not be presented as proof of compression, secrecy, authenticity, tamper resistance, safe key evolution, or production security.
 
-`UN-MATRIX-MUTATE` is explicit, deterministic, replayable, bounded, and commitment-backed only. Signed mutation envelopes, matrix combine, certificates, N-dimensional angle math, GWM integration, stack integration, cascade integration, CLI/file wrappers, and browser playground work remain future scope.
+`UN-MATRIX-MUTATE` is explicit, deterministic, replayable, bounded, and commitment-backed only. `UN-MATRIX-MUTATE-SIGNED` adds signer intent over committed recipes only. Signing does not make hidden mutation acceptable and does not prove secrecy, strength, authenticity of a real-world identity, authorization, safe key evolution, or production security. Matrix combine, certificates, N-dimensional angle math, GWM integration, stack integration, cascade integration, CLI/file wrappers, and browser playground work remain future scope.
 
 Generation and residual relations are reconstruction tools. A residual may be the same size as the target, and diagnostics such as residual score or estimated JSON size are not compression metrics.
 

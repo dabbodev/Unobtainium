@@ -28,4 +28,5 @@ module.exports = {
   ...require('./src/cascade'),
   ...require('./src/matrix'),
   ...require('./src/matrix-mutate'),
+  ...require('./src/signed-matrix-mutate'),
 };

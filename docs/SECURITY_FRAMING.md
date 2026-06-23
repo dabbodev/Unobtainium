@@ -13,7 +13,7 @@ This project should avoid security claims until a future sealed mode has a preci
 - Biased masks: geometric angle buckets and coordinate arithmetic may produce non-uniform shift distributions.
 - Degenerate points: duplicate points, collinear samples, zero-length triangle edges, too few points, or NaN angles can create invalid or weak mask values.
 - Known plaintext: if an attacker knows or guesses plaintext and masked output at the same position, they can infer the mask value for that position.
-- License mismatch: `package.json` currently declares `ISC`, while `LICENSE` contains GPL-3.0 text. This should be resolved before publishing or depending on the package.
+- Package metadata should continue to match the repository `LICENSE` file before publishing or depending on the package.
 
 ## Language Guidance
 
@@ -24,4 +24,3 @@ Avoid terms like secure encryption, military grade, unbreakable, production safe
 ## Future Safety Direction
 
 A future sealed mode should authenticate packets or stacks before exposing obtained data. It should also define canonical key serialization, reject degenerate geometry, require nonces or unique walk domains, and document exactly what security property it attempts to provide.
-

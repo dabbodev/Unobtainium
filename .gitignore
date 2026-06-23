@@ -1,0 +1,12 @@
+node_modules/
+
+# Local/generated runtime output
+out/
+output/
+outputs/
+dist/
+build/
+coverage/
+*.log
+*.tmp
+*.un
