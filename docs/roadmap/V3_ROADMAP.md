@@ -1,6 +1,6 @@
 # Unobtainium v3 Roadmap
 
-Status: planning document for an experimental cipher lab. Raw v3 modes are not production encryption. Fitting, cascade, matrix, certificate, stencil, and steganography branches are research directions, not compression or security claims.
+Status: planning document for an experimental cipher lab. Raw v3 modes are not production encryption. Fitting, cascade, matrix, certificate, cutout/stencil, and steganography branches are research directions, not compression or security claims.
 
 ## Completed Sprints
 
@@ -28,6 +28,8 @@ Status: planning document for an experimental cipher lab. Raw v3 modes are not p
 - Sprint 21: added first-pass `UN-MATRIX-MUTATE-SIGNED` envelopes for signer intent over explicit committed matrix mutation recipes.
 - Sprint 24: added first-pass `UN-MATRIX-COMBINE` pure committed combine recipes for deterministic tiled matrix assembly.
 - Sprint 25: added first-pass `UN-MATRIX-COMBINE-SIGNED` envelopes for signer intent over explicit committed matrix combine recipes.
+- Sprint 26: added first-pass `UN-CERT` split validation certificate objects.
+- Sprint 27: added first-pass `UN-CUTOUT` / `UN-STENCIL` committed region descriptors for byte-like payloads.
 
 ## Current Module Map
 
@@ -50,19 +52,21 @@ Status: planning document for an experimental cipher lab. Raw v3 modes are not p
 - `UN-MATRIX-MUTATE-SIGNED`: signed envelopes over explicit committed matrix mutation recipes. A signature proves signer intent over the committed recipe only; it does not prove secrecy, strength, real-world identity, authorization, or safe key evolution.
 - `UN-MATRIX-COMBINE`: pure utilities for committed matrix combine recipes. Recipes place transformed copies of named source tiles into a fully filled rectangular tile grid and return a normal `UN-MATRIX` key when applied; they are not certificates, asymmetric cryptography, or production cryptography.
 - `UN-MATRIX-COMBINE-SIGNED`: signed envelopes over explicit committed matrix combine recipes. A signature proves signer intent over the committed recipe only; it does not prove secrecy, strength, asymmetric encryption, real-world identity, certificate validity, authorization, or production authentication.
+- `UN-CERT`: split validation certificate objects that bind public matrix tile material or commitments, private tile slots and expected commitments, signed matrix combine material, an expected output matrix commitment, optional target commitments, metadata, context, and a certificate commitment. A certificate proves only that supplied material satisfies a committed validation relationship.
+- `UN-CUTOUT` / `UN-STENCIL`: committed region descriptors for byte-like payloads. A cutout plan declares ordered hidden ranges, deterministic public fill, span commitments, payload commitments, context, metadata, and a plan commitment. Verification proves only that supplied hidden spans satisfy committed reconstruction checks.
 
 ## Near-Term Recommended Sprints
 
 - Demo archaeology docs complete: finish documenting side demos as reference material and keep the authority boundary clear.
 - v3 browser playground planning: design a browser-only playground that rebuilds old demo affordances using v3 abstractions.
 - `UN-CASCADE` descriptor/reconstruction follow-up: sketch how external generated data, descriptors, and final residual material could support reconstruction workflows without turning cascade reports into compression or carrier formats.
-- `UN-MATRIX` follow-up design: refine certificate, stack integration, N-dimensional geometry, cascade, CLI/file, and browser boundaries after the Sprint 19 through Sprint 25 pure utilities and signed envelopes.
+- `UN-MATRIX` follow-up design: refine stack integration, N-dimensional geometry, cascade, CLI/file, and browser boundaries after the Sprint 19 through Sprint 27 pure utilities, signed envelopes, certificate objects, and committed region descriptors.
 - `UN-ND` docs-only design: define N-dimensional point support and angle derivation without changing existing 3D helpers.
 
 ## Medium-Term Sprints
 
-- `UN-CERT`: split validation certificates that bind public and secret key tiles through signed combine recipes inside a future certificate layer.
-- `UN-STENCIL` / `UN-CUTOUT`: overlay and cutout design for original-vs-shifted layers with context-bound XOR stencil material.
+- `UN-CERT` follow-up: refine certificate policy, target bindings, and interop boundaries without turning certificates into production authentication or public-key cryptography.
+- `UN-STENCIL` / `UN-CUTOUT` follow-up: refine overlay and cutout design for original-vs-shifted layers with context-bound XOR stencil material. UN-CERT integration, GWM integration, stack integration, cascade integration, file wrappers, browser behavior, and CLI behavior remain future scope.
 - v3 CLI/file wrappers: file and command wrappers around already specified v3 primitives, without changing legacy API behavior.
 
 ## Long-Term / Experimental
@@ -79,7 +83,7 @@ Unobtainium v3 is an experimental cipher lab. Raw `UN-GWM`, `UN-ROTATE`, `UN-SWA
 
 Fitting, cascade, matrix, mutation, certificate, stencil, cutout, and steganography work are research branches. They must not be presented as proof of compression, secrecy, authenticity, tamper resistance, safe key evolution, or production security.
 
-`UN-MATRIX-MUTATE` is explicit, deterministic, replayable, bounded, and commitment-backed only. `UN-MATRIX-MUTATE-SIGNED` adds signer intent over committed recipes only. `UN-MATRIX-COMBINE` adds pure committed tiled combine recipes only. `UN-MATRIX-COMBINE-SIGNED` adds signer intent over committed combine recipes only. Signing does not make hidden mutation acceptable and does not prove secrecy, strength, authenticity of a real-world identity, authorization, safe key evolution, certificate validity, asymmetric encryption, or production authentication. Matrix combine remains explicit, deterministic, replayable, and commitment-backed. Combining public/private-looking tiles does not create real asymmetric cryptography, and combine recipe commitments do not prove secrecy, key strength, identity, or certificate validity. `UN-CERT`, certificates, N-dimensional angle math, GWM integration, stack integration, cascade integration, CLI/file wrappers, and browser playground work remain future scope.
+`UN-MATRIX-MUTATE` is explicit, deterministic, replayable, bounded, and commitment-backed only. `UN-MATRIX-MUTATE-SIGNED` adds signer intent over committed recipes only. `UN-MATRIX-COMBINE` adds pure committed tiled combine recipes only. `UN-MATRIX-COMBINE-SIGNED` adds signer intent over committed combine recipes only. `UN-CERT` adds split validation certificate objects only. `UN-CUTOUT` / `UN-STENCIL` adds committed region descriptors only. Signing does not make hidden mutation acceptable and does not prove secrecy, strength, authenticity of a real-world identity, authorization, safe key evolution, certificate authority trust, asymmetric encryption, or production authentication. Matrix combine remains explicit, deterministic, replayable, and commitment-backed. Combining public/private-looking tiles does not create real asymmetric cryptography, certificates prove only that supplied material satisfies a committed validation relationship, and cutout verification proves only that supplied hidden spans satisfy committed reconstruction checks. Secure redaction, redaction/unredaction workflows, N-dimensional angle math, GWM integration, stack integration, cascade integration, UN-CERT integration, CLI/file wrappers, and browser playground work remain future scope.
 
 Generation and residual relations are reconstruction tools. A residual may be the same size as the target, and diagnostics such as residual score or estimated JSON size are not compression metrics.
 

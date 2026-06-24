@@ -31,4 +31,6 @@ module.exports = {
   ...require('./src/matrix-combine'),
   ...require('./src/signed-matrix-mutate'),
   ...require('./src/signed-matrix-combine'),
+  ...require('./src/cert'),
+  ...require('./src/cutout'),
 };

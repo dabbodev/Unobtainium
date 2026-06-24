@@ -264,21 +264,35 @@ signed matrix combine commitment: A domain-separated SHA-256 hex digest over the
 
 signed matrix combine intent: The signed statement that a signer endorsed an exact committed matrix combine recipe for a purpose. It does not prove matrix secrecy, key strength, asymmetric encryption, authenticity of a real-world identity, certificate validity, authorization, or production authentication.
 
-public key tile: The public matrix tile in a split validation design. Combining public/private-looking tiles does not create real asymmetric cryptography.
+UN-CERT: The Sprint 26 v3 split validation certificate object. It binds public tile descriptors or material, private tile slots and expected commitments, signed matrix combine material, an expected output matrix commitment, optional target commitments, metadata, context, and a certificate commitment. It is experimental and not production cryptography.
 
-secret key tile: The private matrix tile supplied by an authorized verifier in a split validation design.
+certificate commitment: A domain-separated SHA-256 hex digest over the canonical `UN-CERT` payload, excluding the `certificateCommitment` field itself.
 
-split validation certificate: A future certificate form that binds a public tile, secret tile commitment, signed combine recipe, combined key commitment, and data or gate commitments.
+split validation certificate: A validation artifact that proves only that supplied material satisfies a committed validation relationship. It does not prove legal ownership, human identity, production authentication, secrecy, key strength, asymmetric encryption, certificate authority trust, compression, steganography, tamper-proofing, or production-safe cryptography.
 
-UN-CERT: A future split validation certificate branch where public and secret matrix tiles plus a signed combine recipe reconstruct a combined validation key for stack or gate checks.
+public matrix tile: Conceptual public-side matrix material in a split validation certificate. Public/private matrix tile wording is conceptual and must not be described as real public-key cryptography.
 
-UN-STENCIL: A future overlay branch where original and shifted/generated layers are related by committed region rules and context-bound stencil material.
+private matrix tile: Conceptual private-side matrix material supplied during completion verification. A matching private tile only satisfies the committed certificate relationship; it does not prove identity, ownership, secrecy, or key strength.
 
-UN-CUTOUT: A future redaction or reveal branch built on selected regions/cutouts between an original layer and a shifted/generated underlayer.
+UN-STENCIL: The Sprint 27 committed region descriptor branch, paired with `UN-CUTOUT`, for byte-like payload cutout plans. Broader original-vs-shifted overlay relations and context-bound stencil material remain future scope.
+
+UN-CUTOUT: The Sprint 27 v3 committed region descriptor utility family for byte-like payloads. A cutout plan records ordered hidden ranges, deterministic fill settings, span commitments, payload commitments, label/context/metadata, and a plan commitment. It is experimental and not production cryptography.
+
+cutout plan: A canonical `UN-CUTOUT` object describing ordered byte ranges removed or masked from a public payload. It preserves span order as part of descriptor identity and rejects overlapping or unsorted spans in the first pass.
+
+cutout plan commitment: A domain-separated SHA-256 hex digest over the canonical `UN-CUTOUT` plan payload, excluding the `cutoutPlanCommitment` field itself.
+
+cutout span commitment: A domain-separated SHA-256 hex digest over one hidden span's bytes plus its offset, length, and label context.
+
+cutout payload commitment: A domain-separated SHA-256 hex digest over a full byte payload for cutout/stencil reconstruction checks.
+
+cutout verification: A structural validation check that supplied hidden spans satisfy committed reconstruction checks for a public payload and plan. It does not prove legal ownership, human identity, production authentication, secrecy, key strength, asymmetric encryption, certificate authority trust, compression, steganography, tamper-proofing, secure redaction, or production-safe cryptography.
+
+public cutout payload: The byte payload returned by `applyCutout()` with declared cutout ranges replaced by a deterministic fill byte. It may leak information through size, position, structure, fill patterns, labels, metadata, and surrounding context.
 
 XOR stencil: Reversible stencil material defined by `X = P XOR S`, where `P` is an original layer and `S` is a shifted or generated layer. It must be context-bound and must not be reused across objects, ranges, certificates, recipes, or purposes.
 
-cutout region: A declared byte, element, or geometric region where a stencil/cutout recipe changes whether original or shifted/generated material is visible.
+cutout region: A declared byte, element, or geometric region where a stencil/cutout recipe changes whether original or shifted/generated material is visible. Sprint 27 implements byte ranges only.
 
 shifted underlayer: The shifted or generated layer placed underneath an original layer for stencil or cutout experiments.
 

@@ -1,52 +1,62 @@
 # UN-CERT and UN-STENCIL Ideas
 
-Status: future design notes only. No `UN-CERT`, `UN-STENCIL`, or `UN-CUTOUT` implementation exists yet.
+Status: Sprint 26 implements first-pass `UN-CERT` split validation certificate objects. Sprint 27 adds first-pass `UN-CUTOUT` / `UN-STENCIL` committed region descriptors only.
 
-These ideas do not make raw mode production-secure. They are planning notes for validation, redaction, and overlay experiments that would require explicit commitments, signatures, misuse boundaries, and review before implementation.
+These ideas do not make raw mode production-secure. `UN-CERT` is a validation artifact only. `UN-CUTOUT` / `UN-STENCIL` descriptors are structural validation primitives only. They are experimental and not production cryptography.
 
 ## Split Validation Certificates
 
-`UN-CERT` is a future split validation certificate idea built around matrix tiles and a signed combine recipe.
+`UN-CERT` is a first-pass split validation certificate object built around matrix tiles and a signed combine recipe. It binds public matrix tile material or commitments, private tile slots and expected private tile commitments, a signed matrix combine envelope or signed combine commitment, an expected effective/output matrix commitment, optional target commitments, metadata, context, and a deterministic certificate commitment.
 
 Core parts:
 
-- public key tile B: a matrix tile that can be shared with observers;
-- secret key tile A: a private matrix tile supplied only by an authorized verifier;
+- public matrix tile B: conceptual public-side matrix material that can be shared with observers;
+- private matrix tile A: conceptual private-side matrix material supplied later by a claimant;
 - signed matrix-combine recipe: a signed recipe that declares how tile A and tile B combine;
-- combined validation key: the reconstructed matrix key used for stack or gate validation;
+- combined validation matrix: the reconstructed matrix output checked against the certificate commitment;
 - data/object/slice commitments: commitments that bind the certificate to exact data, ranges, or validation targets.
 
 Public observer capability:
 
 - verify certificate structure and public commitments;
-- verify the public key tile B commitment;
-- verify the signed combine recipe if the signer policy is available;
-- confirm which object, range, gate, or stack commitments the certificate claims to bind;
-- not reconstruct the combined validation key without secret tile A.
+- verify the public matrix tile B commitment;
+- verify an embedded signed combine envelope when present;
+- confirm which object, range, label, context, or other target commitments the certificate claims to bind;
+- not reconstruct the combined validation matrix without private tile A.
 
-Authorized verifier capability:
+Completion verifier capability:
 
 - verify all public observer checks;
-- supply secret key tile A;
-- verify the secret tile commitment;
-- reconstruct the combined validation key;
-- verify the combined key commitment;
-- use the combined key for stack or gate validation.
+- supply private matrix tile A;
+- verify the private tile commitment;
+- reconstruct the combined validation matrix through the signed matrix combine envelope;
+- verify the computed output matrix commitment against the certificate's expected output matrix commitment.
 
 ## Certificate Verification Flow
 
-1. Verify the certificate commitment and signature.
+1. Verify the certificate shape and certificate commitment.
 2. Verify the public tile commitment.
-3. Verify the secret tile commitment if the secret tile is supplied.
-4. Reconstruct the combined matrix key from public tile B, secret tile A, and the signed combine recipe.
-5. Verify the combined key commitment.
-6. Use the combined key for stack or gate validation.
+3. Verify the embedded signed matrix combine envelope if present.
+4. Verify the private tile commitment if private tile material is supplied.
+5. Reconstruct the combined validation matrix from public tile B, private tile A, and the signed combine recipe.
+6. Verify the combined output matrix commitment.
+7. Return a validation result object. Sprint 26 does not use the combined matrix for stack or gate validation.
 
-The certificate should bind the relevant object ID, object commitment, slice commitment, signed stack commitment, gate commitment, combine recipe commitment, public tile commitment, secret tile commitment, combined key commitment, purpose, and context.
+The certificate can bind relevant object commitments, range or slice commitments, label/context commitments, signed combine commitments, public tile commitments, private tile commitments, expected output matrix commitment, metadata, and context. Sprint 26 does not bind certificates into `UN-GATE`, `UNSTACK`, `UN-CASCADE`, file wrappers, browser paths, or legacy runtime paths.
+
+## Sprint 26 Boundaries
+
+`UN-CERT` proves only that supplied material satisfies a committed validation relationship. It does not prove legal ownership, human identity, production authentication, secrecy, key strength, asymmetric encryption, certificate authority trust, compression, steganography, tamper-proofing, or production-safe cryptography.
+
+Public/private matrix tile language is conceptual. It must not be described as real public-key cryptography.
 
 ## UN-STENCIL / UN-CUTOUT
 
-`UN-STENCIL` and `UN-CUTOUT` are future overlay/redaction ideas. The core model compares an original layer and a shifted or generated layer, then reveals or masks selected regions by explicit region rules.
+Sprint 27 adds first-pass `UN-CUTOUT` / `UN-STENCIL` committed region descriptors for byte-like payloads. A cutout plan declares ordered ranges, replaces those ranges in a public payload with a deterministic fill byte, commits to the original payload and hidden span material, and supports later verification when the hidden spans are supplied.
+
+This is not secure redaction by itself. Public payloads may leak information through size, position, structure, fill patterns, labels, metadata, and surrounding context. A successful verification proves only that supplied hidden spans satisfy committed reconstruction checks. It does not prove legal ownership, human identity, production authentication, secrecy, key strength, asymmetric encryption, certificate authority trust, compression, steganography, tamper-proofing, or production-safe cryptography.
+
+The broader stencil model still compares an original layer and a shifted or generated layer, then reveals or masks selected regions by explicit region rules. Sprint 27 implements only the committed byte-region descriptor subset.
 
 Core parts:
 
@@ -86,6 +96,8 @@ A future stencil descriptor should bind at least:
 
 ## Boundaries
 
-These are future designs only. No implementation exists yet.
+Sprint 27 `UN-CUTOUT` / `UN-STENCIL` work is limited to pure committed region descriptor utilities. It does not add file wrappers, browser behavior, CLI behavior, `UN-CERT` integration, GWM integration, stack integration, cascade integration, real encryption, steganography, secure redaction, production authentication, or N-dimensional angle math.
 
-They do not make raw mode production-secure, and they should not be described as authenticated encryption, safe redaction, or secure access control without a future sealed construction and external review.
+UN-CERT integration remains future scope. File wrappers, browser playground work, N-dimensional angle math, GWM integration, stack integration, cascade integration, and richer original-vs-shifted stencil relations remain future scope.
+
+They do not make raw mode production-secure, and they should not be described as authenticated encryption, safe redaction, secure access control, production authentication, asymmetric cryptography, ownership proof, identity proof, compression, steganography, or tamper-proofing without a future sealed construction and external review.
