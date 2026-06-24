@@ -244,11 +244,27 @@ hidden matrix mutation: A non-goal where key state changes without an explicit m
 
 key-state commitment: A commitment that binds a key state, transition recipe, or post-mutation state so verifiers can detect hidden or accidental key evolution.
 
-UN-MATRIX-COMBINE: A future matrix recipe family for combining two equal-sized matrix keys into a larger tiled key, such as a 2x2 quadrant layout with declared flips, rotations, transposes, and placement policy.
+UN-MATRIX-COMBINE: The Sprint 24 v3 pure committed recipe family for combining supplied matrix tiles into a larger tiled matrix key with declared placements and transforms. It is experimental and not production cryptography.
 
 tiled key: A matrix key built from source matrix tiles under an explicit placement and transform recipe.
 
-public key tile: The public matrix tile in a split validation design. It may be inspected by observers but should not be enough to reconstruct the combined validation key by itself.
+matrix combine recipe: A deterministic `UN-MATRIX-COMBINE` object containing named source tile descriptors, ordered placements, optional canonical metadata, and a recipe commitment. It does not prove secrecy, key strength, identity, certificate validity, authorization, or safe key evolution.
+
+matrix combine recipe commitment: A domain-separated SHA-256 hex digest over the canonical combine recipe payload. Tile names, tile matrix commitments, placement order, placement coordinates, placement transforms, and metadata affect it.
+
+matrix combine placement: One ordered placement in a combine recipe. Sprint 24 placements declare a tile name, non-negative output tile-row and tile-column indexes, and an optional transform.
+
+UN-MATRIX-COMBINE-SIGNED: The Sprint 25 v3 signed envelope format for explicit committed matrix combine recipes. It binds signed-envelope format/version context, Ed25519 algorithm context, public key material, signer ID, purpose, metadata, normalized combine recipe payload, recipe commitment, input tile commitments, output matrix commitment when available or declared, signature value, and a signed matrix combine commitment.
+
+signed matrix combine envelope: A plain-data object that carries a normalized committed matrix combine recipe plus signature fields needed to verify signer intent over that exact recipe. It is experimental and not production cryptography.
+
+signed matrix combine payload: The canonical signed data for `UN-MATRIX-COMBINE-SIGNED`. It includes explicit domain separation and does not include the signature value itself.
+
+signed matrix combine commitment: A domain-separated SHA-256 hex digest over the canonical signed matrix combine payload. It aids reproducibility and diagnostics, but it is not a substitute for signature verification.
+
+signed matrix combine intent: The signed statement that a signer endorsed an exact committed matrix combine recipe for a purpose. It does not prove matrix secrecy, key strength, asymmetric encryption, authenticity of a real-world identity, certificate validity, authorization, or production authentication.
+
+public key tile: The public matrix tile in a split validation design. Combining public/private-looking tiles does not create real asymmetric cryptography.
 
 secret key tile: The private matrix tile supplied by an authorized verifier in a split validation design.
 

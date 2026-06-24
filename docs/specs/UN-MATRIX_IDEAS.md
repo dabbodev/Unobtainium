@@ -1,6 +1,6 @@
 # UN-MATRIX Ideas
 
-Status: Sprint 21 adds first-pass `UN-MATRIX-MUTATE-SIGNED` signed envelopes over explicit committed `UN-MATRIX-MUTATE` recipes beside the Sprint 19 `UN-MATRIX` utilities and Sprint 20 mutation helpers. `UN-ND`, `UN-MATRIX-COMBINE`, certificates, stack integration, cascade integration, CLI/file wrappers, and browser playground work remain future scope.
+Status: Sprint 25 adds first-pass `UN-MATRIX-COMBINE-SIGNED` envelopes over explicit committed matrix combine recipes beside the Sprint 19 `UN-MATRIX` utilities, Sprint 20 mutation helpers, Sprint 21 signed mutation envelopes, and Sprint 24 combine recipes. `UN-ND`, `UN-CERT`, certificates, GWM integration, stack integration, cascade integration, CLI/file wrappers, and browser playground work remain future scope.
 
 Sprint 19 `UN-MATRIX` utilities normalize rectangular safe-integer matrix values, create committed matrix descriptors, clone matrix values defensively, expose row/column accessors, transpose and flip matrix values, rotate square matrices by 90 or 270 degrees, rotate any rectangular matrix by 180 degrees, and flatten rows as ordered N-dimensional point vectors. These helpers do not mutate caller input or hidden key state.
 
@@ -9,6 +9,10 @@ Sprint 19 `UN-MATRIX` utilities normalize rectangular safe-integer matrix values
 Sprint 20 `UN-MATRIX-MUTATE` recipes are experimental and are not production cryptography. Mutation recipes do not prove secrecy, strength, authenticity, or safe key evolution. They are explicit, deterministic, replayable, bounded, and commitment-backed transition records only.
 
 Sprint 21 `UN-MATRIX-MUTATE-SIGNED` envelopes are experimental and are not production cryptography. A signature proves signer intent over an explicit committed mutation recipe only. It does not prove matrix secrecy, key strength, authenticity of a real-world identity, safe key evolution, authorization, or production security.
+
+Sprint 24 `UN-MATRIX-COMBINE` recipes are experimental and are not production cryptography. Combine recipes deterministically place transformed copies of supplied matrix tiles into a larger matrix key and commit to the recipe identity. They do not prove secrecy, key strength, identity, certificate validity, asymmetric behavior, production authentication, or safe key evolution.
+
+Sprint 25 `UN-MATRIX-COMBINE-SIGNED` envelopes are experimental and are not production cryptography. A signature proves signer intent over an explicit committed combine recipe only. It does not prove matrix secrecy, key strength, asymmetric encryption, authenticity of a real-world identity, certificate validity, authorization, or production authentication.
 
 ## Motivation
 
@@ -81,46 +85,65 @@ Signing does not make hidden mutation acceptable. Matrix mutation remains explic
 
 - Mutation must be explicit. A helper that computes distance, angle, matrix values, rows, columns, or transforms must not secretly change key shape or key state.
 - Mutation must be deterministic. The same input matrix, context, and recipe must produce the same output matrix.
-- Sprint 21 signing covers explicit committed recipes only. Signing must not hide mutation, create automatic key evolution, or imply production-safe cryptography.
+- Sprint 21 and Sprint 25 signing cover explicit committed recipes only. Signing must not hide mutation, create automatic key evolution, or imply production-safe cryptography.
 - Future mutation may bind to frame, layer, context, and packet commitments when used inside stacks or streams.
 - Future mutation may bind to relevant object, gate, certificate, or descriptor commitments when used for validation.
 - Geometry helpers should remain pure readers of key material. They should reject invalid shape or return degenerate geometry rather than mutating state.
 
 ## UN-MATRIX-COMBINE
 
-`UN-MATRIX-COMBINE` would combine two equal-sized source matrices into a larger tiled matrix by placing transformed copies into a 2x2 quadrant layout.
+Sprint 24 `UN-MATRIX-COMBINE` combines named source matrix tiles into a larger tiled matrix by placing transformed copies into an output tile grid. It is a pure committed recipe family only. It does not add certificates, GWM integration, stack integration, cascade integration, CLI/file wrappers, browser demo behavior, or legacy runtime changes.
 
-Initial design constraints:
+First-pass recipe shape:
 
-- Source matrices must be equal-sized unless a future version defines padding or crop policy.
-- The combined output is a 2x2 quadrant tiling of source-derived tiles.
-- A placement recipe declares which source matrix contributes to each quadrant.
-- Each quadrant can declare a transform.
+- `tiles`: an object or array of named source matrix tiles;
+- `placements`: an ordered array of placement objects;
+- optional canonical `metadata`.
 
-Candidate transforms:
+Each placement declares `tile`, `row`, `column`, and an optional `transform`. Placement order is part of recipe identity even when the assembled matrix values would match another ordering.
+
+Supported Sprint 24 transforms:
 
 - identity;
-- horizontal flip;
-- vertical flip;
-- 180-degree rotation;
-- 90-degree rotation when square shape policy permits it;
-- 270-degree rotation when square shape policy permits it;
-- transpose when shape policy permits it.
+- `flipHorizontal`;
+- `flipVertical`;
+- `rotate180`;
+- `transpose`;
+- `rotate90` for square source tiles only;
+- `rotate270` for square source tiles only.
 
-Candidate policies:
+Shape and bounds rules:
 
-- balanced: both source matrices must appear in the combined output under policy-defined minimum coverage.
-- free: any quadrant placement is allowed as long as commitments match.
-- coverage: the recipe must satisfy explicit source coverage and transform coverage requirements.
+- all source tiles must be valid normalized matrix keys or raw matrix values accepted by `UN-MATRIX`;
+- all source tiles must have the same base shape;
+- transformed tile shape must fit the output cell shape;
+- placement row and column indexes must be non-negative safe integers;
+- missing tile references, unsupported transforms, overlapping placements, and unfilled output cells are rejected;
+- every tile-grid cell from row `0` through the maximum used row and column `0` through the maximum used column must be filled;
+- empty output cells and fill values are not supported in Sprint 24.
 
 Commitments should cover:
 
-- source matrix A commitment;
-- source matrix B commitment;
+- tile names;
+- tile matrix commitments;
+- ordered placements;
+- placement coordinates;
+- placement transforms;
+- canonical metadata;
 - combine recipe commitment;
-- combined matrix commitment;
-- shape policy and transform policy;
-- optional frame/layer/context/gate/certificate bindings.
+- combined matrix commitment when a recipe is applied.
+
+Matrix combine is experimental and not production cryptography. Combining public/private-looking tiles does not create real asymmetric cryptography. Combine recipe commitments do not prove secrecy, key strength, identity, or certificate validity. `UN-CERT` remains future scope. N-dimensional angle math, GWM integration, stack integration, cascade integration, CLI/file wrappers, and browser playground work remain future scope.
+
+## UN-MATRIX-COMBINE-SIGNED
+
+Sprint 25 `UN-MATRIX-COMBINE-SIGNED` signs an explicit normalized `UN-MATRIX-COMBINE` recipe using Ed25519. The signed payload includes signed-envelope format/version context, algorithm, public key material, signer metadata, the normalized combine recipe payload, the combine recipe commitment, input tile commitments, and an output matrix commitment when available or declared.
+
+The signed matrix combine commitment is deterministic and domain-separated. Verification checks the combine recipe commitment, signed input tile commitments, signed output matrix commitment field, signed envelope commitment, public key material, and signature bytes. Applying a signed combine verifies the envelope first, then applies the underlying recipe only when supplied tiles match the signed tile commitments and the computed output matrix matches any signed output commitment.
+
+Matrix combine remains explicit, deterministic, replayable, and commitment-backed. The signature proves signer intent over the committed combine recipe only. It does not prove secrecy, key strength, asymmetric encryption, real-world identity, certificate validity, authorization, or production authentication. Combining public/private-looking tiles does not create real asymmetric cryptography.
+
+Sprint 25 does not add `UN-CERT`, certificates, N-dimensional angle math, GWM integration, stack integration, cascade integration, CLI/file wrappers, browser playground behavior, hidden key evolution, automatic key evolution, `UN-STENCIL`, or `UN-CUTOUT`.
 
 ## Future Sprint Outline
 
@@ -128,10 +151,11 @@ Commitments should cover:
 - Pure matrix utilities: Sprint 19 adds validation, canonicalization, transforms, row-as-point flattening, and commitments without stack integration.
 - Matrix mutation descriptors: Sprint 20 adds explicit committed `UN-MATRIX-MUTATE` recipes only; no helper mutates key state implicitly.
 - Signed matrix mutation envelopes: Sprint 21 adds `UN-MATRIX-MUTATE-SIGNED` signer-intent envelopes over committed recipes only.
+- Matrix combine recipes: Sprint 24 adds pure committed `UN-MATRIX-COMBINE` recipes only; no certificates, stack integration, cascade integration, GWM integration, CLI/file wrappers, browser paths, or legacy runtime changes.
+- Signed matrix combine envelopes: Sprint 25 adds `UN-MATRIX-COMBINE-SIGNED` signer-intent envelopes over explicit committed combine recipes only; no certificates, stack integration, cascade integration, GWM integration, CLI/file wrappers, browser paths, or legacy runtime changes.
 - Flatten matrix to N-D mesh: define a deterministic conversion from matrix keys to ordered N-dimensional point meshes.
-- Combine descriptors: define committed `UN-MATRIX-COMBINE` recipe descriptors and verification helpers.
 - Stack integration: allow stacks to consume committed matrix-derived meshes only after the docs and pure utilities are stable.
 
 ## Future Scope Boundaries
 
-Matrix combine, certificates, N-dimensional angle math, GWM integration, stack integration, cascade integration, CLI/file wrappers, and browser playground work remain future scope. `UN-MATRIX-MUTATE` and `UN-MATRIX-MUTATE-SIGNED` do not add hidden key mutation, automatic key evolution, production-safe cryptography, compression, steganography, homomorphic behavior, or production authentication.
+`UN-CERT`, certificates, N-dimensional angle math, GWM integration, stack integration, cascade integration, CLI/file wrappers, and browser playground work remain future scope. `UN-MATRIX-MUTATE`, `UN-MATRIX-MUTATE-SIGNED`, `UN-MATRIX-COMBINE`, and `UN-MATRIX-COMBINE-SIGNED` do not add hidden key mutation, automatic key evolution, production-safe cryptography, asymmetric cryptography, compression, steganography, homomorphic behavior, or production authentication.
