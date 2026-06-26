@@ -23,13 +23,13 @@ points you've added to the list on the left
 
 ## v3 status
 
-This repository also contains early v3 lab work under `packages/core` and `docs/`. The v3 work is experimental and currently covers geometry instructions, in-memory rotate/swap transforms, point packets, unsigned and signed stacks, validation gates, committed patches, keyfile-derived meshes, generation descriptors, naive fit evaluation, cascade reports, and first-pass matrix utilities.
+This repository also contains early v3 lab work under `packages/core` and `docs/`. The v3 work is experimental and currently covers geometry instructions, in-memory rotate/swap transforms, point packets, unsigned and signed stacks, validation gates, committed patches, keyfile-derived meshes, generation descriptors, naive fit evaluation, cascade reports, matrix utilities, matrix mutation, signed mutation, matrix combine, signed combine, split certificates, cutout descriptors, and certificate-bound cutout verification.
 
-The latest v3 matrix branch includes `UN-MATRIX`, `UN-MATRIX-MUTATE`, and `UN-MATRIX-MUTATE-SIGNED`. These are pure experimental utilities and signed/committed envelopes for explicit matrix recipes. They are not production cryptography, authenticated encryption, safe key evolution, compression, steganography, or authorization systems.
+The current v3 line includes `UN-MATRIX`, `UN-MATRIX-MUTATE`, `UN-MATRIX-MUTATE-SIGNED`, `UN-MATRIX-COMBINE`, `UN-MATRIX-COMBINE-SIGNED`, `UN-CERT`, `UN-CUTOUT` / `UN-STENCIL`, and `UN-CERT` cutout binding helpers. These are experimental object, recipe, validation, and data-transformation primitives. Commitments are deterministic integrity/check artifacts, and signed envelopes are signer-intent wrappers over committed payloads. They are not production cryptography, authenticated encryption, asymmetric cryptography, secure redaction, safe key evolution, compression, steganography, ownership proof, identity proof, or authorization systems.
 
 The root package import still returns the legacy `Unobtainium` constructor. v3 docs and core helpers are being developed beside the legacy runtime, not as a replacement for the published legacy API.
 
-See the [v3 roadmap](docs/roadmap/V3_ROADMAP.md) for current module status and future design branches. Raw v3 modes are not production encryption, and fitting/cascade/steg/matrix branches are research directions rather than compression, authentication, or security claims.
+See the [v3 roadmap](docs/roadmap/V3_ROADMAP.md) for current module status and future design branches. Raw v3 modes are not production encryption. `UN-TRIAD-MIX` / `UN-GWM-V2` is documented as future design work in [UN-TRIAD-MIX ideas](docs/specs/UN-TRIAD-MIX_IDEAS.md); CLI/file wrappers, browser playground work, and hybrid production crypto envelopes remain future scope. A future hybrid envelope should preserve the project as an experimental geometry-key lab rather than flattening it into "just use AES."
 
 Unobtainium now supports being imported as a package!
 

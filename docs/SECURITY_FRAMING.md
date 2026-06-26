@@ -21,6 +21,12 @@ Use terms like experimental, masking, obfuscation, research mode, and legacy beh
 
 Avoid terms like secure encryption, military grade, unbreakable, production safe, authenticated, tamper-proof, or cryptographically proven for the current raw mode.
 
+For v3 matrix, certificate, and cutout work, describe commitments as deterministic integrity/check artifacts for reproducibility and diagnostics. Describe signed envelopes as signer-intent wrappers over exact committed payloads, not production authentication, identity proof, ownership proof, asymmetric cryptography, or certificate authority trust.
+
+The current v3 line includes matrix utilities, matrix mutation, signed mutation, matrix combine, signed combine, split certificates, cutout descriptors, certificate-bound cutout verification, and first-pass `UN-TRIAD-MIX` feature extraction. These are experimental object, recipe, validation, feature, and data-transformation primitives. `UN-GWM-V2`, `UN-TRIAD-MIX` instruction emission, CLI/file wrappers, browser playground work, and hybrid production crypto envelopes remain future scope.
+
+`UN-TRIAD-MIX` is a pure deterministic triad feature extraction branch in Sprint 31. It is not random, not production cryptography, and not a source of cryptographic uncertainty. More point, edge, triangle, walk-state, matrix, or N-dimensional feature mixing does not automatically mean more security. Sprint 31 does not emit `UN-ROTATE`, `UN-SWAP`, or permutation instructions and does not change existing `UN-GWM` behavior.
+
 ## Future Safety Direction
 
-A future sealed mode should authenticate packets or stacks before exposing obtained data. It should also define canonical key serialization, reject degenerate geometry, require nonces or unique walk domains, and document exactly what security property it attempts to provide.
+A future sealed mode should authenticate packets or stacks before exposing obtained data. It should also define canonical key serialization, reject degenerate geometry, require nonces or unique walk domains, and document exactly what security property it attempts to provide. A future hybrid production crypto envelope may wrap v3 experimental material, but it should not flatten the project into "just use AES" or recast raw v3 primitives as production cryptography.

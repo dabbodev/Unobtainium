@@ -139,9 +139,9 @@ New references:
 - `docs/legacy/DEMO_REPOS.md` documents `UnDemo-Builder` and `undemo-encryptor` as archaeology and future playground reference material.
 - `docs/roadmap/V3_ROADMAP.md` summarizes completed sprints, current modules, and recommended future sprint sequencing.
 - `docs/specs/UN-MATRIX_IDEAS.md` captures `UN-ND`, matrix-shaped key material, matrix mutation, `UN-MATRIX-COMBINE` recipe boundaries, and `UN-MATRIX-COMBINE-SIGNED` signer-intent envelopes.
-- `docs/specs/UN-CERT_AND_STENCIL_IDEAS.md` captures first-pass split validation certificates, Sprint 27 committed cutout/stencil region descriptors, and future overlay integration ideas.
+- `docs/specs/UN-CERT_AND_STENCIL_IDEAS.md` captures first-pass split validation certificates, Sprint 27 committed cutout/stencil region descriptors, Sprint 28 validation-only certificate cutout bindings, and future overlay integration ideas.
 
-Future branches now explicitly include `UN-ND` and `UN-STENCIL`. `UN-MATRIX-COMBINE-SIGNED` is the signed combine envelope branch, limited to signer intent over explicit committed combine recipes. Sprint 26 adds first-pass `UN-CERT` split validation certificate objects only. Sprint 27 adds first-pass `UN-CUTOUT` / `UN-STENCIL` committed region descriptors only.
+Future branches now explicitly include `UN-ND` and `UN-STENCIL`. `UN-MATRIX-COMBINE-SIGNED` is the signed combine envelope branch, limited to signer intent over explicit committed combine recipes. Sprint 26 adds first-pass `UN-CERT` split validation certificate objects only. Sprint 27 adds first-pass `UN-CUTOUT` / `UN-STENCIL` committed region descriptors only. Sprint 28 extends `UN-CERT` to bind `UN-CUTOUT` descriptors and cutout commitments as validation artifacts only.
 
 ## Sprint 18 UN-CASCADE Deterministic Residual Layering
 
@@ -157,7 +157,7 @@ Sprint 19 adds first-pass `UN-MATRIX` pure utilities beside the legacy runtime. 
 
 The helpers normalize matrix values, clone values defensively, expose copied rows and columns, transpose rectangular or square matrices, flip rows or columns, rotate rectangular matrices by 180 degrees, rotate square matrices by 90 or 270 degrees, and flatten rows as ordered N-dimensional point vectors. They do not mutate caller input or hidden key state, and they do not call the existing 3D geometry helpers or implement N-dimensional angle math.
 
-`UN-MATRIX` is not production cryptography. Matrix commitments do not prove secrecy, strength, authenticity, safe key evolution, tamper-proofing, compression, steganography, or production-safe encryption. Certificates, N-dimensional angle math, stack integration, cascade integration, CLI/file wrappers, and browser playground work remain future scope.
+`UN-MATRIX` is not production cryptography. Matrix commitments do not prove secrecy, strength, authenticity, safe key evolution, tamper-proofing, compression, steganography, or production-safe encryption. Certificate integration into matrix/GWM/stack runtime paths, N-dimensional angle math, stack integration, cascade integration, CLI/file wrappers, and browser playground work remain future scope.
 
 ## Sprint 20 UN-MATRIX-MUTATE Committed Recipes
 
@@ -167,7 +167,7 @@ Mutation recipes record `UN-MATRIX-MUTATE` format/version context, source matrix
 
 Mutation is explicit, deterministic, replayable, bounded, and commitment-backed. Bounds are checked at the time each operation is applied because earlier operations can change matrix shape. The helpers defensively clone caller data and return new matrix results; they do not mutate caller input or hidden key state.
 
-`UN-MATRIX-MUTATE` is experimental and not production cryptography. Mutation recipes do not prove secrecy, strength, authenticity, or safe key evolution. Certificates, N-dimensional angle math, GWM integration, stack integration, cascade integration, CLI/file wrappers, and browser playground work remain future scope.
+`UN-MATRIX-MUTATE` is experimental and not production cryptography. Mutation recipes do not prove secrecy, strength, authenticity, or safe key evolution. Certificate integration into matrix/GWM/stack runtime paths, N-dimensional angle math, GWM integration, stack integration, cascade integration, CLI/file wrappers, and browser playground work remain future scope.
 
 ## Sprint 21 UN-MATRIX-MUTATE-SIGNED Intent Envelopes
 
@@ -214,6 +214,32 @@ The helpers operate in memory on `Buffer`, `Uint8Array`, and byte-array input. `
 `UN-CUTOUT` / `UN-STENCIL` is experimental and not production cryptography. Cutout descriptors are not secure redaction by themselves. Public payloads may leak information through size, position, structure, fill patterns, labels, metadata, and surrounding context. A successful verification proves only that supplied hidden spans satisfy committed reconstruction checks. It does not prove legal ownership, human identity, production authentication, secrecy, key strength, asymmetric encryption, certificate authority trust, compression, steganography, tamper-proofing, or production-safe cryptography.
 
 Sprint 27 does not implement file wrappers, browser behavior, CLI behavior, `UN-CERT` integration, GWM integration, stack integration, cascade integration, real encryption, steganography, secure redaction, N-dimensional angle math, or legacy runtime changes.
+
+## Sprint 28 UN-CERT Cutout Bindings
+
+Sprint 28 extends `UN-CERT` so a certificate can bind ordered `UN-CUTOUT` descriptors and cutout commitments. A cutout binding records a label, cutout plan commitment, original payload commitment, public payload commitment, expected hidden span commitments, and optional context or metadata. The ordered binding list is part of the certificate commitment, so adding, removing, reordering, or changing a binding changes certificate identity.
+
+Verification remains validation-only. Structure-only verification validates certificate and binding shape without hidden spans. Completion verification accepts supplied cutout material, uses the existing `UN-CUTOUT` verification checks, and confirms that the supplied plan, original payload commitment, public payload commitment, and hidden span commitments match the certificate binding. `applyCertificateCutout()` can restore the original payload for a named binding when valid material is supplied, but it does not persist state or create a file wrapper.
+
+A successful cutout-bound certificate verification proves only that supplied hidden spans and payloads satisfy committed reconstruction checks. Cutout descriptors are not secure redaction by themselves, and public payloads may leak information through size, position, structure, fill patterns, labels, metadata, and surrounding context. A cutout-bound certificate does not prove legal ownership, human identity, production authentication, secrecy, key strength, asymmetric encryption, certificate authority trust, compression, steganography, tamper-proofing, or production-safe cryptography.
+
+Sprint 28 does not implement file wrappers, browser behavior, CLI behavior, N-dimensional angle math, GWM integration, stack integration, cascade integration, real encryption, steganography, secure redaction, or legacy runtime changes.
+
+## Sprint 30 UN-TRIAD-MIX / UN-GWM-V2 Design Spec
+
+Sprint 30 is documentation-only. It adds `docs/specs/UN-TRIAD-MIX_IDEAS.md` as a focused future design specification for `UN-TRIAD-MIX` / `UN-GWM-V2`, a next-generation geometric walk mask concept where the ordered triad is the instruction cell.
+
+The design explores deterministic feature families from points A, B, C, ordered edges `AB`, `BC`, `CA`, whole-triangle features, and walk state. It sketches multi-channel instruction emission for rotate/value, swap/position, rule/mix, and explain/debug material while preserving existing v3 instruction streams unless a future opt-in version or format is introduced.
+
+Sprint 30 does not implement code, add `packages/core/src/triad-mix.js`, change legacy runtime behavior, change existing `UN-GWM` behavior, integrate with stacks, cascade, certificates, cutouts, CLI/file paths, or browser paths, or add cryptographic security claims.
+
+## Sprint 31 UN-TRIAD-MIX Feature Extraction
+
+Sprint 31 adds first-pass `UN-TRIAD-MIX` pure feature extraction utilities under `packages/core/src/triad-mix.js`. The helpers normalize ordered 3D triads from array or `{ x, y, z }` point forms, derive deterministic point, edge, whole-triangle, and optional walk-context features, and commit to the canonical feature payload with domain-separated SHA-256.
+
+This sprint is feature extraction only. It does not emit `UN-ROTATE`, `UN-SWAP`, or permutation instructions; does not apply transforms; does not integrate with `UN-GWM`, instruction streams, stacks, cascade, certificates, cutouts, CLI/file wrappers, or browser paths; and does not change existing `UN-GWM` behavior or legacy runtime behavior.
+
+`UN-TRIAD-MIX` remains experimental and not production cryptography. Feature extraction is deterministic, not random. Contextual dependency should not be marketed as cryptographic uncertainty, and more point, edge, triangle, context, matrix, or N-dimensional mixing does not automatically mean more security. Multi-channel instruction emission, N-dimensional angles, matrix mutation integration, transform integration, CLI/file wrappers, and browser playground work remain future scope.
 
 ## Purpose
 
@@ -306,7 +332,7 @@ Sealed mode should reject tampered packets through authentication. Malleable mod
 
 Sprint 14 uses `UN-GEN` for blank-substrate materialization through existing stacks. Broader deterministic point-cloud generation from seeds, prompts, parameters, or procedural geometry remains future scope. UN-FIT is the working name for fitting or adapting point clouds to target constraints. UN-CASCADE is the working name for chaining multiple point-cloud masks. UN-STEG is the working name for carrying point packets inside another medium.
 
-Future key-shape branches include `UN-ND` for broader N-dimensional geometry support. Sprint 19 `UN-MATRIX` is limited to pure matrix descriptors and value transforms. Sprint 20 `UN-MATRIX-MUTATE` is limited to explicit committed mutation recipes. Sprint 21 `UN-MATRIX-MUTATE-SIGNED` is limited to signed envelopes over those explicit committed recipes. Sprint 24 `UN-MATRIX-COMBINE` is limited to pure committed tiled combine recipes. Sprint 25 `UN-MATRIX-COMBINE-SIGNED` is limited to signed envelopes over explicit committed combine recipes. Sprint 26 `UN-CERT` is limited to split validation certificate objects. Sprint 27 `UN-CUTOUT` / `UN-STENCIL` is limited to committed byte-region descriptors. Future validation and overlay branches include context-bound original-vs-shifted layer experiments and integration with certificates, GWM, stacks, and cascade reports.
+Future key-shape branches include `UN-ND` for broader N-dimensional geometry support. Sprint 19 `UN-MATRIX` is limited to pure matrix descriptors and value transforms. Sprint 20 `UN-MATRIX-MUTATE` is limited to explicit committed mutation recipes. Sprint 21 `UN-MATRIX-MUTATE-SIGNED` is limited to signed envelopes over those explicit committed recipes. Sprint 24 `UN-MATRIX-COMBINE` is limited to pure committed tiled combine recipes. Sprint 25 `UN-MATRIX-COMBINE-SIGNED` is limited to signed envelopes over explicit committed combine recipes. Sprint 26 `UN-CERT` is limited to split validation certificate objects. Sprint 27 `UN-CUTOUT` / `UN-STENCIL` is limited to committed byte-region descriptors. Sprint 28 is limited to validation-only `UN-CERT` bindings for those descriptors and commitments. Sprint 30 defines `UN-TRIAD-MIX` / `UN-GWM-V2` as a docs-only successor path for triad-as-instruction-cell mask generation. Sprint 31 adds pure `UN-TRIAD-MIX` feature extraction only. Future validation and overlay branches include context-bound original-vs-shifted layer experiments and integration with GWM, stacks, and cascade reports.
 
 These modes are future research directions. They should not be exposed as security claims. The first requirement is reproducibility: identical inputs must produce identical ordered point clouds across supported runtimes.
 
@@ -315,6 +341,10 @@ These modes are future research directions. They should not be exposed as securi
 `UN-GEN`: The Sprint 14 v3 in-memory generation primitive that creates a blank substrate and materializes generated data by applying an existing `UNSTACK` recipe. It is not compression, steganography, fitting, optimization, filesystem support, or CLI support.
 
 `UN-GEN-DESCRIPTOR`: The Sprint 15 v3 generation manifest format. It records blank-substrate settings, stack or signed-stack bindings, generated/target/residual commitments, metadata, and a descriptor commitment.
+
+`UN-TRIAD-MIX`: The Sprint 31 pure feature extraction branch for treating an ordered point triad as deterministic point, edge, triangle, and context feature material. It does not emit transform instructions, does not integrate with existing `UN-GWM`, and is not production cryptography.
+
+`UN-GWM-V2`: A future opt-in successor path for geometric walk mask generation using `UN-TRIAD-MIX` concepts. Existing `UN-GWM` streams must not change unless a future explicit version or format is introduced.
 
 `UN-FIT`: The broader working name for fitting or adapting point-cloud generation material to target constraints. Sprint 16 implements only the supplied-candidate evaluator subset.
 
@@ -390,17 +420,19 @@ Matrix combine recipe commitment: A domain-separated SHA-256 hex digest over the
 
 Signed matrix combine commitment: A domain-separated SHA-256 hex digest over the canonical signed matrix combine payload. It aids reproducibility and diagnostics for the signed envelope.
 
-`UN-CERT`: The Sprint 26 v3 split validation certificate object. It binds public tile descriptors or material, private tile slots and expected commitments, signed matrix combine material, an expected output matrix commitment, optional target commitments, metadata, context, and a certificate commitment.
+`UN-CERT`: The Sprint 26 v3 split validation certificate object, extended in Sprint 28 with optional ordered cutout bindings. It binds public tile descriptors or material, private tile slots and expected commitments, signed matrix combine material, an expected output matrix commitment, optional target commitments, optional cutout plan and payload commitments, metadata, context, and a certificate commitment.
 
-Certificate commitment: A domain-separated SHA-256 hex digest over the canonical `UN-CERT` payload, excluding the `certificateCommitment` field itself. Public tile commitments, private slot names, expected private commitments, signed combine commitment, expected output matrix commitment, target commitments, metadata, and context affect it.
+Certificate commitment: A domain-separated SHA-256 hex digest over the canonical `UN-CERT` payload, excluding the `certificateCommitment` field itself. Public tile commitments, private slot names, expected private commitments, signed combine commitment, expected output matrix commitment, target commitments, ordered cutout bindings, metadata, and context affect it.
 
 Split validation certificate: A validation artifact proving only that supplied material satisfies a committed relationship. It does not prove legal ownership, human identity, production authentication, secrecy, key strength, asymmetric encryption, certificate authority trust, compression, steganography, or tamper-proofing.
+
+Cutout-bound certificate: A Sprint 28 `UN-CERT` certificate with ordered `UN-CUTOUT` bindings. It proves only that supplied hidden spans and payloads satisfy committed reconstruction checks, not secure redaction, legal ownership, human identity, production authentication, secrecy, key strength, asymmetric encryption, certificate authority trust, compression, steganography, or production-safe cryptography.
 
 `UN-CUTOUT` / `UN-STENCIL`: The Sprint 27 v3 committed region descriptor utilities for byte-like payloads. A plan records ordered hidden ranges, deterministic fill settings, span commitments, payload commitments, label/context/metadata, and a plan commitment. It is not secure redaction, secrecy, production authentication, asymmetric cryptography, compression, steganography, or production cryptography.
 
 Cutout plan commitment: A domain-separated SHA-256 hex digest over the canonical `UN-CUTOUT` plan payload, excluding the `cutoutPlanCommitment` field itself. Span order, offsets, lengths, labels, span commitments, original payload commitment, fill settings, context, and metadata affect it.
 
-Cutout verification: A structural check that supplied public payload and hidden spans satisfy committed reconstruction checks. It does not prove legal ownership, human identity, certificate authority trust, secrecy, key strength, production authentication, or secure redaction.
+Cutout verification: A structural check that supplied public payload and hidden spans satisfy committed reconstruction checks. It does not prove legal ownership, human identity, certificate authority trust, secrecy, key strength, production authentication, asymmetric encryption, compression, steganography, or secure redaction.
 
 `UN-GATE`: A v3 validation-only capability object that binds an object ID, byte range, object commitment, slice commitment, signed stack commitments, metadata, and a canonical gate commitment.
 

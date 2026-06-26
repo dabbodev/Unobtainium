@@ -33,4 +33,5 @@ module.exports = {
   ...require('./src/signed-matrix-combine'),
   ...require('./src/cert'),
   ...require('./src/cutout'),
+  ...require('./src/triad-mix'),
 };

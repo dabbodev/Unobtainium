@@ -159,8 +159,10 @@ function createSignedPatchEnvelope({
 
 function invalid(reason) {
   return {
+    ok: false,
     valid: false,
     reason,
+    error: reason,
   };
 }
 
@@ -227,6 +229,7 @@ function verifySignedPatchEnvelope(envelope, options = {}) {
     }
 
     return {
+      ok: true,
       valid: true,
       patchCommitment,
       payloadCommitment,

@@ -60,6 +60,16 @@ anchored walk state: A deterministic `{ point, shift, gap }` state derived from 
 
 UN-GWM: Unobtainium Geometric Walk Mask, the raw family of modes that derive mask values from an ordered 3D point-cloud walk.
 
+UN-TRIAD-MIX: A Sprint 31 pure feature extraction branch where an ordered point triad is normalized into deterministic point, edge, whole-triangle, and optional walk-context feature material. It is experimental, deterministic rather than random, not production cryptography, and does not emit transform instructions.
+
+UN-GWM-V2: A future opt-in successor path for geometric walk mask generation based on `UN-TRIAD-MIX` concepts. It must not change existing `UN-GWM` instruction streams unless a future explicit version or format is introduced.
+
+triad feature payload: The canonical Sprint 31 `UN-TRIAD-MIX` payload derived from ordered points A, B, C; ordered edges `AB`, `BC`, `CA`; whole-triangle features; and optional walk context. It is committed for reproducibility and diagnostics, not for production cryptographic security.
+
+triad feature commitment: A domain-separated SHA-256 hex digest over the canonical `UN-TRIAD-MIX` feature payload. Changing point material, point order, supported context, format, or version changes the commitment.
+
+triad instruction cell: A conceptual future `UN-TRIAD-MIX` bundle that may emit rotate/value, swap/position, rule/mix, and explain/debug channels. Sprint 31 does not emit `UN-ROTATE`, `UN-SWAP`, or permutation instructions.
+
 UNSTACK: The v3 unsigned stack recipe format for composing multiple ordered transform layers. The current runtime supports `format: "UNSTACK"`, `version: 1`, a shared window size, stack metadata, and ordered `UN-ROTATE` and `UN-SWAP` layers.
 
 stack layer: One ordered entry in a stack recipe. A layer declares a supported transform type, mesh, optional packet graft, walk state mode, minimum shift, and walk mode. `UN-ROTATE` layers add direction and turns. `UN-SWAP` layers add swap count.
@@ -264,11 +274,13 @@ signed matrix combine commitment: A domain-separated SHA-256 hex digest over the
 
 signed matrix combine intent: The signed statement that a signer endorsed an exact committed matrix combine recipe for a purpose. It does not prove matrix secrecy, key strength, asymmetric encryption, authenticity of a real-world identity, certificate validity, authorization, or production authentication.
 
-UN-CERT: The Sprint 26 v3 split validation certificate object. It binds public tile descriptors or material, private tile slots and expected commitments, signed matrix combine material, an expected output matrix commitment, optional target commitments, metadata, context, and a certificate commitment. It is experimental and not production cryptography.
+UN-CERT: The Sprint 26 v3 split validation certificate object, extended in Sprint 28 with optional ordered `UN-CUTOUT` bindings. It binds public tile descriptors or material, private tile slots and expected commitments, signed matrix combine material, an expected output matrix commitment, optional target commitments, optional cutout plan and payload commitments, metadata, context, and a certificate commitment. It is experimental and not production cryptography.
 
-certificate commitment: A domain-separated SHA-256 hex digest over the canonical `UN-CERT` payload, excluding the `certificateCommitment` field itself.
+certificate commitment: A domain-separated SHA-256 hex digest over the canonical `UN-CERT` payload, excluding the `certificateCommitment` field itself. Ordered cutout bindings are part of the payload when present.
 
 split validation certificate: A validation artifact that proves only that supplied material satisfies a committed validation relationship. It does not prove legal ownership, human identity, production authentication, secrecy, key strength, asymmetric encryption, certificate authority trust, compression, steganography, tamper-proofing, or production-safe cryptography.
+
+cutout-bound certificate: A Sprint 28 `UN-CERT` certificate that binds ordered `UN-CUTOUT` plan commitments, original payload commitments, public payload commitments, expected hidden span commitments, and optional context or metadata. It is a validation artifact only. A successful verification proves only that supplied hidden spans and payloads satisfy committed reconstruction checks.
 
 public matrix tile: Conceptual public-side matrix material in a split validation certificate. Public/private matrix tile wording is conceptual and must not be described as real public-key cryptography.
 
@@ -289,6 +301,8 @@ cutout payload commitment: A domain-separated SHA-256 hex digest over a full byt
 cutout verification: A structural validation check that supplied hidden spans satisfy committed reconstruction checks for a public payload and plan. It does not prove legal ownership, human identity, production authentication, secrecy, key strength, asymmetric encryption, certificate authority trust, compression, steganography, tamper-proofing, secure redaction, or production-safe cryptography.
 
 public cutout payload: The byte payload returned by `applyCutout()` with declared cutout ranges replaced by a deterministic fill byte. It may leak information through size, position, structure, fill patterns, labels, metadata, and surrounding context.
+
+certificate cutout binding: The canonical record inside a Sprint 28 `UN-CERT` object that links a label to a cutout plan commitment, original payload commitment, public payload commitment, expected hidden span commitments, and optional context or metadata. Binding order affects the certificate commitment.
 
 XOR stencil: Reversible stencil material defined by `X = P XOR S`, where `P` is an original layer and `S` is a shifted or generated layer. It must be context-bound and must not be reused across objects, ranges, certificates, recipes, or purposes.
 

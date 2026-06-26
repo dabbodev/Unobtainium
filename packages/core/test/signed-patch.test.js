@@ -319,7 +319,12 @@ test('unsupported algorithm is rejected', () => {
 test('malformed envelope returns invalid result', () => {
   assert.deepEqual(
     verifySignedPatchEnvelope(null),
-    { valid: false, reason: 'envelope must be an object' },
+    {
+      ok: false,
+      valid: false,
+      reason: 'envelope must be an object',
+      error: 'envelope must be an object',
+    },
   );
   assert.equal(verifySignedPatchEnvelope({ format: 'UNPATCH-SIGNED', version: 1 }).valid, false);
 });

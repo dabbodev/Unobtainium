@@ -9,11 +9,16 @@ const {
   applySignedMatrixCombine,
   verifySignedMatrixCombine,
 } = require('./signed-matrix-combine');
+const {
+  restoreCutout,
+  verifyCutout,
+} = require('./cutout');
 const { stableStringify } = require('./stack-canonical');
 
 const CERT_FORMAT = 'UN-CERT';
 const CERT_VERSION = 1;
 const CERT_COMMITMENT_DOMAIN = 'UN-CERT:v1';
+const CERT_CUTOUT_COMMITMENT_DOMAIN = 'UN-CERT:CUTOUT:v1';
 const SHA256_HEX_PATTERN = /^[0-9a-f]{64}$/;
 
 function assertObject(value, name) {
@@ -51,6 +56,14 @@ function normalizeName(value, fieldName) {
   }
 
   return value;
+}
+
+function normalizeOptionalLabel(value, fieldName) {
+  if (value === undefined || value === null) {
+    return null;
+  }
+
+  return normalizeName(value, fieldName);
 }
 
 function normalizePositiveDimension(value, fieldName) {
@@ -254,6 +267,113 @@ function normalizeTargetCommitments(value) {
   return normalized;
 }
 
+function firstDefined(values) {
+  for (const value of values) {
+    if (value !== undefined) {
+      return value;
+    }
+  }
+  return undefined;
+}
+
+function cutoutSpanCommitmentsFrom(bindingLike, fieldName) {
+  const spanCommitments = firstDefined([
+    bindingLike.spanCommitments,
+    bindingLike.spans,
+    bindingLike.plan === undefined ? undefined : bindingLike.plan.spans,
+    bindingLike.cutoutPlan === undefined ? undefined : bindingLike.cutoutPlan.spans,
+  ]);
+
+  if (!Array.isArray(spanCommitments)) {
+    throw new TypeError(`${fieldName}.spanCommitments must be an array`);
+  }
+
+  return spanCommitments.map((entry, index) => {
+    const commitment = typeof entry === 'string'
+      ? entry
+      : entry !== null && typeof entry === 'object' && !Array.isArray(entry)
+        ? entry.spanCommitment
+        : undefined;
+    return assertSha256Hex(commitment, `${fieldName}.spanCommitments[${index}]`);
+  });
+}
+
+function normalizeCutoutBinding(bindingLike, index, fieldName = `cutouts[${index}]`) {
+  assertObject(bindingLike, fieldName);
+
+  return {
+    label: normalizeOptionalLabel(bindingLike.label, `${fieldName}.label`),
+    cutoutPlanCommitment: assertSha256Hex(
+      firstDefined([
+        bindingLike.cutoutPlanCommitment,
+        bindingLike.plan === undefined ? undefined : bindingLike.plan.cutoutPlanCommitment,
+        bindingLike.cutoutPlan === undefined ? undefined : bindingLike.cutoutPlan.cutoutPlanCommitment,
+      ]),
+      `${fieldName}.cutoutPlanCommitment`
+    ),
+    originalPayloadCommitment: assertSha256Hex(
+      firstDefined([
+        bindingLike.originalPayloadCommitment,
+        bindingLike.plan === undefined ? undefined : bindingLike.plan.originalPayloadCommitment,
+        bindingLike.cutoutPlan === undefined ? undefined : bindingLike.cutoutPlan.originalPayloadCommitment,
+      ]),
+      `${fieldName}.originalPayloadCommitment`
+    ),
+    publicPayloadCommitment: assertSha256Hex(
+      bindingLike.publicPayloadCommitment,
+      `${fieldName}.publicPayloadCommitment`
+    ),
+    spanCommitments: cutoutSpanCommitmentsFrom(bindingLike, fieldName),
+    context: cloneCanonicalValue(
+      bindingLike.context === undefined ? {} : bindingLike.context,
+      `${fieldName}.context`
+    ),
+    metadata: cloneCanonicalValue(
+      bindingLike.metadata === undefined ? {} : bindingLike.metadata,
+      `${fieldName}.metadata`
+    ),
+  };
+}
+
+function normalizeCutoutBindings(value) {
+  if (value === undefined) {
+    return [];
+  }
+  if (!Array.isArray(value)) {
+    throw new TypeError('cutouts must be an array');
+  }
+
+  const normalized = value.map((entry, index) => normalizeCutoutBinding(entry, index));
+  const labels = new Set();
+  for (const binding of normalized) {
+    if (binding.label === null) {
+      continue;
+    }
+    if (labels.has(binding.label)) {
+      throw new RangeError(`duplicate cutout label: ${binding.label}`);
+    }
+    labels.add(binding.label);
+  }
+
+  return cloneCanonicalValue(normalized, 'cutouts');
+}
+
+function certificateCutoutPayload(cutoutBindingLike) {
+  return cloneCanonicalValue(
+    normalizeCutoutBinding(cutoutBindingLike, 0, 'cutoutBinding'),
+    'cutoutBinding'
+  );
+}
+
+function certificateCutoutCommitment(cutoutBindingLike) {
+  return crypto
+    .createHash('sha256')
+    .update(CERT_CUTOUT_COMMITMENT_DOMAIN)
+    .update(Buffer.from([0]))
+    .update(stableStringify(certificateCutoutPayload(cutoutBindingLike)))
+    .digest('hex');
+}
+
 function signedCombineCommitmentFrom(input) {
   const hasEnvelope = input.signedMatrixCombine !== undefined;
   const hasCommitment = input.signedMatrixCombineCommitment !== undefined;
@@ -315,6 +435,10 @@ function certificatePayloadObject(input) {
     metadata: cloneCanonicalValue(input.metadata === undefined ? {} : input.metadata, 'metadata'),
     context: cloneCanonicalValue(input.context === undefined ? {} : input.context, 'context'),
   };
+  const cutouts = normalizeCutoutBindings(input.cutouts);
+  if (cutouts.length > 0) {
+    payload.cutouts = cutouts;
+  }
 
   if (input.signedMatrixCombine !== undefined) {
     payload.signedMatrixCombine = cloneCanonicalValue(input.signedMatrixCombine, 'signedMatrixCombine');
@@ -447,6 +571,214 @@ function structureFields(certificate) {
   };
 }
 
+function cutoutLabelForResult(binding, index) {
+  return binding.label === null ? `#${index}` : binding.label;
+}
+
+function isCutoutMaterial(value) {
+  return value !== null
+    && typeof value === 'object'
+    && !Array.isArray(value)
+    && (
+      Object.hasOwn(value, 'plan')
+      || Object.hasOwn(value, 'cutoutPlan')
+      || Object.hasOwn(value, 'publicPayload')
+      || Object.hasOwn(value, 'hiddenSpans')
+      || Object.hasOwn(value, 'cutoutPlanCommitment')
+      || Object.hasOwn(value, 'spans')
+    );
+}
+
+function suppliedCutoutMaterialFor(binding, index, suppliedCutouts, cutoutCount) {
+  if (suppliedCutouts === undefined) {
+    return undefined;
+  }
+  if (Array.isArray(suppliedCutouts)) {
+    if (suppliedCutouts[index] !== undefined) {
+      return suppliedCutouts[index];
+    }
+    if (binding.label !== null) {
+      return suppliedCutouts.find((entry) => (
+        entry !== null
+        && typeof entry === 'object'
+        && !Array.isArray(entry)
+        && entry.label === binding.label
+      ));
+    }
+    return undefined;
+  }
+  if (suppliedCutouts !== null && typeof suppliedCutouts === 'object') {
+    if (cutoutCount === 1 && isCutoutMaterial(suppliedCutouts)) {
+      return suppliedCutouts;
+    }
+    if (binding.label !== null && Object.hasOwn(suppliedCutouts, binding.label)) {
+      return suppliedCutouts[binding.label];
+    }
+  }
+
+  return undefined;
+}
+
+function cutoutResult(label, fields) {
+  return cloneCanonicalValue({
+    label,
+    ...fields,
+  }, 'cutoutResult');
+}
+
+function verifyCutoutAgainstBinding(binding, index, suppliedCutouts, cutoutCount) {
+  const label = cutoutLabelForResult(binding, index);
+  const material = suppliedCutoutMaterialFor(binding, index, suppliedCutouts, cutoutCount);
+  if (material === undefined) {
+    return cutoutResult(label, {
+      ok: false,
+      valid: false,
+      mode: 'completion',
+      reason: 'cutout material is required',
+      cutoutPlanCommitment: binding.cutoutPlanCommitment,
+      originalPayloadCommitment: binding.originalPayloadCommitment,
+      publicPayloadCommitment: binding.publicPayloadCommitment,
+    });
+  }
+
+  const verification = verifyCutout(material);
+  if (!verification.ok) {
+    return cutoutResult(label, {
+      ok: false,
+      valid: false,
+      mode: 'completion',
+      reason: verification.reason,
+      cutoutPlanCommitment: binding.cutoutPlanCommitment,
+      originalPayloadCommitment: binding.originalPayloadCommitment,
+      publicPayloadCommitment: binding.publicPayloadCommitment,
+    });
+  }
+
+  const suppliedSpanCommitments = verification.spanVerification.map((span) => span.spanCommitment);
+  let reason = null;
+  if (verification.cutoutPlanCommitment !== binding.cutoutPlanCommitment) {
+    reason = 'cutout plan commitment mismatch';
+  } else if (verification.originalPayloadCommitment !== binding.originalPayloadCommitment) {
+    reason = 'cutout originalPayloadCommitment mismatch';
+  } else if (verification.publicPayloadCommitment !== binding.publicPayloadCommitment) {
+    reason = 'cutout publicPayloadCommitment mismatch';
+  } else if (
+    suppliedSpanCommitments.length !== binding.spanCommitments.length
+    || suppliedSpanCommitments.some((commitment, spanIndex) => (
+      commitment !== binding.spanCommitments[spanIndex]
+    ))
+  ) {
+    reason = 'cutout spanCommitments mismatch';
+  } else if (verification.spanVerification.some((span) => !span.ok)) {
+    reason = 'cutout hidden span verification incomplete';
+  }
+
+  if (reason !== null) {
+    return cutoutResult(label, {
+      ok: false,
+      valid: false,
+      mode: 'completion',
+      reason,
+      cutoutPlanCommitment: binding.cutoutPlanCommitment,
+      suppliedCutoutPlanCommitment: verification.cutoutPlanCommitment,
+      originalPayloadCommitment: binding.originalPayloadCommitment,
+      suppliedOriginalPayloadCommitment: verification.originalPayloadCommitment,
+      publicPayloadCommitment: binding.publicPayloadCommitment,
+      suppliedPublicPayloadCommitment: verification.publicPayloadCommitment,
+      spanCommitments: binding.spanCommitments,
+      suppliedSpanCommitments,
+    });
+  }
+
+  return cutoutResult(label, {
+    ok: true,
+    valid: true,
+    mode: 'completion',
+    cutoutPlanCommitment: binding.cutoutPlanCommitment,
+    originalPayloadCommitment: binding.originalPayloadCommitment,
+    publicPayloadCommitment: binding.publicPayloadCommitment,
+    spanCommitments: binding.spanCommitments,
+    verification,
+  });
+}
+
+function verifyCertificateCutouts(input, suppliedCutouts) {
+  let certificate;
+  try {
+    certificate = normalizeCertificate(input);
+  } catch (error) {
+    return invalid(error.message);
+  }
+
+  const bindings = certificate.cutouts === undefined ? [] : certificate.cutouts;
+  const wantsCompletion = suppliedCutouts !== undefined;
+  const cutoutResults = [];
+
+  if (!wantsCompletion) {
+    for (let index = 0; index < bindings.length; index += 1) {
+      const binding = bindings[index];
+      cutoutResults.push(cutoutResult(cutoutLabelForResult(binding, index), {
+        ok: true,
+        valid: true,
+        mode: 'structure',
+        cutoutPlanCommitment: binding.cutoutPlanCommitment,
+        originalPayloadCommitment: binding.originalPayloadCommitment,
+        publicPayloadCommitment: binding.publicPayloadCommitment,
+        spanCommitments: binding.spanCommitments,
+      }));
+    }
+
+    return validResult({
+      ...structureFields(certificate),
+      cutoutsOk: true,
+      cutoutMode: 'structure',
+      cutoutResults,
+      failedCutoutLabels: [],
+      certificate,
+    });
+  }
+
+  for (let index = 0; index < bindings.length; index += 1) {
+    cutoutResults.push(verifyCutoutAgainstBinding(
+      bindings[index],
+      index,
+      suppliedCutouts,
+      bindings.length
+    ));
+  }
+
+  const failedCutoutLabels = cutoutResults
+    .filter((result) => !result.ok)
+    .map((result) => result.label);
+
+  const fields = {
+    ...structureFields(certificate),
+    cutoutsOk: failedCutoutLabels.length === 0,
+    cutoutMode: 'completion',
+    cutoutResults,
+    failedCutoutLabels,
+    certificate,
+  };
+
+  if (failedCutoutLabels.length > 0) {
+    return invalid('cutout verification failed', fields);
+  }
+
+  return validResult(fields);
+}
+
+function cutoutVerificationFields(cutoutVerification) {
+  return {
+    cutoutsOk: cutoutVerification.cutoutsOk,
+    cutoutMode: cutoutVerification.cutoutMode,
+    cutoutResults: cloneCanonicalValue(cutoutVerification.cutoutResults, 'cutoutResults'),
+    failedCutoutLabels: cloneCanonicalValue(
+      cutoutVerification.failedCutoutLabels,
+      'failedCutoutLabels'
+    ),
+  };
+}
+
 function verifyCertificate(input, options = {}) {
   let certificate;
   try {
@@ -472,16 +804,41 @@ function verifyCertificate(input, options = {}) {
     }
   }
 
+  const cutoutVerification = verifyCertificateCutouts(certificate, options.cutouts);
+  const cutoutFields = cutoutVerification.ok
+    ? cutoutVerificationFields(cutoutVerification)
+    : {
+      cutoutsOk: false,
+      cutoutMode: cutoutVerification.cutoutMode,
+      cutoutResults: cutoutVerification.cutoutResults || [],
+      failedCutoutLabels: cutoutVerification.failedCutoutLabels || [],
+    };
+  if (!cutoutVerification.ok) {
+    return invalid(cutoutVerification.reason, {
+      ...fields,
+      ...cutoutFields,
+    });
+  }
+
   const wantsCompletion = options.mode === 'completion' || options.privateTiles !== undefined;
   if (!wantsCompletion) {
     return validResult({
       ...fields,
+      ...cutoutFields,
       mode: 'structure',
       certificate,
     });
   }
 
-  return applyCertificateCombine(certificate, options.privateTiles, options);
+  const combined = applyCertificateCombine(certificate, options.privateTiles, options);
+  if (!combined.ok) {
+    return combined;
+  }
+
+  return {
+    ...combined,
+    ...cutoutFields,
+  };
 }
 
 function applyCertificateCombine(input, privateTiles = {}, options = {}) {
@@ -539,13 +896,89 @@ function applyCertificateCombine(input, privateTiles = {}, options = {}) {
   }
 }
 
+function applyCertificateCutout(input, label, cutoutMaterial, options = {}) {
+  let certificate;
+  try {
+    certificate = normalizeCertificate(input);
+  } catch (error) {
+    return invalid(error.message);
+  }
+
+  const bindings = certificate.cutouts === undefined ? [] : certificate.cutouts;
+  const bindingIndex = bindings.findIndex((binding) => binding.label === label);
+  if (bindingIndex === -1) {
+    return invalid('cutout binding not found', {
+      ...structureFields(certificate),
+      cutoutsOk: false,
+      failedCutoutLabels: [label],
+    });
+  }
+
+  const bindingResult = verifyCutoutAgainstBinding(
+    bindings[bindingIndex],
+    bindingIndex,
+    cutoutMaterial,
+    1
+  );
+  if (!bindingResult.ok) {
+    return invalid(bindingResult.reason, {
+      ...structureFields(certificate),
+      cutoutsOk: false,
+      cutoutMode: 'completion',
+      cutoutResults: [bindingResult],
+      failedCutoutLabels: [label],
+    });
+  }
+
+  const restore = options.restore === undefined ? true : options.restore;
+  const cutoutResults = [bindingResult];
+  const fields = {
+    ...structureFields(certificate),
+    cutoutsOk: true,
+    cutoutMode: 'completion',
+    cutoutResults,
+    failedCutoutLabels: [],
+    label,
+    certificate,
+  };
+
+  if (!restore) {
+    return {
+      ok: true,
+      valid: true,
+      ...cloneCanonicalValue(fields, 'fields'),
+    };
+  }
+
+  const restored = restoreCutout(cutoutMaterial);
+  if (!restored.ok) {
+    return invalid(restored.reason, fields);
+  }
+  if (restored.reconstructedPayloadCommitment !== bindings[bindingIndex].originalPayloadCommitment) {
+    return invalid('restored payload commitment mismatch', fields);
+  }
+
+  return {
+    ok: true,
+    valid: true,
+    ...cloneCanonicalValue(fields, 'fields'),
+    reconstructedPayloadCommitment: restored.reconstructedPayloadCommitment,
+    restoredPayload: Buffer.from(restored.restoredPayload),
+    payload: Buffer.from(restored.payload),
+  };
+}
+
 module.exports = {
   CERT_FORMAT,
   CERT_VERSION,
   normalizeCertificate,
   certificatePayload,
   certificateCommitment,
+  certificateCutoutPayload,
+  certificateCutoutCommitment,
   createCertificate,
   verifyCertificate,
+  verifyCertificateCutouts,
   applyCertificateCombine,
+  applyCertificateCutout,
 };

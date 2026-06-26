@@ -145,8 +145,10 @@ function createSignedStackEnvelope({
 
 function invalid(reason) {
   return {
+    ok: false,
     valid: false,
     reason,
+    error: reason,
   };
 }
 
@@ -209,6 +211,7 @@ function verifySignedStackEnvelope(envelope, options = {}) {
     }
 
     return {
+      ok: true,
       valid: true,
       stackCommitment,
       payloadCommitment,

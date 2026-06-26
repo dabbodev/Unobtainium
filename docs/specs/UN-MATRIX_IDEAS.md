@@ -1,6 +1,6 @@
 # UN-MATRIX Ideas
 
-Status: Sprint 25 adds first-pass `UN-MATRIX-COMBINE-SIGNED` envelopes over explicit committed matrix combine recipes beside the Sprint 19 `UN-MATRIX` utilities, Sprint 20 mutation helpers, Sprint 21 signed mutation envelopes, and Sprint 24 combine recipes. `UN-ND`, `UN-CERT`, certificates, GWM integration, stack integration, cascade integration, CLI/file wrappers, and browser playground work remain future scope.
+Status: The current v3 matrix line includes Sprint 19 `UN-MATRIX` utilities, Sprint 20 mutation helpers, Sprint 21 signed mutation envelopes, Sprint 24 combine recipes, and Sprint 25 signed combine envelopes. Sprint 26 adds `UN-CERT`, Sprint 27 adds `UN-CUTOUT` / `UN-STENCIL`, and Sprint 28 adds validation-only `UN-CERT` cutout bindings beside the matrix work. `UN-ND`, `UN-TRIAD-MIX`, `UN-GWM-V2`, GWM integration, stack integration, cascade integration, CLI/file wrappers, browser playground work, and hybrid production crypto envelopes remain future scope.
 
 Sprint 19 `UN-MATRIX` utilities normalize rectangular safe-integer matrix values, create committed matrix descriptors, clone matrix values defensively, expose row/column accessors, transpose and flip matrix values, rotate square matrices by 90 or 270 degrees, rotate any rectangular matrix by 180 degrees, and flatten rows as ordered N-dimensional point vectors. These helpers do not mutate caller input or hidden key state.
 
@@ -133,7 +133,20 @@ Commitments should cover:
 - combine recipe commitment;
 - combined matrix commitment when a recipe is applied.
 
-Matrix combine is experimental and not production cryptography. Combining public/private-looking tiles does not create real asymmetric cryptography. Combine recipe commitments do not prove secrecy, key strength, identity, or certificate validity. `UN-CERT` remains future scope. N-dimensional angle math, GWM integration, stack integration, cascade integration, CLI/file wrappers, and browser playground work remain future scope.
+Matrix combine is experimental and not production cryptography. Combining public/private-looking tiles does not create real asymmetric cryptography. Combine recipe commitments do not prove secrecy, key strength, identity, or certificate validity. Certificate integration into GWM, stacks, cascade, CLI/file wrappers, browser paths, and legacy runtime paths remains future scope. N-dimensional angle math, `UN-TRIAD-MIX`, and `UN-GWM-V2` also remain future scope.
+
+Tiny non-production recipe shape:
+
+```javascript
+{
+  tiles: { left: [[1, 2]], right: [[3, 4]] },
+  placements: [
+    { tile: 'left', row: 0, column: 0 },
+    { tile: 'right', row: 0, column: 1 }
+  ],
+  metadata: { example: 'matrix-combine-shape' }
+}
+```
 
 ## UN-MATRIX-COMBINE-SIGNED
 
@@ -145,6 +158,20 @@ Matrix combine remains explicit, deterministic, replayable, and commitment-backe
 
 Sprint 25 does not add `UN-CERT`, certificates, N-dimensional angle math, GWM integration, stack integration, cascade integration, CLI/file wrappers, browser playground behavior, hidden key evolution, automatic key evolution, `UN-STENCIL`, or `UN-CUTOUT`.
 
+Tiny non-production signed combine concept:
+
+```javascript
+{
+  format: 'UN-MATRIX-COMBINE-SIGNED',
+  matrixCombineRecipeCommitment: '...',
+  inputTileCommitments: [{ name: 'left', rows: 1, columns: 2, matrixCommitment: '...' }],
+  outputMatrixCommitment: '...',
+  signerId: 'lab-signer',
+  purpose: 'signer-intent-over-combine-recipe',
+  signature: { algorithm: 'ed25519', publicKey: '...', value: '...' }
+}
+```
+
 ## Future Sprint Outline
 
 - Docs-only design: refine vocabulary, shape constraints, mutation rules, and commitment boundaries.
@@ -152,10 +179,11 @@ Sprint 25 does not add `UN-CERT`, certificates, N-dimensional angle math, GWM in
 - Matrix mutation descriptors: Sprint 20 adds explicit committed `UN-MATRIX-MUTATE` recipes only; no helper mutates key state implicitly.
 - Signed matrix mutation envelopes: Sprint 21 adds `UN-MATRIX-MUTATE-SIGNED` signer-intent envelopes over committed recipes only.
 - Matrix combine recipes: Sprint 24 adds pure committed `UN-MATRIX-COMBINE` recipes only; no certificates, stack integration, cascade integration, GWM integration, CLI/file wrappers, browser paths, or legacy runtime changes.
-- Signed matrix combine envelopes: Sprint 25 adds `UN-MATRIX-COMBINE-SIGNED` signer-intent envelopes over explicit committed combine recipes only; no certificates, stack integration, cascade integration, GWM integration, CLI/file wrappers, browser paths, or legacy runtime changes.
+- Signed matrix combine envelopes: Sprint 25 adds `UN-MATRIX-COMBINE-SIGNED` signer-intent envelopes over explicit committed combine recipes only; no stack integration, cascade integration, GWM integration, CLI/file wrappers, browser paths, or legacy runtime changes.
+- Split certificates and cutout bindings: Sprints 26-28 add `UN-CERT`, `UN-CUTOUT` / `UN-STENCIL`, and validation-only certificate cutout bindings beside the matrix modules. They do not integrate matrix/cert/cutout behavior into GWM, stacks, cascade, CLI/file wrappers, browser paths, or legacy runtime changes.
 - Flatten matrix to N-D mesh: define a deterministic conversion from matrix keys to ordered N-dimensional point meshes.
 - Stack integration: allow stacks to consume committed matrix-derived meshes only after the docs and pure utilities are stable.
 
 ## Future Scope Boundaries
 
-`UN-CERT`, certificates, N-dimensional angle math, GWM integration, stack integration, cascade integration, CLI/file wrappers, and browser playground work remain future scope. `UN-MATRIX-MUTATE`, `UN-MATRIX-MUTATE-SIGNED`, `UN-MATRIX-COMBINE`, and `UN-MATRIX-COMBINE-SIGNED` do not add hidden key mutation, automatic key evolution, production-safe cryptography, asymmetric cryptography, compression, steganography, homomorphic behavior, or production authentication.
+N-dimensional angle math, `UN-TRIAD-MIX`, `UN-GWM-V2`, GWM integration, stack integration, cascade integration, CLI/file wrappers, browser playground work, and hybrid production crypto envelopes remain future scope. `UN-MATRIX-MUTATE`, `UN-MATRIX-MUTATE-SIGNED`, `UN-MATRIX-COMBINE`, `UN-MATRIX-COMBINE-SIGNED`, `UN-CERT`, and `UN-CUTOUT` / `UN-STENCIL` do not add hidden key mutation, automatic key evolution, production-safe cryptography, asymmetric cryptography, secure redaction, compression, steganography, homomorphic behavior, or production authentication.

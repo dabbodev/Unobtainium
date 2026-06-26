@@ -260,7 +260,12 @@ test('unsupported algorithm is rejected', () => {
 test('malformed envelope returns invalid result', () => {
   assert.deepEqual(
     verifySignedStackEnvelope(null),
-    { valid: false, reason: 'envelope must be an object' },
+    {
+      ok: false,
+      valid: false,
+      reason: 'envelope must be an object',
+      error: 'envelope must be an object',
+    },
   );
   assert.equal(verifySignedStackEnvelope({ format: 'UNSTACK-SIGNED', version: 1 }).valid, false);
 });
