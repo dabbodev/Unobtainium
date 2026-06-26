@@ -11,7 +11,27 @@ const { stableStringify } = require('./stack-canonical');
 const TRIAD_MIX_FORMAT = 'UN-TRIAD-MIX';
 const TRIAD_MIX_VERSION = 1;
 const TRIAD_MIX_COMMITMENT_DOMAIN = 'UN-TRIAD-MIX:v1';
-const CONTEXT_FIELDS = ['walkIndex', 'ring', 'horizon', 'point', 'shift', 'gap'];
+const TRIAD_INSTRUCTION_FORMAT = 'UN-TRIAD-MIX-INSTRUCTIONS';
+const TRIAD_INSTRUCTION_VERSION = 1;
+const TRIAD_INSTRUCTION_COMMITMENT_DOMAIN = 'UN-TRIAD-MIX-INSTRUCTIONS:v1';
+const DEFAULT_TRIAD_INSTRUCTION_RING = 256;
+const MIX_PATTERNS = [
+  'point-balanced',
+  'edge-weighted',
+  'orientation-selected',
+  'centroid-coupled',
+  'walk-index-coupled',
+];
+const CONTEXT_FIELDS = [
+  'walkIndex',
+  'ring',
+  'horizon',
+  'point',
+  'shift',
+  'gap',
+  'payloadLength',
+  'span',
+];
 const POINT_LABELS = ['A', 'B', 'C'];
 
 function assertObject(value, name) {
@@ -379,6 +399,419 @@ function triadFeaturePayload(triadLike, options = {}) {
   return cloneCanonicalValue(buildFeaturePayload(triadLike, options), 'triadFeatures');
 }
 
+function hasInstructionShape(input) {
+  return input !== null
+    && typeof input === 'object'
+    && !Array.isArray(input)
+    && Object.hasOwn(input, 'format')
+    && Object.hasOwn(input, 'version')
+    && Object.hasOwn(input, 'triadFeatureCommitment')
+    && Object.hasOwn(input, 'channels');
+}
+
+function instructionPayloadFromEnvelope(input) {
+  assertObject(input, 'triadInstructionChannels');
+  if (input.format !== TRIAD_INSTRUCTION_FORMAT) {
+    throw new TypeError('triad instruction format is not UN-TRIAD-MIX-INSTRUCTIONS');
+  }
+  if (input.version !== TRIAD_INSTRUCTION_VERSION) {
+    throw new TypeError('triad instruction version is not supported');
+  }
+
+  const payload = cloneCanonicalValue(input, 'triadInstructionChannels');
+  delete payload.triadInstructionCommitment;
+  return payload;
+}
+
+function normalizePositiveSafeInteger(value, fieldName) {
+  const normalized = normalizeSafeInteger(value, fieldName);
+  if (normalized <= 0) {
+    throw new RangeError(`${fieldName} must be a positive safe integer`);
+  }
+
+  return normalized;
+}
+
+function instructionContextFrom(options = {}, fallbackContext = {}) {
+  const contextLike = options.context === undefined ? options : options.context;
+  if (contextLike === undefined || contextLike === null) {
+    return normalizeContext(fallbackContext);
+  }
+  if (Object.keys(contextLike).length === 0 && fallbackContext !== undefined) {
+    return normalizeContext(fallbackContext);
+  }
+
+  return normalizeContext(contextLike);
+}
+
+function boundedDigestInteger(domain, value) {
+  const digest = crypto
+    .createHash('sha256')
+    .update(domain)
+    .update(Buffer.from([0]))
+    .update(stableStringify(value))
+    .digest('hex');
+
+  return Number.parseInt(digest.slice(0, 12), 16);
+}
+
+function modulo(value, modulus) {
+  return ((value % modulus) + modulus) % modulus;
+}
+
+function resolveInstructionRing(context) {
+  if (context.ring === undefined) {
+    return DEFAULT_TRIAD_INSTRUCTION_RING;
+  }
+
+  return normalizePositiveSafeInteger(context.ring, 'context.ring');
+}
+
+function resolveInstructionSpan(context) {
+  if (context.span !== undefined) {
+    return normalizePositiveSafeInteger(context.span, 'context.span');
+  }
+  if (context.payloadLength !== undefined) {
+    return normalizePositiveSafeInteger(context.payloadLength, 'context.payloadLength');
+  }
+
+  return null;
+}
+
+function pointSummary(points) {
+  return {
+    A: points.A.coordinateSum,
+    B: points.B.coordinateSum,
+    C: points.C.coordinateSum,
+  };
+}
+
+function edgeSummary(edges) {
+  return {
+    AB: edges.AB.squaredDistance,
+    BC: edges.BC.squaredDistance,
+    CA: edges.CA.squaredDistance,
+  };
+}
+
+function triangleSummary(triangle) {
+  return {
+    angleBucket: triangle.angleBucket,
+    centroidSum: triangle.centroidSum,
+    orientationDominantAxis: triangle.orientationDominantAxis,
+    perimeterSquaredSignature: triangle.perimeterSquaredSignature,
+  };
+}
+
+function sourceFeatureFamilies(context) {
+  const families = ['points', 'edges', 'triangle'];
+  if (Object.keys(context).length > 0) {
+    families.push('context');
+  }
+
+  return families;
+}
+
+function mixSelectionMaterial(triadFeatures, context) {
+  const { features } = triadFeatures;
+
+  return {
+    featureCommitment: triadFeatures.triadFeatureCommitment,
+    points: pointSummary(features.points),
+    edges: edgeSummary(features.edges),
+    triangle: triangleSummary(features.triangle),
+    context,
+  };
+}
+
+function selectMixPattern(triadFeatures, context) {
+  const selector = boundedDigestInteger(
+    'UN-TRIAD-MIX-INSTRUCTIONS:pattern:v1',
+    mixSelectionMaterial(triadFeatures, context)
+  );
+
+  return MIX_PATTERNS[selector % MIX_PATTERNS.length];
+}
+
+function emitTriadRotateChannel(triadFeaturesLike, options = {}) {
+  const triadFeatures = assertTriadFeatures(triadFeaturesLike);
+  const context = instructionContextFrom(options, triadFeatures.context);
+  const ring = resolveInstructionRing(context);
+  const mixPattern = selectMixPattern(triadFeatures, context);
+  const material = {
+    featureCommitment: triadFeatures.triadFeatureCommitment,
+    mixPattern,
+    points: pointSummary(triadFeatures.features.points),
+    edges: edgeSummary(triadFeatures.features.edges),
+    triangle: triangleSummary(triadFeatures.features.triangle),
+    context,
+  };
+  const seed = boundedDigestInteger('UN-TRIAD-MIX-INSTRUCTIONS:rotate:v1', material);
+
+  return {
+    delta: modulo(seed, ring),
+    direction: seed % 2 === 0 ? 'up' : 'down',
+    ring,
+    sourceFeatures: {
+      points: ['A.coordinateSum', 'B.coordinateSum', 'C.coordinateSum'],
+      edges: ['AB.squaredDistance', 'BC.squaredDistance', 'CA.squaredDistance'],
+      triangle: [
+        'angleBucket',
+        'centroidSum',
+        'orientationDominantAxis',
+        'perimeterSquaredSignature',
+      ],
+      context: Object.keys(context).sort(),
+    },
+    mixPattern,
+  };
+}
+
+function emitTriadPositionChannel(triadFeaturesLike, options = {}) {
+  const triadFeatures = assertTriadFeatures(triadFeaturesLike);
+  const context = instructionContextFrom(options, triadFeatures.context);
+  const span = resolveInstructionSpan(context);
+  const mixPattern = selectMixPattern(triadFeatures, context);
+  const material = {
+    featureCommitment: triadFeatures.triadFeatureCommitment,
+    mixPattern,
+    points: pointSummary(triadFeatures.features.points),
+    edges: edgeSummary(triadFeatures.features.edges),
+    triangle: triangleSummary(triadFeatures.features.triangle),
+    context,
+  };
+  const seed = boundedDigestInteger('UN-TRIAD-MIX-INSTRUCTIONS:position:v1', material);
+  const offset = boundedDigestInteger('UN-TRIAD-MIX-INSTRUCTIONS:position-offset:v1', {
+    seed,
+    edgeSummary: material.edges,
+    triangleSummary: material.triangle,
+  });
+
+  return {
+    seed,
+    span,
+    a: span === null ? null : modulo(seed, span),
+    b: span === null ? null : modulo(seed + offset, span),
+    sourceFeatures: {
+      points: ['A.coordinateSum', 'B.coordinateSum', 'C.coordinateSum'],
+      edges: ['AB.squaredDistance', 'BC.squaredDistance', 'CA.squaredDistance'],
+      triangle: [
+        'angleBucket',
+        'centroidSum',
+        'orientationDominantAxis',
+        'perimeterSquaredSignature',
+      ],
+      context: Object.keys(context).sort(),
+    },
+    mixPattern,
+  };
+}
+
+function emitTriadRuleChannel(triadFeaturesLike, options = {}) {
+  const triadFeatures = assertTriadFeatures(triadFeaturesLike);
+  const context = instructionContextFrom(options, triadFeatures.context);
+  const mixPattern = selectMixPattern(triadFeatures, context);
+  const triangle = triadFeatures.features.triangle;
+
+  return {
+    angleBucket: triangle.angleBucket,
+    mixPattern,
+    degenerate: triangle.degenerate,
+    repeatedPoint: triangle.repeatedPoint,
+    sourceFeatureFamilies: sourceFeatureFamilies(context),
+  };
+}
+
+function emitTriadExplainChannel(triadFeatures, context, ruleChannel, positionChannel) {
+  const notes = [
+    'deterministic instruction-channel descriptor only',
+    'does not apply UN-ROTATE, UN-SWAP, or permutation transforms',
+  ];
+  if (positionChannel.span === null) {
+    notes.push('position indexes are abstract because no span or payloadLength was supplied');
+  }
+  if (ruleChannel.degenerate) {
+    notes.push('degenerate triad emitted deterministic flagged channels');
+  }
+
+  return {
+    featureCommitment: triadFeatures.triadFeatureCommitment,
+    selectedPattern: ruleChannel.mixPattern,
+    changedByPointOrder: true,
+    degenerate: ruleChannel.degenerate,
+    notes,
+  };
+}
+
+function triadFeaturesFromInstructionInput(input, options = {}) {
+  if (hasFeatureShape(input)) {
+    return assertTriadFeatures(input);
+  }
+
+  return extractTriadFeatures(input, options);
+}
+
+function buildInstructionPayload(input, options = {}) {
+  const triadFeatures = triadFeaturesFromInstructionInput(input, options);
+  const context = instructionContextFrom(options, triadFeatures.context);
+  const rotate = emitTriadRotateChannel(triadFeatures, { context });
+  const position = emitTriadPositionChannel(triadFeatures, { context });
+  const rule = emitTriadRuleChannel(triadFeatures, { context });
+
+  return {
+    format: TRIAD_INSTRUCTION_FORMAT,
+    version: TRIAD_INSTRUCTION_VERSION,
+    triadFeatureCommitment: triadFeatures.triadFeatureCommitment,
+    context,
+    channels: {
+      rotate,
+      position,
+      rule,
+      explain: emitTriadExplainChannel(triadFeatures, context, rule, position),
+    },
+  };
+}
+
+function triadInstructionPayload(input, options = {}) {
+  if (hasInstructionShape(input)) {
+    return instructionPayloadFromEnvelope(input);
+  }
+
+  return cloneCanonicalValue(buildInstructionPayload(input, options), 'triadInstructionChannels');
+}
+
+function triadInstructionCommitment(input, options = {}) {
+  return crypto
+    .createHash('sha256')
+    .update(TRIAD_INSTRUCTION_COMMITMENT_DOMAIN)
+    .update(Buffer.from([0]))
+    .update(stableStringify(triadInstructionPayload(input, options)))
+    .digest('hex');
+}
+
+function emitTriadInstructionChannels(input, options = {}) {
+  const payload = triadInstructionPayload(input, options);
+
+  return {
+    ...payload,
+    triadInstructionCommitment: triadInstructionCommitment(payload),
+  };
+}
+
+function assertHexCommitment(value, fieldName) {
+  if (typeof value !== 'string' || !/^[0-9a-f]{64}$/.test(value)) {
+    throw new TypeError(`${fieldName} must be a SHA-256 hex commitment`);
+  }
+}
+
+function assertSourceFeatureObject(value, fieldName) {
+  assertObject(value, fieldName);
+  for (const key of ['points', 'edges', 'triangle', 'context']) {
+    if (!Array.isArray(value[key])) {
+      throw new TypeError(`${fieldName}.${key} must be an array`);
+    }
+  }
+}
+
+function validateInstructionPayload(payload) {
+  assertObject(payload, 'triadInstructionChannels');
+  if (payload.format !== TRIAD_INSTRUCTION_FORMAT) {
+    throw new TypeError('triad instruction format is not UN-TRIAD-MIX-INSTRUCTIONS');
+  }
+  if (payload.version !== TRIAD_INSTRUCTION_VERSION) {
+    throw new TypeError('triad instruction version is not supported');
+  }
+  assertHexCommitment(payload.triadFeatureCommitment, 'triadFeatureCommitment');
+  normalizeContext(payload.context);
+  assertObject(payload.channels, 'channels');
+
+  const { rotate, position, rule, explain } = payload.channels;
+  assertObject(rotate, 'channels.rotate');
+  const ring = normalizePositiveSafeInteger(rotate.ring, 'channels.rotate.ring');
+  normalizeSafeInteger(rotate.delta, 'channels.rotate.delta');
+  if (rotate.delta < 0 || rotate.delta >= ring) {
+    throw new RangeError('channels.rotate.delta must be within ring bounds');
+  }
+  if (!['up', 'down'].includes(rotate.direction)) {
+    throw new TypeError('channels.rotate.direction must be up or down');
+  }
+  if (!MIX_PATTERNS.includes(rotate.mixPattern)) {
+    throw new TypeError('channels.rotate.mixPattern is not supported');
+  }
+  assertSourceFeatureObject(rotate.sourceFeatures, 'channels.rotate.sourceFeatures');
+
+  assertObject(position, 'channels.position');
+  normalizeSafeInteger(position.seed, 'channels.position.seed');
+  if (position.span !== null) {
+    const span = normalizePositiveSafeInteger(position.span, 'channels.position.span');
+    for (const fieldName of ['a', 'b']) {
+      normalizeSafeInteger(position[fieldName], `channels.position.${fieldName}`);
+      if (position[fieldName] < 0 || position[fieldName] >= span) {
+        throw new RangeError(`channels.position.${fieldName} must be within span bounds`);
+      }
+    }
+  } else if (position.a !== null || position.b !== null) {
+    throw new TypeError('channels.position indexes must be null when span is null');
+  }
+  if (!MIX_PATTERNS.includes(position.mixPattern)) {
+    throw new TypeError('channels.position.mixPattern is not supported');
+  }
+  assertSourceFeatureObject(position.sourceFeatures, 'channels.position.sourceFeatures');
+
+  assertObject(rule, 'channels.rule');
+  if (typeof rule.angleBucket !== 'string') {
+    throw new TypeError('channels.rule.angleBucket must be a string');
+  }
+  if (!MIX_PATTERNS.includes(rule.mixPattern)) {
+    throw new TypeError('channels.rule.mixPattern is not supported');
+  }
+  if (typeof rule.degenerate !== 'boolean') {
+    throw new TypeError('channels.rule.degenerate must be a boolean');
+  }
+  if (typeof rule.repeatedPoint !== 'boolean') {
+    throw new TypeError('channels.rule.repeatedPoint must be a boolean');
+  }
+  if (!Array.isArray(rule.sourceFeatureFamilies)) {
+    throw new TypeError('channels.rule.sourceFeatureFamilies must be an array');
+  }
+
+  assertObject(explain, 'channels.explain');
+  assertHexCommitment(explain.featureCommitment, 'channels.explain.featureCommitment');
+  if (explain.featureCommitment !== payload.triadFeatureCommitment) {
+    throw new RangeError('channels.explain.featureCommitment mismatch');
+  }
+  if (explain.selectedPattern !== rule.mixPattern) {
+    throw new RangeError('channels.explain.selectedPattern mismatch');
+  }
+  if (typeof explain.changedByPointOrder !== 'boolean') {
+    throw new TypeError('channels.explain.changedByPointOrder must be a boolean');
+  }
+  if (typeof explain.degenerate !== 'boolean') {
+    throw new TypeError('channels.explain.degenerate must be a boolean');
+  }
+  if (!Array.isArray(explain.notes)) {
+    throw new TypeError('channels.explain.notes must be an array');
+  }
+}
+
+function assertTriadInstructionChannels(channelsLike) {
+  const payload = triadInstructionPayload(channelsLike);
+  validateInstructionPayload(payload);
+  const commitment = triadInstructionCommitment(payload);
+
+  if (
+    Object.hasOwn(channelsLike, 'triadInstructionCommitment')
+    && channelsLike.triadInstructionCommitment !== commitment
+  ) {
+    throw new RangeError('triadInstructionCommitment mismatch');
+  }
+
+  return {
+    ...payload,
+    triadInstructionCommitment: commitment,
+  };
+}
+
 function triadFeatureCommitment(triadLike, options = {}) {
   return crypto
     .createHash('sha256')
@@ -417,6 +850,8 @@ function assertTriadFeatures(featuresLike) {
 module.exports = {
   TRIAD_MIX_FORMAT,
   TRIAD_MIX_VERSION,
+  TRIAD_INSTRUCTION_FORMAT,
+  TRIAD_INSTRUCTION_VERSION,
   normalizeTriadPoint,
   normalizeTriad,
   triadFeaturePayload,
@@ -426,4 +861,11 @@ module.exports = {
   extractEdgeFeatures,
   extractTriangleFeatures,
   assertTriadFeatures,
+  triadInstructionPayload,
+  triadInstructionCommitment,
+  emitTriadInstructionChannels,
+  emitTriadRotateChannel,
+  emitTriadPositionChannel,
+  emitTriadRuleChannel,
+  assertTriadInstructionChannels,
 };

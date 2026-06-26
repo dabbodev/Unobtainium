@@ -60,7 +60,7 @@ anchored walk state: A deterministic `{ point, shift, gap }` state derived from 
 
 UN-GWM: Unobtainium Geometric Walk Mask, the raw family of modes that derive mask values from an ordered 3D point-cloud walk.
 
-UN-TRIAD-MIX: A Sprint 31 pure feature extraction branch where an ordered point triad is normalized into deterministic point, edge, whole-triangle, and optional walk-context feature material. It is experimental, deterministic rather than random, not production cryptography, and does not emit transform instructions.
+UN-TRIAD-MIX: A Sprint 31 pure feature extraction and Sprint 32 pure instruction-channel descriptor branch where an ordered point triad is normalized into deterministic point, edge, whole-triangle, optional walk-context, and descriptor material. It is experimental, deterministic rather than random, not production cryptography, and does not apply transforms.
 
 UN-GWM-V2: A future opt-in successor path for geometric walk mask generation based on `UN-TRIAD-MIX` concepts. It must not change existing `UN-GWM` instruction streams unless a future explicit version or format is introduced.
 
@@ -68,7 +68,11 @@ triad feature payload: The canonical Sprint 31 `UN-TRIAD-MIX` payload derived fr
 
 triad feature commitment: A domain-separated SHA-256 hex digest over the canonical `UN-TRIAD-MIX` feature payload. Changing point material, point order, supported context, format, or version changes the commitment.
 
-triad instruction cell: A conceptual future `UN-TRIAD-MIX` bundle that may emit rotate/value, swap/position, rule/mix, and explain/debug channels. Sprint 31 does not emit `UN-ROTATE`, `UN-SWAP`, or permutation instructions.
+triad instruction-channel payload: The canonical Sprint 32 `UN-TRIAD-MIX-INSTRUCTIONS` payload derived from a triad feature commitment, instruction context, and deterministic rotate, position, rule, and explain descriptor channels. It is not an applied transform and does not integrate with existing `UN-GWM`.
+
+triad instruction commitment: A domain-separated SHA-256 hex digest over the canonical triad instruction-channel payload, excluding its own commitment field. Changing the feature commitment, context, channel values, format, or version changes the commitment.
+
+triad instruction cell: A `UN-TRIAD-MIX` descriptor bundle that emits rotate/value, position, rule/mix, and explain/debug channels. Sprint 32 does not apply `UN-ROTATE`, `UN-SWAP`, or permutation transforms.
 
 UNSTACK: The v3 unsigned stack recipe format for composing multiple ordered transform layers. The current runtime supports `format: "UNSTACK"`, `version: 1`, a shared window size, stack metadata, and ordered `UN-ROTATE` and `UN-SWAP` layers.
 

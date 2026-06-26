@@ -241,6 +241,14 @@ This sprint is feature extraction only. It does not emit `UN-ROTATE`, `UN-SWAP`,
 
 `UN-TRIAD-MIX` remains experimental and not production cryptography. Feature extraction is deterministic, not random. Contextual dependency should not be marketed as cryptographic uncertainty, and more point, edge, triangle, context, matrix, or N-dimensional mixing does not automatically mean more security. Multi-channel instruction emission, N-dimensional angles, matrix mutation integration, transform integration, CLI/file wrappers, and browser playground work remain future scope.
 
+## Sprint 32 UN-TRIAD-MIX Instruction Channels
+
+Sprint 32 adds first-pass pure `UN-TRIAD-MIX` multi-channel instruction emission utilities under `packages/core/src/triad-mix.js`. The helpers convert deterministic triad feature objects, or raw triads through the existing feature extraction path, into descriptor channels for rotate/value, position, rule/mix, and explain/debug material.
+
+This sprint emits descriptors only. It does not apply `UN-ROTATE`, `UN-SWAP`, or permutation transforms; does not integrate with existing `UN-GWM`, instruction streams, `UNSTACK`, `UN-CASCADE`, `UN-CERT`, `UN-CUTOUT`, CLI/file wrappers, or browser paths; and does not change existing `UN-GWM` behavior or legacy runtime behavior. Future integration must be opt-in through a new instruction stream version or explicit wrapper.
+
+Instruction emission is deterministic, not random. Contextual dependency should not be marketed as cryptographic uncertainty, and more feature mixing does not automatically mean more security. N-dimensional angles, matrix mutation integration, CLI/file wrappers, browser playground work, and default transform integration remain future scope.
+
 ## Purpose
 
 Unobtainium v3 is intended to explore geometry-driven masking systems built around ordered 3D point-cloud keys. The current v2 code walks a list of points and derives byte shifts from triangle geometry. v3 keeps that creative center but treats the project as a lab for packet formats, stackable transforms, authentication boundaries, and controlled malleability experiments.
@@ -332,7 +340,7 @@ Sealed mode should reject tampered packets through authentication. Malleable mod
 
 Sprint 14 uses `UN-GEN` for blank-substrate materialization through existing stacks. Broader deterministic point-cloud generation from seeds, prompts, parameters, or procedural geometry remains future scope. UN-FIT is the working name for fitting or adapting point clouds to target constraints. UN-CASCADE is the working name for chaining multiple point-cloud masks. UN-STEG is the working name for carrying point packets inside another medium.
 
-Future key-shape branches include `UN-ND` for broader N-dimensional geometry support. Sprint 19 `UN-MATRIX` is limited to pure matrix descriptors and value transforms. Sprint 20 `UN-MATRIX-MUTATE` is limited to explicit committed mutation recipes. Sprint 21 `UN-MATRIX-MUTATE-SIGNED` is limited to signed envelopes over those explicit committed recipes. Sprint 24 `UN-MATRIX-COMBINE` is limited to pure committed tiled combine recipes. Sprint 25 `UN-MATRIX-COMBINE-SIGNED` is limited to signed envelopes over explicit committed combine recipes. Sprint 26 `UN-CERT` is limited to split validation certificate objects. Sprint 27 `UN-CUTOUT` / `UN-STENCIL` is limited to committed byte-region descriptors. Sprint 28 is limited to validation-only `UN-CERT` bindings for those descriptors and commitments. Sprint 30 defines `UN-TRIAD-MIX` / `UN-GWM-V2` as a docs-only successor path for triad-as-instruction-cell mask generation. Sprint 31 adds pure `UN-TRIAD-MIX` feature extraction only. Future validation and overlay branches include context-bound original-vs-shifted layer experiments and integration with GWM, stacks, and cascade reports.
+Future key-shape branches include `UN-ND` for broader N-dimensional geometry support. Sprint 19 `UN-MATRIX` is limited to pure matrix descriptors and value transforms. Sprint 20 `UN-MATRIX-MUTATE` is limited to explicit committed mutation recipes. Sprint 21 `UN-MATRIX-MUTATE-SIGNED` is limited to signed envelopes over those explicit committed recipes. Sprint 24 `UN-MATRIX-COMBINE` is limited to pure committed tiled combine recipes. Sprint 25 `UN-MATRIX-COMBINE-SIGNED` is limited to signed envelopes over explicit committed combine recipes. Sprint 26 `UN-CERT` is limited to split validation certificate objects. Sprint 27 `UN-CUTOUT` / `UN-STENCIL` is limited to committed byte-region descriptors. Sprint 28 is limited to validation-only `UN-CERT` bindings for those descriptors and commitments. Sprint 30 defines `UN-TRIAD-MIX` / `UN-GWM-V2` as a docs-only successor path for triad-as-instruction-cell mask generation. Sprint 31 adds pure `UN-TRIAD-MIX` feature extraction only. Sprint 32 adds pure `UN-TRIAD-MIX` instruction-channel descriptors only. Future validation and overlay branches include context-bound original-vs-shifted layer experiments and opt-in integration with GWM, stacks, and cascade reports.
 
 These modes are future research directions. They should not be exposed as security claims. The first requirement is reproducibility: identical inputs must produce identical ordered point clouds across supported runtimes.
 
@@ -342,7 +350,7 @@ These modes are future research directions. They should not be exposed as securi
 
 `UN-GEN-DESCRIPTOR`: The Sprint 15 v3 generation manifest format. It records blank-substrate settings, stack or signed-stack bindings, generated/target/residual commitments, metadata, and a descriptor commitment.
 
-`UN-TRIAD-MIX`: The Sprint 31 pure feature extraction branch for treating an ordered point triad as deterministic point, edge, triangle, and context feature material. It does not emit transform instructions, does not integrate with existing `UN-GWM`, and is not production cryptography.
+`UN-TRIAD-MIX`: The Sprint 31 pure feature extraction and Sprint 32 pure instruction-channel descriptor branch for treating an ordered point triad as deterministic point, edge, triangle, context, and descriptor material. It does not apply transform instructions, does not integrate with existing `UN-GWM`, and is not production cryptography.
 
 `UN-GWM-V2`: A future opt-in successor path for geometric walk mask generation using `UN-TRIAD-MIX` concepts. Existing `UN-GWM` streams must not change unless a future explicit version or format is introduced.
 
