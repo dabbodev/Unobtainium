@@ -60,7 +60,7 @@ anchored walk state: A deterministic `{ point, shift, gap }` state derived from 
 
 UN-GWM: Unobtainium Geometric Walk Mask, the raw family of modes that derive mask values from an ordered 3D point-cloud walk.
 
-UN-TRIAD-MIX: A Sprint 31 pure feature extraction, Sprint 32 pure instruction-channel descriptor, and Sprint 33 pure stream descriptor branch where an ordered point triad is normalized into deterministic point, edge, whole-triangle, optional walk-context, and descriptor material. It is experimental, deterministic rather than random, not production cryptography, and does not apply transforms.
+UN-TRIAD-MIX: A Sprint 31 pure feature extraction, Sprint 32 pure instruction-channel descriptor, Sprint 33 pure stream descriptor, Sprint 34 pure adapter descriptor, and Sprint 35 opt-in transform proof branch where an ordered point triad is normalized into deterministic point, edge, whole-triangle, optional walk-context, descriptor, and application-proof material. It is experimental, deterministic rather than random, not production cryptography, and does not create a production cipher mode.
 
 UN-GWM-V2: A future opt-in successor path for geometric walk mask generation based on `UN-TRIAD-MIX` concepts. It must not change existing `UN-GWM` instruction streams unless a future explicit version or format is introduced.
 
@@ -79,6 +79,24 @@ triad instruction stream: The Sprint 33 `UN-TRIAD-MIX-STREAM` descriptor that pa
 triad stream payload: The canonical Sprint 33 `UN-TRIAD-MIX-STREAM` payload excluding the top-level stream commitment. It preserves record order, normalized triads, feature commitments, instruction commitments, and deterministic rotate, position, rule, and explain channel summaries.
 
 triad stream commitment: A domain-separated SHA-256 hex digest over the canonical triad stream payload. Changing a triad, triad order, context, channel material, stream format, or stream version changes the commitment.
+
+triad adapter plan: The Sprint 34 `UN-TRIAD-MIX-ADAPTER` descriptor that translates a validated triad instruction stream into rotate-like `UN-ROTATE` descriptor objects and bounded swap-like `UN-SWAP` descriptor objects. It is a pure opt-in translation layer, not an applied transform, not an existing `UN-GWM` instruction stream, and not production cryptography.
+
+triad adapter payload: The canonical Sprint 34 `UN-TRIAD-MIX-ADAPTER` payload excluding the top-level adapter commitment. It records the source stream commitment, adapter context, rotate descriptors, swap descriptors, and skipped records. Adapter output is deterministic, not random.
+
+triad adapter commitment: A domain-separated SHA-256 hex digest over the canonical triad adapter payload. Changing the source stream commitment, descriptor order, rotate descriptors, swap descriptors, skipped records, context, format, or version changes the commitment. Contextual dependency is not cryptographic uncertainty, and more feature mixing does not automatically mean more security.
+
+skipped triad adapter record: A deterministic Sprint 34 warning emitted when a triad stream record has an unbounded position channel. Sprint 34 skips swap descriptors for those records because `a`, `b`, and `span` are not bounded.
+
+triad transform proof: The Sprint 35 `UN-TRIAD-MIX-TRANSFORM-PROOF` object that applies supported triad adapter rotate/swap descriptors to a byte-like payload through existing reversible `UN-ROTATE` and `UN-SWAP` helpers. It is isolated and opt-in; it does not replace or modify existing `UN-GWM`, `UNSTACK`, cascade, certificate, cutout, CLI/file, browser, or legacy runtime behavior.
+
+triad transform proof payload: The canonical Sprint 35 proof payload excluding the top-level proof commitment and raw payload bytes. It records format/version, source plan commitment, input payload commitment, output payload commitment, context, applied operation summaries, skipped adapter records, and warnings.
+
+triad transform proof commitment: A domain-separated SHA-256 hex digest over the canonical triad transform proof payload. Changing the source plan commitment, input payload commitment, output payload commitment, applied operation summaries, skipped records, warnings, context, format, or version changes it.
+
+triad transform roundtrip: The Sprint 35 apply-then-reverse check proving that the selected adapter descriptors can be reversed through existing helper conventions to recover the original payload exactly. It is a deterministic reversibility proof, not a production security claim.
+
+active triad swap descriptor: A bounded `UN-SWAP` descriptor in a triad adapter plan's active `swapInstructions` list. Sprint 35 rejects active swap descriptors with `null` or unbounded span/index fields; unbounded position channels are valid only when the adapter has already represented them in `skippedRecords`.
 
 UNSTACK: The v3 unsigned stack recipe format for composing multiple ordered transform layers. The current runtime supports `format: "UNSTACK"`, `version: 1`, a shared window size, stack metadata, and ordered `UN-ROTATE` and `UN-SWAP` layers.
 

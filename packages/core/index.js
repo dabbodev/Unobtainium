@@ -34,4 +34,6 @@ module.exports = {
   ...require('./src/cert'),
   ...require('./src/cutout'),
   ...require('./src/triad-mix'),
+  ...require('./src/triad-adapter'),
+  ...require('./src/triad-transform-proof'),
 };
