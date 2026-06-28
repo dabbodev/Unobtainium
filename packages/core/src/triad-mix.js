@@ -7,6 +7,7 @@ const {
   isDegenerateTriangle,
 } = require('./geometry');
 const { stableStringify } = require('./stack-canonical');
+const { selectTriple, advanceWalk } = require('./walk');
 
 const TRIAD_MIX_FORMAT = 'UN-TRIAD-MIX';
 const TRIAD_MIX_VERSION = 1;
@@ -14,6 +15,9 @@ const TRIAD_MIX_COMMITMENT_DOMAIN = 'UN-TRIAD-MIX:v1';
 const TRIAD_INSTRUCTION_FORMAT = 'UN-TRIAD-MIX-INSTRUCTIONS';
 const TRIAD_INSTRUCTION_VERSION = 1;
 const TRIAD_INSTRUCTION_COMMITMENT_DOMAIN = 'UN-TRIAD-MIX-INSTRUCTIONS:v1';
+const TRIAD_STREAM_FORMAT = 'UN-TRIAD-MIX-STREAM';
+const TRIAD_STREAM_VERSION = 1;
+const TRIAD_STREAM_COMMITMENT_DOMAIN = 'UN-TRIAD-MIX-STREAM:v1';
 const DEFAULT_TRIAD_INSTRUCTION_RING = 256;
 const MIX_PATTERNS = [
   'point-balanced',
@@ -847,11 +851,206 @@ function assertTriadFeatures(featuresLike) {
   };
 }
 
+function normalizeTriadArray(triadsLike) {
+  if (!Array.isArray(triadsLike)) {
+    throw new TypeError('triads must be an array');
+  }
+  if (triadsLike.length === 0) {
+    throw new RangeError('triads must contain at least one triad');
+  }
+
+  return triadsLike.map((triad, index) => normalizeTriad(triad, `triads[${index}]`));
+}
+
+function triadStreamRecord(triadLike, index, context) {
+  const triad = normalizeTriad(triadLike);
+  const channels = emitTriadInstructionChannels(triad, { context });
+
+  return {
+    index,
+    triad,
+    triadFeatureCommitment: channels.triadFeatureCommitment,
+    triadInstructionCommitment: channels.triadInstructionCommitment,
+    rotate: cloneCanonicalValue(channels.channels.rotate, 'record.rotate'),
+    position: cloneCanonicalValue(channels.channels.position, 'record.position'),
+    rule: cloneCanonicalValue(channels.channels.rule, 'record.rule'),
+    explain: cloneCanonicalValue(channels.channels.explain, 'record.explain'),
+  };
+}
+
+function buildStreamPayload(triadsLike, contextLike = {}) {
+  const triads = normalizeTriadArray(triadsLike);
+  const context = normalizeContext(contextLike);
+
+  return {
+    format: TRIAD_STREAM_FORMAT,
+    version: TRIAD_STREAM_VERSION,
+    context,
+    records: triads.map((triad, index) => triadStreamRecord(triad, index, context)),
+  };
+}
+
+function hasTriadStreamShape(input) {
+  return input !== null
+    && typeof input === 'object'
+    && !Array.isArray(input)
+    && Object.hasOwn(input, 'format')
+    && Object.hasOwn(input, 'version')
+    && Object.hasOwn(input, 'records');
+}
+
+function triadStreamPayloadFromEnvelope(input) {
+  assertObject(input, 'triadInstructionStream');
+  if (input.format !== TRIAD_STREAM_FORMAT) {
+    throw new TypeError('triad instruction stream format is not UN-TRIAD-MIX-STREAM');
+  }
+  if (input.version !== TRIAD_STREAM_VERSION) {
+    throw new TypeError('triad instruction stream version is not supported');
+  }
+
+  const payload = cloneCanonicalValue(input, 'triadInstructionStream');
+  delete payload.streamCommitment;
+  return payload;
+}
+
+function triadStreamPayload(input, context = {}) {
+  if (hasTriadStreamShape(input)) {
+    return triadStreamPayloadFromEnvelope(input);
+  }
+
+  return cloneCanonicalValue(buildStreamPayload(input, context), 'triadInstructionStream');
+}
+
+function triadStreamCommitment(input, context = {}) {
+  return crypto
+    .createHash('sha256')
+    .update(TRIAD_STREAM_COMMITMENT_DOMAIN)
+    .update(Buffer.from([0]))
+    .update(stableStringify(triadStreamPayload(input, context)))
+    .digest('hex');
+}
+
+function createTriadInstructionStream(triads, context = {}) {
+  const payload = triadStreamPayload(triads, context);
+
+  return {
+    ...payload,
+    streamCommitment: triadStreamCommitment(payload),
+  };
+}
+
+function normalizeWalkPoints(pointsLike) {
+  if (!Array.isArray(pointsLike)) {
+    throw new TypeError('points must be an array');
+  }
+  if (pointsLike.length === 0) {
+    throw new RangeError('points must contain at least one point');
+  }
+
+  return pointsLike.map((point, index) => normalizeTriadPoint(point, `points[${index}]`));
+}
+
+function normalizeWalkOptions(walkOptions = {}) {
+  assertObject(walkOptions, 'walkOptions');
+
+  const state = walkOptions.state === undefined
+    ? { point: 0, shift: 1, gap: 1 }
+    : cloneCanonicalValue(walkOptions.state, 'walkOptions.state');
+  const mode = walkOptions.mode === undefined ? 'permissive' : walkOptions.mode;
+  if (mode !== 'permissive' && mode !== 'distinct') {
+    throw new RangeError('walkOptions.mode must be "permissive" or "distinct"');
+  }
+
+  if (walkOptions.count !== undefined && !Number.isInteger(walkOptions.count)) {
+    throw new TypeError('walkOptions.count must be an integer');
+  }
+
+  return {
+    state,
+    mode,
+    count: walkOptions.count,
+  };
+}
+
+function createTriadInstructionStreamFromWalk(points, walkOptions = {}, context = {}) {
+  const normalizedPoints = normalizeWalkPoints(points);
+  const options = normalizeWalkOptions(walkOptions);
+  const count = options.count === undefined ? normalizedPoints.length : options.count;
+  if (count <= 0) {
+    throw new RangeError('walkOptions.count must be positive');
+  }
+
+  const triads = [];
+  let state = cloneCanonicalValue(options.state, 'walkOptions.state');
+  for (let index = 0; index < count; index += 1) {
+    const selected = selectTriple(state, normalizedPoints.length, options.mode);
+    triads.push(selected.map((pointIndex) => normalizedPoints[pointIndex]));
+    state = advanceWalk(state, normalizedPoints.length, options.mode);
+  }
+
+  return createTriadInstructionStream(triads, context);
+}
+
+function validateStreamPayload(payload) {
+  assertObject(payload, 'triadInstructionStream');
+  if (payload.format !== TRIAD_STREAM_FORMAT) {
+    throw new TypeError('triad instruction stream format is not UN-TRIAD-MIX-STREAM');
+  }
+  if (payload.version !== TRIAD_STREAM_VERSION) {
+    throw new TypeError('triad instruction stream version is not supported');
+  }
+  const context = normalizeContext(payload.context);
+  if (!Array.isArray(payload.records)) {
+    throw new TypeError('records must be an array');
+  }
+  if (payload.records.length === 0) {
+    throw new RangeError('records must contain at least one record');
+  }
+
+  payload.records.forEach((record, index) => {
+    assertObject(record, `records[${index}]`);
+    if (record.index !== index) {
+      throw new RangeError(`records[${index}].index must match its stream position`);
+    }
+    normalizeTriad(record.triad);
+    assertHexCommitment(record.triadFeatureCommitment, `records[${index}].triadFeatureCommitment`);
+    assertHexCommitment(
+      record.triadInstructionCommitment,
+      `records[${index}].triadInstructionCommitment`
+    );
+
+    const expected = triadStreamRecord(record.triad, index, context);
+    if (stableStringify(record) !== stableStringify(expected)) {
+      throw new RangeError(`records[${index}] does not match its triad instruction channels`);
+    }
+  });
+}
+
+function assertTriadInstructionStream(streamLike) {
+  const payload = triadStreamPayload(streamLike);
+  validateStreamPayload(payload);
+  const commitment = triadStreamCommitment(payload);
+
+  if (
+    Object.hasOwn(streamLike, 'streamCommitment')
+    && streamLike.streamCommitment !== commitment
+  ) {
+    throw new RangeError('streamCommitment mismatch');
+  }
+
+  return {
+    ...payload,
+    streamCommitment: commitment,
+  };
+}
+
 module.exports = {
   TRIAD_MIX_FORMAT,
   TRIAD_MIX_VERSION,
   TRIAD_INSTRUCTION_FORMAT,
   TRIAD_INSTRUCTION_VERSION,
+  TRIAD_STREAM_FORMAT,
+  TRIAD_STREAM_VERSION,
   normalizeTriadPoint,
   normalizeTriad,
   triadFeaturePayload,
@@ -868,4 +1067,9 @@ module.exports = {
   emitTriadPositionChannel,
   emitTriadRuleChannel,
   assertTriadInstructionChannels,
+  triadStreamPayload,
+  triadStreamCommitment,
+  createTriadInstructionStream,
+  createTriadInstructionStreamFromWalk,
+  assertTriadInstructionStream,
 };

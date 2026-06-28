@@ -60,7 +60,7 @@ anchored walk state: A deterministic `{ point, shift, gap }` state derived from 
 
 UN-GWM: Unobtainium Geometric Walk Mask, the raw family of modes that derive mask values from an ordered 3D point-cloud walk.
 
-UN-TRIAD-MIX: A Sprint 31 pure feature extraction and Sprint 32 pure instruction-channel descriptor branch where an ordered point triad is normalized into deterministic point, edge, whole-triangle, optional walk-context, and descriptor material. It is experimental, deterministic rather than random, not production cryptography, and does not apply transforms.
+UN-TRIAD-MIX: A Sprint 31 pure feature extraction, Sprint 32 pure instruction-channel descriptor, and Sprint 33 pure stream descriptor branch where an ordered point triad is normalized into deterministic point, edge, whole-triangle, optional walk-context, and descriptor material. It is experimental, deterministic rather than random, not production cryptography, and does not apply transforms.
 
 UN-GWM-V2: A future opt-in successor path for geometric walk mask generation based on `UN-TRIAD-MIX` concepts. It must not change existing `UN-GWM` instruction streams unless a future explicit version or format is introduced.
 
@@ -72,7 +72,13 @@ triad instruction-channel payload: The canonical Sprint 32 `UN-TRIAD-MIX-INSTRUC
 
 triad instruction commitment: A domain-separated SHA-256 hex digest over the canonical triad instruction-channel payload, excluding its own commitment field. Changing the feature commitment, context, channel values, format, or version changes the commitment.
 
-triad instruction cell: A `UN-TRIAD-MIX` descriptor bundle that emits rotate/value, position, rule/mix, and explain/debug channels. Sprint 32 does not apply `UN-ROTATE`, `UN-SWAP`, or permutation transforms.
+triad instruction cell: A `UN-TRIAD-MIX` descriptor bundle that emits rotate/value, position, rule/mix, and explain/debug channels. Sprint 33 stream descriptors do not apply `UN-ROTATE`, `UN-SWAP`, or permutation transforms.
+
+triad instruction stream: The Sprint 33 `UN-TRIAD-MIX-STREAM` descriptor that packages ordered triad instruction-channel records, normalized context, and a stream commitment. It is a standalone opt-in descriptor, not an existing `UN-GWM` instruction stream and not an applied transform.
+
+triad stream payload: The canonical Sprint 33 `UN-TRIAD-MIX-STREAM` payload excluding the top-level stream commitment. It preserves record order, normalized triads, feature commitments, instruction commitments, and deterministic rotate, position, rule, and explain channel summaries.
+
+triad stream commitment: A domain-separated SHA-256 hex digest over the canonical triad stream payload. Changing a triad, triad order, context, channel material, stream format, or stream version changes the commitment.
 
 UNSTACK: The v3 unsigned stack recipe format for composing multiple ordered transform layers. The current runtime supports `format: "UNSTACK"`, `version: 1`, a shared window size, stack metadata, and ordered `UN-ROTATE` and `UN-SWAP` layers.
 

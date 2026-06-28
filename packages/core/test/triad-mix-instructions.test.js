@@ -9,14 +9,21 @@ const { generateInstructionStream } = require('../src/instruction-stream');
 const {
   TRIAD_INSTRUCTION_FORMAT,
   TRIAD_INSTRUCTION_VERSION,
+  TRIAD_STREAM_FORMAT,
+  TRIAD_STREAM_VERSION,
   extractTriadFeatures,
   triadInstructionPayload,
   triadInstructionCommitment,
+  triadStreamPayload,
+  triadStreamCommitment,
   emitTriadInstructionChannels,
+  createTriadInstructionStream,
+  createTriadInstructionStreamFromWalk,
   emitTriadRotateChannel,
   emitTriadPositionChannel,
   emitTriadRuleChannel,
   assertTriadInstructionChannels,
+  assertTriadInstructionStream,
 } = core;
 
 const BASE_TRIAD = [
@@ -257,13 +264,20 @@ test('instruction emission does not mutate caller input', () => {
 test('public instruction helpers are exported through packages/core entrypoint', () => {
   assert.equal(TRIAD_INSTRUCTION_FORMAT, 'UN-TRIAD-MIX-INSTRUCTIONS');
   assert.equal(TRIAD_INSTRUCTION_VERSION, 1);
+  assert.equal(TRIAD_STREAM_FORMAT, 'UN-TRIAD-MIX-STREAM');
+  assert.equal(TRIAD_STREAM_VERSION, 1);
   assert.equal(typeof triadInstructionPayload, 'function');
   assert.equal(typeof triadInstructionCommitment, 'function');
+  assert.equal(typeof triadStreamPayload, 'function');
+  assert.equal(typeof triadStreamCommitment, 'function');
   assert.equal(typeof emitTriadInstructionChannels, 'function');
+  assert.equal(typeof createTriadInstructionStream, 'function');
+  assert.equal(typeof createTriadInstructionStreamFromWalk, 'function');
   assert.equal(typeof emitTriadRotateChannel, 'function');
   assert.equal(typeof emitTriadPositionChannel, 'function');
   assert.equal(typeof emitTriadRuleChannel, 'function');
   assert.equal(typeof assertTriadInstructionChannels, 'function');
+  assert.equal(typeof assertTriadInstructionStream, 'function');
 });
 
 test('root legacy export remains unchanged', () => {

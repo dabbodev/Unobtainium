@@ -1,6 +1,6 @@
 # UN-TRIAD-MIX / UN-GWM-V2 Ideas
 
-Status: Sprint 32 first-pass implementation. `UN-TRIAD-MIX` now has pure feature extraction utilities and pure multi-channel instruction emission utilities under `packages/core/src/triad-mix.js`. Sprint 32 emits instruction-channel descriptors only. It does not apply `UN-ROTATE`, `UN-SWAP`, or permutation transforms, and it does not change legacy runtime behavior, existing `UN-GWM` behavior, instruction streams, stack/cascade/cert/cutout integration, CLI behavior, browser behavior, or file behavior.
+Status: Sprint 33 first-pass stream adapter. `UN-TRIAD-MIX` now has pure feature extraction utilities, pure multi-channel instruction emission utilities, and an opt-in triad instruction stream descriptor under `packages/core/src/triad-mix.js`. Sprint 33 emits stream descriptors only. It does not apply `UN-ROTATE`, `UN-SWAP`, or permutation transforms, and it does not change legacy runtime behavior, existing `UN-GWM` behavior, existing instruction streams, stack/cascade/cert/cutout integration, CLI behavior, browser behavior, or file behavior.
 
 `UN-TRIAD-MIX` is experimental deterministic feature extraction and instruction-channel description. It is not production cryptography, not cryptographic randomness, not authenticated encryption, not asymmetric cryptography, not secure redaction, not compression, not steganography, not tamper-proofing, and not a production-safe cipher claim.
 
@@ -8,9 +8,9 @@ Status: Sprint 32 first-pass implementation. `UN-TRIAD-MIX` now has pure feature
 
 `UN-TRIAD-MIX` is an opt-in successor research path for first-point-heavy geometric mask generation. The current geometric walk chooses an ordered point triple, but the value path can be dominated by a primary point while the other two points mainly provide contextual angle behavior. `UN-GWM-V2` should instead treat the ordered triad itself as the instruction cell.
 
-Sprint 31 implemented the deterministic bundle of point, edge, triangle, order, and optional walk-context features. Sprint 32 adds deterministic descriptor emission for rotate/value, position, rule/mix, and explain/debug channels. These channels describe possible future transform parameters; they are not applied transforms and they are not integrated into any current transform runtime.
+Sprint 31 implemented the deterministic bundle of point, edge, triangle, order, and optional walk-context features. Sprint 32 adds deterministic descriptor emission for rotate/value, position, rule/mix, and explain/debug channels. Sprint 33 wraps ordered channel records into a standalone `UN-TRIAD-MIX-STREAM` descriptor with a stream commitment. These channels and streams describe possible future transform parameters; they are not applied transforms and they are not integrated into any current transform runtime.
 
-This is deterministic feature extraction and deterministic instruction-channel emission, not randomness. Identical inputs, options, and walk context reproduce identical feature payloads, instruction-channel payloads, and commitments. Contextual dependency should not be marketed as cryptographic uncertainty. More feature mixing does not automatically mean more security. Any future transform that consumes emitted instructions remains responsible for reversibility and bounds.
+This is deterministic feature extraction, deterministic instruction-channel emission, and deterministic stream creation, not randomness. Identical inputs, options, walk context, stream context, and triad order reproduce identical feature payloads, instruction-channel payloads, stream payloads, and commitments. Contextual dependency should not be marketed as cryptographic uncertainty. More feature mixing does not automatically mean more security. Any future transform that consumes emitted instructions remains responsible for reversibility and bounds.
 
 ## Design Principles
 
@@ -25,7 +25,7 @@ This is deterministic feature extraction and deterministic instruction-channel e
 
 ## Feature Families
 
-Feature extraction keeps feature groups visible so test vectors can explain which part of the triad influenced the payload. Sprint 31 exposed point, edge, triangle, and optional walk-context material. Sprint 32 uses those helpers to emit descriptor channels without duplicating feature extraction logic and without producing executable `UN-ROTATE`, `UN-SWAP`, or permutation instructions.
+Feature extraction keeps feature groups visible so test vectors can explain which part of the triad influenced the payload. Sprint 31 exposed point, edge, triangle, and optional walk-context material. Sprint 32 uses those helpers to emit descriptor channels without duplicating feature extraction logic and without producing executable `UN-ROTATE`, `UN-SWAP`, or permutation instructions. Sprint 33 uses the same helpers to build ordered stream records without replacing existing `UN-GWM` streams.
 
 ### Single-Point Features
 
@@ -103,7 +103,17 @@ The debug channel is not a security disclosure boundary. If future sealed format
 
 ### Future-Only Channels
 
-Potential future channels include gate hints, cutout hints, certificate hints, cascade hints, or stack policy hints. These are future-only and are not integrated by Sprint 32. Hints must not be described as authorization, secure redaction, identity proof, ownership proof, or production authentication.
+Potential future channels include gate hints, cutout hints, certificate hints, cascade hints, or stack policy hints. These are future-only and are not integrated by Sprint 33. Hints must not be described as authorization, secure redaction, identity proof, ownership proof, or production authentication.
+
+## Sprint 33 Stream Descriptor
+
+Sprint 33 adds a standalone `UN-TRIAD-MIX-STREAM` descriptor. A stream contains a format/version marker, normalized context, ordered records, and a domain-separated stream commitment. Each record preserves its index, normalized triad, triad feature commitment, triad instruction commitment, and deterministic rotate, position, rule, and explain channel summaries.
+
+Direct stream creation accepts an ordered array of raw or normalized triads. Empty streams are rejected so every stream commitment identifies at least one record. A walk adapter can also select ordered triads from points with the existing walk helpers, but it remains a thin opt-in adapter and does not alter existing `UN-GWM` generation.
+
+`triadStreamPayload` returns the canonical stream payload excluding the top-level stream commitment. `triadStreamCommitment` hashes that canonical payload with stream-specific domain separation. Triad order is part of stream identity: changing a triad, reordering triads, changing context, changing emitted channel material, or changing the stream format/version changes the commitment.
+
+Sprint 33 emits stream descriptors only. It does not apply `UN-ROTATE`, `UN-SWAP`, or permutation transforms. It does not replace or modify existing `UN-GWM`. Future transform integration must be opt-in through a new adapter or wrapper.
 
 ## Mixing Patterns
 
@@ -131,7 +141,7 @@ Couples triad features with walk index, horizon, ring, or point/shift/gap schedu
 
 ## Instruction Stream Compatibility
 
-`UN-TRIAD-MIX` instruction-channel emission is opt-in. Existing v3 instruction streams must not change unless a new version, format, or explicit generator option is introduced.
+`UN-TRIAD-MIX` instruction-channel emission and Sprint 33 stream descriptor creation are opt-in. Existing v3 instruction streams must not change unless a new version, format, or explicit generator option is introduced.
 
 Potential compatibility paths:
 
@@ -140,7 +150,7 @@ Potential compatibility paths:
 - emit future `UN-PERMUTE` instruction material after permutation formats are specified;
 - emit an explain/debug object beside instructions for test vectors and deterministic inspection.
 
-Existing `UN-GWM` instruction stream generation remains its own compatibility path and is unchanged by Sprint 32. `UN-GWM-V2` should not reinterpret existing streams, silently change stack layer meaning, or alter existing transform behavior. Future integration must be opt-in through a new instruction stream version or explicit wrapper.
+Existing `UN-GWM` instruction stream generation remains its own compatibility path and is unchanged by Sprint 33. `UN-GWM-V2` should not reinterpret existing streams, silently change stack layer meaning, or alter existing transform behavior. Future integration must be opt-in through a new instruction stream version, adapter, or explicit wrapper.
 
 ## Test-Vector Strategy
 
@@ -159,7 +169,7 @@ Required future test properties:
 - degenerate triads are stable and explicit;
 - downstream transform reversibility remains tested in the transform layer, not assumed from the mixer.
 
-Sprint 31 test vectors include compact triads, expected point summaries, edge summaries, whole-triangle summaries, context commitment changes, and degenerate cases. Sprint 32 adds selected pattern IDs, emitted channel values, commitments, bounds checks, degenerate/repeated-point checks, export checks, and explain/debug output. Tests should avoid brittle prose assertions.
+Sprint 31 test vectors include compact triads, expected point summaries, edge summaries, whole-triangle summaries, context commitment changes, and degenerate cases. Sprint 32 adds selected pattern IDs, emitted channel values, commitments, bounds checks, degenerate/repeated-point checks, export checks, and explain/debug output. Sprint 33 adds ordered stream records, stream commitments, context/order sensitivity, defensive-copy checks, empty-stream rejection, walk-adapter determinism, public export checks, and unchanged `UN-GWM` behavior checks. Tests should avoid brittle prose assertions.
 
 ## Security Framing
 
@@ -173,12 +183,12 @@ If future work wants production safety, it should define a sealed construction w
 
 ## Non-Goals
 
-- Sprint 32 implements pure instruction-channel descriptor emission only.
+- Sprint 33 implements pure opt-in triad instruction stream descriptors only.
 - No changes to legacy runtime.
 - No changes to root package export behavior.
 - No changes to existing `UN-GWM` behavior.
 - No transform application.
-- No integration with existing instruction streams.
+- No replacement or mutation of existing instruction streams.
 - No integration with existing `UN-GWM`.
 - No `UN-ROTATE`, `UN-SWAP`, or permutation transform application.
 - No integration into `UNSTACK`, `UN-CASCADE`, `UN-CERT`, `UN-CUTOUT`, gates, patches, or descriptor pipelines.
@@ -187,6 +197,7 @@ If future work wants production safety, it should define a sealed construction w
 - No CLI work.
 - No file wrapper work.
 - No browser work.
+- No default transform integration.
 - No new runtime feature behavior.
 - No cryptographic security claims.
 
@@ -196,6 +207,7 @@ Suggested future slices only:
 
 - Sprint 31: added pure `UN-TRIAD-MIX` feature extraction utilities with explicit feature groups, stable degenerate handling, no transform integration, and deterministic test vectors.
 - Sprint 32: added pure multi-channel instruction emission descriptors for rotate/value, position, rule/mix, and explain/debug channels while preserving existing instruction stream compatibility.
-- Sprint 33: add an opt-in instruction stream version or transform integration tests that prove bounds and downstream reversibility without changing legacy streams by default.
+- Sprint 33: added pure opt-in `UN-TRIAD-MIX-STREAM` descriptors that package ordered triad instruction-channel records without applying transforms or changing legacy streams.
+- Future: add opt-in transform translation tests that prove bounds and downstream reversibility without changing legacy streams by default.
 
 These suggestions should be revisited against the repository state at the start of each sprint.
