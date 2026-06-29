@@ -1,6 +1,6 @@
 # UN-TRIAD-MIX / UN-GWM-V2 Ideas
 
-Status: Sprint 36 consolidation checkpoint after the Sprint 31-35 triad pipeline work. `UN-TRIAD-MIX` now has pure feature extraction utilities, pure multi-channel instruction emission utilities, an opt-in triad instruction stream descriptor under `packages/core/src/triad-mix.js`, an opt-in adapter under `packages/core/src/triad-adapter.js` that translates stream records into rotate/swap descriptor objects, and an isolated proof helper under `packages/core/src/triad-transform-proof.js` that can apply supported adapter descriptors through existing reversible transform helpers. Sprint 36 adds no new runtime feature behavior and does not replace or modify existing `UN-GWM`; existing `UN-GWM` behavior remains unchanged. It does not change legacy runtime behavior, existing instruction streams, stack/cascade/cert/cutout integration, CLI behavior, browser behavior, or file behavior.
+Status: Sprint 40 documentation checkpoint after the Sprint 31-35 triad pipeline work, Sprint 38 `UN-GWM-V2` design specification, Sprint 39 pure `UN-GWM-V2` descriptor utilities, and Sprint 40 source point commitment plus opt-in triad stream generation utilities. `UN-TRIAD-MIX` now has pure feature extraction utilities, pure multi-channel instruction emission utilities, an opt-in triad instruction stream descriptor under `packages/core/src/triad-mix.js`, an opt-in adapter under `packages/core/src/triad-adapter.js` that translates stream records into rotate/swap descriptor objects, and an isolated proof helper under `packages/core/src/triad-transform-proof.js` that can apply supported adapter descriptors through existing reversible transform helpers. Sprint 40 extends `packages/core/src/gwm-v2.js` with helpers that commit supplied ordered source points and derive a `UN-TRIAD-MIX` stream commitment for `UN-GWM-V2` descriptors only. Sprint 40 adds no default runtime feature behavior and does not replace or modify existing `UN-GWM`; existing `UN-GWM` behavior remains unchanged. It does not change legacy runtime behavior, existing instruction streams, stack/cascade/cert/cutout integration, CLI behavior, browser behavior, or file behavior.
 
 `UN-TRIAD-MIX` is experimental deterministic feature extraction and instruction-channel description. It is not production cryptography, not cryptographic randomness, not authenticated encryption, not asymmetric cryptography, not secure redaction, not compression, not steganography, not tamper-proofing, and not a production-safe cipher claim.
 
@@ -137,6 +137,32 @@ Active swap descriptors must be bounded. If a position channel was unbounded, th
 
 Sprint 35 does not create a production cipher mode. It does not replace or modify existing `UN-GWM`; existing `UN-GWM` behavior remains unchanged. It does not integrate with `UNSTACK`, `UN-CASCADE`, `UN-CERT`, `UN-CUTOUT`, CLI/file wrappers, browser paths, or legacy runtime. Future default integration would require a separate explicit versioned mode and tests.
 
+## Sprint 38 UN-GWM-V2 Mode Spec
+
+Sprint 38 adds a separate docs-only `UN-GWM-V2` mode specification in `docs/specs/UN-GWM-V2_IDEAS.md`. That document narrows the future mode boundary: `UN-GWM-V2` would be an explicit opt-in geometric walk mask mode powered by the existing `UN-TRIAD-MIX` pipeline, not a replacement for existing `UN-GWM`.
+
+The proposed future mode has its own format/version/mode markers, source point set or point commitment, walk options, triad stream commitment, adapter plan commitment, optional transform proof commitment, optional context/metadata, and mode commitment. Existing `UN-GWM` remains the v1/default legacy-compatible v3 path. No default migration, silent behavior change, stack/cascade/cert/cutout integration, CLI/file/browser work, matrix mutation integration, or `UN-ND` work is part of Sprint 38.
+
+`UN-GWM-V2` remains experimental deterministic transformation machinery. Triadic feature mixing does not automatically mean more security, contextual dependency is deterministic rather than cryptographic uncertainty, and more channels, matrices, or dimensions do not automatically improve security.
+
+## Sprint 39 UN-GWM-V2 Descriptor Utilities
+
+Sprint 39 adds pure committed `UN-GWM-V2` descriptor utilities under `packages/core/src/gwm-v2.js`. The descriptor binds format/version/mode, a source point commitment, explicit walk options, a triad stream commitment, an adapter plan commitment, optional transform proof commitment, optional context, optional metadata, and a descriptor commitment.
+
+Sprint 39 does not create triad streams, adapter plans, or transform proofs automatically. It does not derive triad streams from points, adapt streams to instruction plans, apply `UN-ROTATE`, apply `UN-SWAP`, apply permutation transforms, or integrate with existing `UN-GWM`, stack, cascade, certificate, cutout, CLI/file, browser, default runtime, matrix mutation, or `UN-ND` paths. Existing `UN-GWM` behavior remains unchanged, and any future implementation must be explicit and opt-in.
+
+Descriptor commitments are deterministic integrity/check artifacts for reproducibility, diagnostics, and exact-shape validation only. They do not prove secrecy, identity, ownership, production authentication, authorization, secure redaction, compression, steganography, tamper-proofing, asymmetric cryptography, or production-safe cryptography. More triadic feature mixing does not automatically mean more security.
+
+## Sprint 40 UN-GWM-V2 Source Point Stream Utilities
+
+Sprint 40 adds `UN-GWM-V2` source point commitment and stream generation helpers that reuse the existing `UN-TRIAD-MIX` stream machinery. The new helpers accept ordered 3D points in the same `[x, y, z]` and `{ x, y, z }` forms used by `UN-TRIAD-MIX`, normalize them deterministically, preserve point order as identity, and reject malformed, empty, or too-small source point sets.
+
+For GWM-V2 stream generation, Sprint 40 requires at least three source points and adapts the validated Sprint 39 flat walk options into the existing triad walk helper with distinct point selection. `point`, `shift`, and `gap` are required non-negative safe integers and may be zero. Optional `horizon` and `ring` are positive safe integers; `horizon` selects the generated triad count when supplied, and `ring` is bound into stream context when supplied.
+
+Source point commitments and triad stream commitments are deterministic integrity/check artifacts for reproducibility and diagnostics. They are not proof of secrecy, key strength, identity, ownership, production authentication, authorization, secure redaction, compression, steganography, asymmetric cryptography, tamper-proofing, or production-safe cryptography.
+
+Sprint 40 does not apply `UN-ROTATE`, `UN-SWAP`, or permutation transforms. It does not generate adapter plans or transform proofs automatically. Descriptor creation from points requires a supplied adapter plan commitment and can only bind an optional supplied transform proof commitment. Future adapter/proof integration must remain explicit and opt-in. Existing `UN-GWM` behavior remains unchanged, and stack/cascade/cert/cutout/CLI/browser/default runtime integration remains future scope.
+
 ## Mixing Patterns
 
 Sprint 32 implements a small named set of deterministic, test-vector-friendly pattern concepts.
@@ -172,7 +198,7 @@ Potential compatibility paths:
 - emit future `UN-PERMUTE` instruction material after permutation formats are specified;
 - emit an explain/debug object beside instructions for test vectors and deterministic inspection.
 
-Existing `UN-GWM` instruction stream generation remains its own compatibility path and is unchanged by Sprint 35. `UN-GWM-V2` should not reinterpret existing streams, silently change stack layer meaning, or alter existing transform behavior. Sprint 34's adapter is a standalone opt-in descriptor path only. Sprint 35's transform proof is a standalone opt-in application wrapper only. Future default transform integration must be opt-in through a separate explicit versioned mode and test path.
+Existing `UN-GWM` instruction stream generation remains its own compatibility path and is unchanged by Sprint 38. `UN-GWM-V2` should not reinterpret existing streams, silently change stack layer meaning, or alter existing transform behavior. Sprint 34's adapter is a standalone opt-in descriptor path only. Sprint 35's transform proof is a standalone opt-in application wrapper only. Sprint 38's `UN-GWM-V2` spec requires a separate explicit mode marker, payload format, and commitment boundary. Future default transform integration must be opt-in through a separate explicit versioned mode and test path.
 
 ## Test-Vector Strategy
 
@@ -191,7 +217,7 @@ Required future test properties:
 - degenerate triads are stable and explicit;
 - downstream transform reversibility remains tested in the transform layer, not assumed from the mixer.
 
-Sprint 31 test vectors include compact triads, expected point summaries, edge summaries, whole-triangle summaries, context commitment changes, and degenerate cases. Sprint 32 adds selected pattern IDs, emitted channel values, commitments, bounds checks, degenerate/repeated-point checks, export checks, and explain/debug output. Sprint 33 adds ordered stream records, stream commitments, context/order sensitivity, defensive-copy checks, empty-stream rejection, walk-adapter determinism, public export checks, and unchanged `UN-GWM` behavior checks. Sprint 34 adds adapter descriptor tests for rotate/swap translation, skipped unbounded position channels, commitment sensitivity, defensive-copy behavior, malformed-stream rejection, public exports, unchanged root legacy export, unchanged `UN-GWM` behavior, and no transform application. Sprint 35 adds transform proof tests for apply/reverse roundtrip, deterministic rotate/swap application, operation ordering, proof commitment sensitivity, malformed plans, unsupported descriptor types, invalid payloads, active null swap rejection, defensive-copy behavior, unchanged root legacy export, and unchanged `UN-GWM` behavior. Tests should avoid brittle prose assertions.
+Sprint 31 test vectors include compact triads, expected point summaries, edge summaries, whole-triangle summaries, context commitment changes, and degenerate cases. Sprint 32 adds selected pattern IDs, emitted channel values, commitments, bounds checks, degenerate/repeated-point checks, export checks, and explain/debug output. Sprint 33 adds ordered stream records, stream commitments, context/order sensitivity, defensive-copy checks, empty-stream rejection, walk-adapter determinism, public export checks, and unchanged `UN-GWM` behavior checks. Sprint 34 adds adapter descriptor tests for rotate/swap translation, skipped unbounded position channels, commitment sensitivity, defensive-copy behavior, malformed-stream rejection, public exports, unchanged root legacy export, unchanged `UN-GWM` behavior, and no transform application. Sprint 35 adds transform proof tests for apply/reverse roundtrip, deterministic rotate/swap application, operation ordering, proof commitment sensitivity, malformed plans, unsupported descriptor types, invalid payloads, active null swap rejection, defensive-copy behavior, unchanged root legacy export, and unchanged `UN-GWM` behavior. Sprint 38 defines future `UN-GWM-V2` tests that should prove deterministic mode commitments, point-order sensitivity, walk-option sensitivity, triad-stream sensitivity, deterministic adapter plans, isolated transform proof roundtrips, malformed option rejection, unchanged existing `UN-GWM`, and no legacy runtime behavior changes. Tests should avoid brittle prose assertions.
 
 ## Security Framing
 
@@ -206,10 +232,17 @@ If future work wants production safety, it should define a sealed construction w
 ## Non-Goals
 
 - Sprint 35 implements an isolated opt-in triad transform application proof only.
+- Sprint 38 implements a docs-only `UN-GWM-V2` mode specification only.
+- Sprint 39 implements pure committed `UN-GWM-V2` descriptor utilities only.
+- Sprint 40 implements source point commitments and opt-in `UN-GWM-V2` triad stream descriptor generation only.
 - No changes to legacy runtime.
 - No changes to root package export behavior.
 - No changes to existing `UN-GWM` behavior.
 - No default transform integration.
+- No default `UN-GWM-V2`.
+- No default triad stream creation from `UN-GWM-V2` descriptors.
+- No automatic adapter plan creation from `UN-GWM-V2` descriptors.
+- No automatic transform proof application from `UN-GWM-V2` descriptors.
 - No production cipher mode.
 - No replacement or mutation of existing instruction streams.
 - No integration with existing `UN-GWM`.
@@ -233,6 +266,10 @@ Suggested future slices only:
 - Sprint 33: added pure opt-in `UN-TRIAD-MIX-STREAM` descriptors that package ordered triad instruction-channel records without applying transforms or changing legacy streams.
 - Sprint 34: added pure opt-in `UN-TRIAD-MIX-ADAPTER` descriptors that translate triad stream records to rotate/swap descriptor objects without applying transforms or changing legacy streams.
 - Sprint 35: added an isolated opt-in transform application proof that applies supported adapter rotate/swap descriptors through existing reversible helpers and proves reverse roundtrip without changing legacy streams by default.
-- Future: default transform integration, N-dimensional angles, matrix mutation integration, CLI/file wrappers, and browser playground work remain separate future scopes.
+- Sprint 38: added `docs/specs/UN-GWM-V2_IDEAS.md` as a focused docs-only specification for a future explicit opt-in `UN-GWM-V2` mode powered by the existing triad pipeline.
+- Sprint 39: added `UN-GWM-V2` pure descriptor utilities.
+- Sprint 40: added opt-in `UN-GWM-V2` source point commitments and triad stream generation from point walks.
+- Sprint 41: proposed opt-in `UN-GWM-V2` adapter and transform proof integration tests.
+- Later: explicit stack integration only if requested. Default transform integration, N-dimensional angles, matrix mutation integration, CLI/file wrappers, and browser playground work remain separate future scopes.
 
 These suggestions should be revisited against the repository state at the start of each sprint.

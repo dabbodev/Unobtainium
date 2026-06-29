@@ -36,4 +36,5 @@ module.exports = {
   ...require('./src/triad-mix'),
   ...require('./src/triad-adapter'),
   ...require('./src/triad-transform-proof'),
+  ...require('./src/gwm-v2'),
 };
