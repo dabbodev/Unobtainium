@@ -9,6 +9,10 @@ const core = require('..');
 const {
   GWM_V2_FORMAT,
   GWM_V2_VERSION,
+  GWM_V2_ADAPTER_BINDING_FORMAT,
+  GWM_V2_ADAPTER_BINDING_VERSION,
+  GWM_V2_PROOF_BINDING_FORMAT,
+  GWM_V2_PROOF_BINDING_VERSION,
   GWM_V2_SOURCE_POINT_FORMAT,
   GWM_V2_SOURCE_POINT_VERSION,
   assertGwmV2SourcePoints,
@@ -20,9 +24,31 @@ const {
   gwmV2Payload,
   gwmV2Commitment,
   createGwmV2Descriptor,
+  gwmV2AdapterBindingPayload,
+  gwmV2AdapterBindingCommitment,
+  gwmV2ProofBindingPayload,
+  gwmV2ProofBindingCommitment,
+  verifyGwmV2AdapterPlan,
+  bindGwmV2AdapterPlan,
+  verifyGwmV2TransformProof,
+  bindGwmV2TransformProof,
+  createGwmV2DescriptorFromPointsAndAdapter,
+  createGwmV2DescriptorFromPointsAdapterAndProof,
+  assertGwmV2AdapterBinding,
+  assertGwmV2ProofBinding,
   assertGwmV2Descriptor,
 } = require('../src/gwm-v2');
 const { generateInstructionStream } = require('../src/instruction-stream');
+const {
+  adaptTriadStreamToInstructionPlan,
+  triadAdapterPayload,
+  triadAdapterCommitment,
+} = require('../src/triad-adapter');
+const {
+  applyTriadInstructionPlan,
+  triadTransformProofPayload,
+  triadTransformProofCommitment,
+} = require('../src/triad-transform-proof');
 
 const HEX = {
   source: 'a'.repeat(64),
@@ -83,6 +109,57 @@ function descriptorInput(overrides = {}) {
 
 function createFixture(overrides = {}) {
   return createGwmV2Descriptor(descriptorInput(overrides));
+}
+
+function gwmV2AdapterFixture(adapterOptions = {}) {
+  const walkOptions = { point: 0, shift: 0, gap: 0, horizon: 3, ring: 17 };
+  const context = { payloadLength: 8 };
+  const stream = createGwmV2TriadStream(POINTS, walkOptions, context);
+  const adapterPlan = adaptTriadStreamToInstructionPlan(stream.triadStream, adapterOptions);
+  const descriptor = createGwmV2Descriptor({
+    sourcePointCommitment: stream.sourcePointCommitment,
+    walkOptions: stream.walkOptions,
+    triadStreamCommitment: stream.triadStreamCommitment,
+    adapterPlanCommitment: adapterPlan.adapterCommitment,
+    context,
+    metadata: { label: 'adapter-binding' },
+  });
+
+  return { stream, descriptor, adapterPlan, walkOptions, context };
+}
+
+function gwmV2ProofFixture(adapterOptions = {}) {
+  const fixture = gwmV2AdapterFixture(adapterOptions);
+  const transformProof = applyTriadInstructionPlan(
+    fixture.adapterPlan,
+    Buffer.from([0, 1, 2, 3, 4, 5, 6, 7]),
+    { context: { proof: 'supplied' } }
+  );
+  const descriptor = createGwmV2Descriptor({
+    ...fixture.descriptor,
+    transformProofCommitment: transformProof.proofCommitment,
+    metadata: { label: 'proof-binding' },
+  });
+
+  return { ...fixture, descriptor, transformProof };
+}
+
+function changedAdapterPlan(planLike, mutatePayload) {
+  const payload = triadAdapterPayload(planLike);
+  mutatePayload(payload);
+  return {
+    ...payload,
+    adapterCommitment: triadAdapterCommitment(payload),
+  };
+}
+
+function changedTransformProof(proofLike, mutatePayload) {
+  const payload = triadTransformProofPayload(proofLike);
+  mutatePayload(payload);
+  return {
+    ...payload,
+    proofCommitment: triadTransformProofCommitment(payload),
+  };
 }
 
 function changedCommitment(fieldOverrides) {
@@ -231,6 +308,430 @@ test('descriptor-from-points rejects missing adapter plan commitment', () => {
     }),
     /adapterPlanCommitment/
   );
+});
+
+test('verifies a GWM-V2 descriptor against a matching supplied adapter plan', () => {
+  const { descriptor, adapterPlan } = gwmV2AdapterFixture({ context: { adapter: 'matching' } });
+  const result = verifyGwmV2AdapterPlan(descriptor, adapterPlan);
+
+  assert.equal(result.format, GWM_V2_ADAPTER_BINDING_FORMAT);
+  assert.equal(result.version, GWM_V2_ADAPTER_BINDING_VERSION);
+  assert.equal(result.ok, true);
+  assert.equal(result.descriptorCommitment, descriptor.descriptorCommitment);
+  assert.equal(result.triadStreamCommitment, descriptor.triadStreamCommitment);
+  assert.equal(result.adapterPlanCommitment, adapterPlan.adapterCommitment);
+  assert.equal(result.expectedAdapterPlanCommitment, descriptor.adapterPlanCommitment);
+  assert.deepEqual(result.adapterSummary, {
+    sourceStreamCommitment: adapterPlan.sourceStreamCommitment,
+    rotateInstructionCount: adapterPlan.rotateInstructions.length,
+    swapInstructionCount: adapterPlan.swapInstructions.length,
+    skippedRecordCount: adapterPlan.skippedRecords.length,
+  });
+  assert.equal(
+    result.bindingCommitment,
+    gwmV2AdapterBindingCommitment(gwmV2AdapterBindingPayload(result))
+  );
+  assert.equal(Object.hasOwn(result, 'reason'), false);
+  assert.equal(Object.hasOwn(result, 'error'), false);
+});
+
+test('verification fails without throwing for adapter plan commitment mismatch', () => {
+  const { descriptor, adapterPlan } = gwmV2AdapterFixture();
+  const mismatched = createGwmV2Descriptor({
+    ...descriptor,
+    adapterPlanCommitment: HEX.adapter2,
+  });
+  const result = verifyGwmV2AdapterPlan(mismatched, adapterPlan);
+
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, 'adapter-plan-commitment-mismatch');
+  assert.equal(result.adapterPlanCommitment, adapterPlan.adapterCommitment);
+  assert.equal(result.expectedAdapterPlanCommitment, HEX.adapter2);
+  assert.equal(Object.hasOwn(result, 'error'), false);
+  assert.equal(Object.hasOwn(result, 'bindingCommitment'), false);
+});
+
+test('verification fails without throwing for malformed descriptor and adapter plan', () => {
+  const { descriptor, adapterPlan } = gwmV2AdapterFixture();
+  const badDescriptor = verifyGwmV2AdapterPlan({ ...descriptor, format: 'BAD' }, adapterPlan);
+  const badPlan = clone(adapterPlan);
+  badPlan.rotateInstructions[0].delta = badPlan.rotateInstructions[0].ring;
+  const badAdapter = verifyGwmV2AdapterPlan(descriptor, badPlan);
+
+  assert.equal(badDescriptor.ok, false);
+  assert.equal(badDescriptor.reason, 'invalid-descriptor');
+  assert.match(badDescriptor.error, /format/);
+  assert.equal(badAdapter.ok, false);
+  assert.equal(badAdapter.reason, 'invalid-adapter-plan');
+  assert.match(badAdapter.error, /delta must be within ring bounds|adapterCommitment mismatch/);
+  assert.equal(badAdapter.descriptorCommitment, descriptor.descriptorCommitment);
+});
+
+test('binding returns deterministic results and asserts valid adapter bindings', () => {
+  const { descriptor, adapterPlan } = gwmV2AdapterFixture({ context: { label: 'deterministic' } });
+  const first = bindGwmV2AdapterPlan(descriptor, adapterPlan);
+  const second = assertGwmV2AdapterBinding(clone(descriptor), clone(adapterPlan));
+
+  assert.deepEqual(first, second);
+  assert.equal(first.ok, true);
+  assert.match(first.bindingCommitment, /^[0-9a-f]{64}$/);
+});
+
+test('binding commitment changes when descriptor commitment changes', () => {
+  const { descriptor, adapterPlan } = gwmV2AdapterFixture();
+  const changedDescriptor = createGwmV2Descriptor({
+    ...descriptor,
+    metadata: { label: 'changed-descriptor' },
+  });
+
+  assert.notEqual(
+    bindGwmV2AdapterPlan(changedDescriptor, adapterPlan).bindingCommitment,
+    bindGwmV2AdapterPlan(descriptor, adapterPlan).bindingCommitment
+  );
+});
+
+test('binding commitment changes when supplied adapter plan changes', () => {
+  const { descriptor, adapterPlan } = gwmV2AdapterFixture();
+  const changedPlan = changedAdapterPlan(adapterPlan, (payload) => {
+    payload.context = { label: 'changed-adapter' };
+  });
+  const changedDescriptor = createGwmV2Descriptor({
+    ...descriptor,
+    adapterPlanCommitment: changedPlan.adapterCommitment,
+  });
+
+  assert.notEqual(
+    bindGwmV2AdapterPlan(changedDescriptor, changedPlan).bindingCommitment,
+    bindGwmV2AdapterPlan(descriptor, adapterPlan).bindingCommitment
+  );
+});
+
+test('createGwmV2DescriptorFromPointsAndAdapter creates and binds a valid descriptor', () => {
+  const { stream, adapterPlan, walkOptions, context } = gwmV2AdapterFixture({
+    context: { adapter: 'descriptor-from-plan' },
+  });
+  const descriptor = createGwmV2DescriptorFromPointsAndAdapter(POINTS, walkOptions, adapterPlan, {
+    context,
+    metadata: { label: 'from-supplied-adapter' },
+    transformProofCommitment: HEX.proof,
+  });
+
+  assert.equal(descriptor.sourcePointCommitment, gwmV2SourcePointCommitment(POINTS));
+  assert.equal(descriptor.sourcePointCommitment, stream.sourcePointCommitment);
+  assert.equal(descriptor.triadStreamCommitment, stream.triadStreamCommitment);
+  assert.equal(descriptor.adapterPlanCommitment, adapterPlan.adapterCommitment);
+  assert.equal(descriptor.transformProofCommitment, HEX.proof);
+  assert.deepEqual(assertGwmV2Descriptor(descriptor), descriptor);
+  assert.equal(verifyGwmV2AdapterPlan(descriptor, adapterPlan).ok, true);
+});
+
+test('createGwmV2DescriptorFromPointsAndAdapter rejects source stream mismatches', () => {
+  const { adapterPlan, walkOptions, context } = gwmV2AdapterFixture();
+
+  assert.throws(
+    () => createGwmV2DescriptorFromPointsAndAdapter(POINTS, {
+      ...walkOptions,
+      gap: 1,
+    }, adapterPlan, { context }),
+    /sourceStreamCommitment/
+  );
+});
+
+test('GWM-V2 adapter binding helpers defensively clone inputs and results', () => {
+  const points = clone(OBJECT_POINTS);
+  const { adapterPlan, walkOptions, context } = gwmV2AdapterFixture();
+  const options = { context: clone(context), metadata: { labels: ['copy-check'] } };
+  const descriptor = createGwmV2DescriptorFromPointsAndAdapter(
+    points,
+    clone(walkOptions),
+    adapterPlan,
+    options
+  );
+  const binding = bindGwmV2AdapterPlan(descriptor, adapterPlan);
+
+  points[0].x = 99;
+  walkOptions.gap = 99;
+  adapterPlan.rotateInstructions[0].delta = 999;
+  options.context.payloadLength = 99;
+  options.metadata.labels.push('mutated');
+  binding.adapterSummary.rotateInstructionCount = 999;
+
+  const fresh = gwmV2AdapterFixture();
+  const freshDescriptor = createGwmV2DescriptorFromPointsAndAdapter(
+    OBJECT_POINTS,
+    fresh.walkOptions,
+    fresh.adapterPlan,
+    { context: fresh.context, metadata: { labels: ['copy-check'] } }
+  );
+  const freshBinding = bindGwmV2AdapterPlan(freshDescriptor, fresh.adapterPlan);
+
+  assert.equal(descriptor.walkOptions.gap, 0);
+  assert.equal(descriptor.context.payloadLength, 8);
+  assert.deepEqual(descriptor.metadata.labels, ['copy-check']);
+  assert.equal(freshBinding.adapterSummary.rotateInstructionCount, fresh.adapterPlan.rotateInstructions.length);
+});
+
+test('GWM-V2 adapter binding does not automatically generate adapter plans or apply transforms', () => {
+  const source = fs.readFileSync(path.join(__dirname, '..', 'src', 'gwm-v2.js'), 'utf8');
+
+  assert.equal(source.includes('adaptTriadStreamToInstructionPlan'), false);
+  assert.equal(source.includes('applyTriadInstructionPlan'), false);
+  assert.equal(source.includes('reverseTriadInstructionPlan'), false);
+  assert.equal(source.includes('roundTripTriadInstructionPlan'), false);
+  assert.equal(source.includes('applyRotateTransform'), false);
+  assert.equal(source.includes('applySwapTransform'), false);
+});
+
+test('verifies a GWM-V2 descriptor against a matching supplied transform proof', () => {
+  const { descriptor, adapterPlan, transformProof } = gwmV2ProofFixture();
+  const result = verifyGwmV2TransformProof(descriptor, transformProof);
+
+  assert.equal(result.format, GWM_V2_PROOF_BINDING_FORMAT);
+  assert.equal(result.version, GWM_V2_PROOF_BINDING_VERSION);
+  assert.equal(result.ok, true);
+  assert.equal(result.descriptorCommitment, descriptor.descriptorCommitment);
+  assert.equal(result.triadStreamCommitment, descriptor.triadStreamCommitment);
+  assert.equal(result.adapterPlanCommitment, adapterPlan.adapterCommitment);
+  assert.equal(result.expectedTransformProofCommitment, descriptor.transformProofCommitment);
+  assert.equal(result.suppliedTransformProofCommitment, transformProof.proofCommitment);
+  assert.deepEqual(result.proofSummary, {
+    mode: transformProof.mode,
+    sourcePlanCommitment: adapterPlan.adapterCommitment,
+    inputPayloadCommitment: transformProof.inputPayloadCommitment,
+    outputPayloadCommitment: transformProof.outputPayloadCommitment,
+    appliedOperationCount: transformProof.appliedOperations.length,
+    skippedRecordCount: transformProof.skippedRecords.length,
+    warningCount: transformProof.warnings.length,
+  });
+  assert.equal(
+    result.bindingCommitment,
+    gwmV2ProofBindingCommitment(gwmV2ProofBindingPayload(result))
+  );
+  assert.equal(Object.hasOwn(result, 'reason'), false);
+  assert.equal(Object.hasOwn(result, 'error'), false);
+});
+
+test('transform proof verification fails when descriptor has no proof commitment', () => {
+  const { descriptor, transformProof } = gwmV2ProofFixture();
+  const missing = createGwmV2Descriptor({
+    ...descriptor,
+    transformProofCommitment: null,
+  });
+  const result = verifyGwmV2TransformProof(missing, transformProof);
+
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, 'missing-transform-proof-commitment');
+  assert.equal(result.descriptorCommitment, missing.descriptorCommitment);
+  assert.equal(result.expectedTransformProofCommitment, null);
+  assert.equal(Object.hasOwn(result, 'suppliedTransformProofCommitment'), false);
+});
+
+test('transform proof verification fails for proof commitment mismatch', () => {
+  const { descriptor, transformProof } = gwmV2ProofFixture();
+  const mismatched = createGwmV2Descriptor({
+    ...descriptor,
+    transformProofCommitment: HEX.proof2,
+  });
+  const result = verifyGwmV2TransformProof(mismatched, transformProof);
+
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, 'transform-proof-commitment-mismatch');
+  assert.equal(result.expectedTransformProofCommitment, HEX.proof2);
+  assert.equal(result.suppliedTransformProofCommitment, transformProof.proofCommitment);
+  assert.equal(Object.hasOwn(result, 'error'), false);
+  assert.equal(Object.hasOwn(result, 'bindingCommitment'), false);
+});
+
+test('transform proof verification fails for malformed descriptor and transform proof', () => {
+  const { descriptor, transformProof } = gwmV2ProofFixture();
+  const badDescriptor = verifyGwmV2TransformProof({ ...descriptor, format: 'BAD' }, transformProof);
+  const badProof = verifyGwmV2TransformProof(descriptor, {
+    ...transformProof,
+    format: 'BAD',
+  });
+
+  assert.equal(badDescriptor.ok, false);
+  assert.equal(badDescriptor.reason, 'invalid-descriptor');
+  assert.match(badDescriptor.error, /format/);
+  assert.equal(badProof.ok, false);
+  assert.equal(badProof.reason, 'invalid-transform-proof');
+  assert.match(badProof.error, /format/);
+  assert.equal(badProof.descriptorCommitment, descriptor.descriptorCommitment);
+});
+
+test('transform proof verification rejects source plan commitment mismatches', () => {
+  const { descriptor, transformProof } = gwmV2ProofFixture();
+  const changedProof = changedTransformProof(transformProof, (payload) => {
+    payload.sourcePlanCommitment = HEX.adapter2;
+  });
+  const changedDescriptor = createGwmV2Descriptor({
+    ...descriptor,
+    transformProofCommitment: changedProof.proofCommitment,
+  });
+  const result = verifyGwmV2TransformProof(changedDescriptor, changedProof);
+
+  assert.equal(result.ok, false);
+  assert.equal(result.reason, 'source-plan-commitment-mismatch');
+  assert.equal(result.adapterPlanCommitment, descriptor.adapterPlanCommitment);
+  assert.equal(result.proofSummary.sourcePlanCommitment, HEX.adapter2);
+});
+
+test('transform proof binding returns deterministic results and asserts valid bindings', () => {
+  const { descriptor, transformProof } = gwmV2ProofFixture({
+    context: { adapter: 'proof-deterministic' },
+  });
+  const first = bindGwmV2TransformProof(descriptor, transformProof);
+  const second = assertGwmV2ProofBinding(
+    clone(descriptor),
+    clone(triadTransformProofPayload(transformProof))
+  );
+
+  assert.deepEqual(first, second);
+  assert.equal(first.ok, true);
+  assert.match(first.bindingCommitment, /^[0-9a-f]{64}$/);
+});
+
+test('transform proof binding commitment changes when descriptor commitment changes', () => {
+  const { descriptor, transformProof } = gwmV2ProofFixture();
+  const changedDescriptor = createGwmV2Descriptor({
+    ...descriptor,
+    metadata: { label: 'changed-proof-descriptor' },
+  });
+
+  assert.notEqual(
+    bindGwmV2TransformProof(changedDescriptor, transformProof).bindingCommitment,
+    bindGwmV2TransformProof(descriptor, transformProof).bindingCommitment
+  );
+});
+
+test('transform proof binding commitment changes when supplied transform proof changes', () => {
+  const { descriptor, transformProof } = gwmV2ProofFixture();
+  const changedProof = changedTransformProof(transformProof, (payload) => {
+    payload.context = { proof: 'changed' };
+  });
+  const changedDescriptor = createGwmV2Descriptor({
+    ...descriptor,
+    transformProofCommitment: changedProof.proofCommitment,
+  });
+
+  assert.notEqual(
+    bindGwmV2TransformProof(changedDescriptor, changedProof).bindingCommitment,
+    bindGwmV2TransformProof(descriptor, transformProof).bindingCommitment
+  );
+});
+
+test('createGwmV2DescriptorFromPointsAdapterAndProof creates and binds a valid descriptor', () => {
+  const { stream, adapterPlan, transformProof, walkOptions, context } = gwmV2ProofFixture();
+  const descriptor = createGwmV2DescriptorFromPointsAdapterAndProof(
+    POINTS,
+    walkOptions,
+    adapterPlan,
+    transformProof,
+    { context, metadata: { label: 'from-supplied-proof' } }
+  );
+
+  assert.equal(descriptor.sourcePointCommitment, gwmV2SourcePointCommitment(POINTS));
+  assert.equal(descriptor.sourcePointCommitment, stream.sourcePointCommitment);
+  assert.equal(descriptor.triadStreamCommitment, stream.triadStreamCommitment);
+  assert.equal(descriptor.adapterPlanCommitment, adapterPlan.adapterCommitment);
+  assert.equal(descriptor.transformProofCommitment, transformProof.proofCommitment);
+  assert.deepEqual(assertGwmV2Descriptor(descriptor), descriptor);
+  assert.equal(verifyGwmV2AdapterPlan(descriptor, adapterPlan).ok, true);
+  assert.equal(verifyGwmV2TransformProof(descriptor, transformProof).ok, true);
+});
+
+test('GWM-V2 descriptor chain commitments can be checked without runtime integration', () => {
+  const { stream, descriptor, adapterPlan, transformProof } = gwmV2ProofFixture({
+    context: { adapter: 'chain-readiness' },
+  });
+  const normalizedDescriptor = assertGwmV2Descriptor(descriptor);
+  const adapterBinding = verifyGwmV2AdapterPlan(normalizedDescriptor, adapterPlan);
+  const proofBinding = verifyGwmV2TransformProof(normalizedDescriptor, transformProof);
+
+  assert.equal(stream.sourcePointCommitment, gwmV2SourcePointCommitment(POINTS));
+  assert.equal(normalizedDescriptor.sourcePointCommitment, stream.sourcePointCommitment);
+  assert.equal(normalizedDescriptor.triadStreamCommitment, stream.triadStreamCommitment);
+  assert.equal(normalizedDescriptor.adapterPlanCommitment, adapterPlan.adapterCommitment);
+  assert.equal(normalizedDescriptor.transformProofCommitment, transformProof.proofCommitment);
+  assert.equal(adapterBinding.ok, true);
+  assert.equal(adapterBinding.descriptorCommitment, normalizedDescriptor.descriptorCommitment);
+  assert.equal(adapterBinding.triadStreamCommitment, normalizedDescriptor.triadStreamCommitment);
+  assert.equal(adapterBinding.adapterPlanCommitment, normalizedDescriptor.adapterPlanCommitment);
+  assert.equal(adapterBinding.bindingCommitment, gwmV2AdapterBindingCommitment(adapterBinding));
+  assert.equal(proofBinding.ok, true);
+  assert.equal(proofBinding.descriptorCommitment, normalizedDescriptor.descriptorCommitment);
+  assert.equal(proofBinding.triadStreamCommitment, normalizedDescriptor.triadStreamCommitment);
+  assert.equal(proofBinding.adapterPlanCommitment, normalizedDescriptor.adapterPlanCommitment);
+  assert.equal(proofBinding.expectedTransformProofCommitment, transformProof.proofCommitment);
+  assert.equal(proofBinding.suppliedTransformProofCommitment, transformProof.proofCommitment);
+  assert.equal(proofBinding.bindingCommitment, gwmV2ProofBindingCommitment(proofBinding));
+});
+
+test('createGwmV2DescriptorFromPointsAdapterAndProof rejects adapter source stream mismatches', () => {
+  const { adapterPlan, transformProof, walkOptions, context } = gwmV2ProofFixture();
+
+  assert.throws(
+    () => createGwmV2DescriptorFromPointsAdapterAndProof(POINTS, {
+      ...walkOptions,
+      gap: 1,
+    }, adapterPlan, transformProof, { context }),
+    /sourceStreamCommitment/
+  );
+});
+
+test('createGwmV2DescriptorFromPointsAdapterAndProof rejects source plan mismatches', () => {
+  const { adapterPlan, transformProof, walkOptions, context } = gwmV2ProofFixture();
+  const changedProof = changedTransformProof(transformProof, (payload) => {
+    payload.sourcePlanCommitment = HEX.adapter2;
+  });
+
+  assert.throws(
+    () => createGwmV2DescriptorFromPointsAdapterAndProof(
+      POINTS,
+      walkOptions,
+      adapterPlan,
+      changedProof,
+      { context }
+    ),
+    /sourcePlanCommitment/
+  );
+});
+
+test('GWM-V2 proof binding helpers defensively clone inputs and results', () => {
+  const points = clone(OBJECT_POINTS);
+  const { adapterPlan, transformProof, walkOptions, context } = gwmV2ProofFixture();
+  const options = { context: clone(context), metadata: { labels: ['proof-copy-check'] } };
+  const descriptor = createGwmV2DescriptorFromPointsAdapterAndProof(
+    points,
+    clone(walkOptions),
+    adapterPlan,
+    transformProof,
+    options
+  );
+  const binding = bindGwmV2TransformProof(descriptor, transformProof);
+
+  points[0].x = 99;
+  walkOptions.gap = 99;
+  adapterPlan.rotateInstructions[0].delta = 999;
+  transformProof.context.proof = 'mutated';
+  options.context.payloadLength = 99;
+  options.metadata.labels.push('mutated');
+  binding.proofSummary.appliedOperationCount = 999;
+
+  const fresh = gwmV2ProofFixture();
+  const freshDescriptor = createGwmV2DescriptorFromPointsAdapterAndProof(
+    OBJECT_POINTS,
+    fresh.walkOptions,
+    fresh.adapterPlan,
+    fresh.transformProof,
+    { context: fresh.context, metadata: { labels: ['proof-copy-check'] } }
+  );
+  const freshBinding = bindGwmV2TransformProof(freshDescriptor, fresh.transformProof);
+
+  assert.equal(descriptor.walkOptions.gap, 0);
+  assert.equal(descriptor.context.payloadLength, 8);
+  assert.deepEqual(descriptor.metadata.labels, ['proof-copy-check']);
+  assert.equal(freshBinding.proofSummary.appliedOperationCount, fresh.transformProof.appliedOperations.length);
 });
 
 test('GWM-V2 source, stream, and descriptor helpers defensively clone inputs and results', () => {
@@ -514,6 +1015,12 @@ test('public exports are available through packages/core', () => {
   for (const name of [
     'GWM_V2_FORMAT',
     'GWM_V2_VERSION',
+    'GWM_V2_ADAPTER_BINDING_FORMAT',
+    'GWM_V2_ADAPTER_BINDING_VERSION',
+    'GWM_V2_PROOF_BINDING_FORMAT',
+    'GWM_V2_PROOF_BINDING_VERSION',
+    'GWM_V2_MODE_FORMAT',
+    'GWM_V2_MODE_VERSION',
     'GWM_V2_SOURCE_POINT_FORMAT',
     'GWM_V2_SOURCE_POINT_VERSION',
     'assertGwmV2SourcePoints',
@@ -525,6 +1032,23 @@ test('public exports are available through packages/core', () => {
     'createGwmV2Descriptor',
     'createGwmV2TriadStream',
     'createGwmV2DescriptorFromPoints',
+    'gwmV2AdapterBindingPayload',
+    'gwmV2AdapterBindingCommitment',
+    'gwmV2ProofBindingPayload',
+    'gwmV2ProofBindingCommitment',
+    'verifyGwmV2AdapterPlan',
+    'bindGwmV2AdapterPlan',
+    'verifyGwmV2TransformProof',
+    'bindGwmV2TransformProof',
+    'gwmV2ModePayload',
+    'gwmV2ModeCommitment',
+    'createGwmV2Mode',
+    'verifyGwmV2Mode',
+    'assertGwmV2Mode',
+    'createGwmV2DescriptorFromPointsAndAdapter',
+    'createGwmV2DescriptorFromPointsAdapterAndProof',
+    'assertGwmV2AdapterBinding',
+    'assertGwmV2ProofBinding',
     'assertGwmV2Descriptor',
   ]) {
     assert.equal(core[name], require('../src/gwm-v2')[name]);
