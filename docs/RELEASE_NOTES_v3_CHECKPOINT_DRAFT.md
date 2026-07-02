@@ -1,8 +1,8 @@
 # Unobtainium v3 Checkpoint Draft
 
-Status: Sprint 45 consolidation and commit-readiness checkpoint for the Sprint 38-44 `UN-GWM-V2` arc.
+Status: Sprint 47 static mock-data/demo architecture checkpoint for future `UN-GWM-V2` / `UN-TRIAD-MIX` visual demo planning.
 
-This checkpoint covers the current v3 lab modules under `packages/core` and the supporting docs. It does not change the legacy root runtime, does not replace existing `UN-GWM`, does not add default runtime integration for the triad pipeline, and does not add a default `UN-GWM-V2` mode.
+This checkpoint covers the current v3 lab modules under `packages/core` and the supporting docs. Sprint 47 is docs/fixture architecture only. It does not change the legacy root runtime, does not replace existing `UN-GWM`, does not add default runtime integration for the triad pipeline, does not add a default `UN-GWM-V2` mode, and does not implement a browser demo.
 
 ## Matrix, Certificate, and Cutout Work
 
@@ -29,17 +29,19 @@ This checkpoint covers the current v3 lab modules under `packages/core` and the 
 - Sprint 43 checks exports, result shapes, descriptor-chain readiness, and docs for those layers.
 - Sprint 44 adds a true opt-in `UN-GWM-V2` mode wrapper that assembles and verifies committed descriptor, supplied adapter binding, and optional supplied proof binding relationships. It does not generate adapter plans, generate transform proofs, apply transform proofs, apply transforms, replace existing `UN-GWM`, become default behavior, or add runtime integration.
 - Sprint 45 verifies exports, verification result shapes, docs, tests, root export behavior, and repo hygiene for the Sprint 38-44 arc. It is commit-readiness work only and adds no new runtime feature behavior.
+- Sprint 46 adds `docs/specs/UN-GWM-V2_VISUAL_DEMO_IDEAS.md`, a docs-only plan for a future explanatory visual/demo bridge over ordered point clouds, selected triads, features, instruction channels, stream records, adapter plans, isolated proof roundtrips, and descriptor/mode commitments.
+- Sprint 47 adds static mock-data/demo architecture documentation plus `docs/examples/gwm-v2-visual-demo-fixture.json`. The fixture is small, deterministic, readable, and intended for future local JSON-driven panels only.
 
 ## Repo Hygiene and Framing
 
 - Sprint 22-23 aligned package metadata, license framing, and generated/dependency artifact hygiene.
 - Root package import still returns the legacy `Unobtainium` constructor.
 - Existing `UN-GWM` behavior remains unchanged.
-- Default `UN-GWM-V2` behavior, default migration from `UN-GWM`, default triad integration, transform application, CLI/file wrappers, browser playground behavior, stack/cascade/cert/cutout integration for triad proof output, and `UN-ND` remain future scope.
+- Default `UN-GWM-V2` behavior, default migration from `UN-GWM`, default triad integration, transform application, CLI/file wrappers, browser playground implementation, WebGL/canvas implementation, static HTML panels, file import, STL import, stack/cascade/cert/cutout integration for triad proof output, and `UN-ND` remain future scope.
 
 ## Security Framing
 
-Unobtainium v3 is an experimental geometry-key transformation lab and computational thought experiment. Raw v3 modes are not production cryptography, secure encryption, authenticated encryption, asymmetric cryptography, identity proof, ownership proof, secure redaction, compression, steganography, tamper-proofing, homomorphic behavior, or production authentication.
+Unobtainium v3 is an experimental geometry-key transformation lab and computational thought experiment. The future visual/demo bridge and Sprint 47 fixture are explanatory playground material for the "3D hex Enigma-like" idea, not production tools. Raw v3 modes are not production cryptography, secure encryption, authenticated encryption, asymmetric cryptography, identity proof, ownership proof, secure redaction, compression, steganography, tamper-proofing, homomorphic behavior, or production authentication. Fixture commitments are integrity/check artifacts, not proof of secrecy.
 
 ## Validation Snapshot
 

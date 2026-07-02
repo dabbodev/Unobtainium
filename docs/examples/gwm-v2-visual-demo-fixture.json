@@ -1,0 +1,193 @@
+{
+  "fixture": {
+    "format": "UN-GWM-V2-VISUAL-DEMO-FIXTURE",
+    "version": 1,
+    "sprint": 47,
+    "purpose": "Static mock-data architecture fixture for a future local visual demo. It is explanatory only and is not a security example.",
+    "generatedFromExistingHelpers": true
+  },
+  "points": [
+    [0, 0, 0],
+    [2, 1, 3],
+    [5, 8, 13],
+    [8, 13, 21]
+  ],
+  "walkOptions": {
+    "point": 0,
+    "shift": 1,
+    "gap": 2,
+    "horizon": 2,
+    "ring": 16
+  },
+  "selectedTriads": [
+    {
+      "index": 0,
+      "pointIndexes": {
+        "A": 0,
+        "B": 2,
+        "C": 3
+      },
+      "triad": {
+        "A": [0, 0, 0],
+        "B": [5, 8, 13],
+        "C": [8, 13, 21]
+      }
+    },
+    {
+      "index": 1,
+      "pointIndexes": {
+        "A": 1,
+        "B": 3,
+        "C": 0
+      },
+      "triad": {
+        "A": [2, 1, 3],
+        "B": [8, 13, 21],
+        "C": [0, 0, 0]
+      }
+    }
+  ],
+  "triadFeatures": [
+    {
+      "recordIndex": 0,
+      "angleBucket": "acute",
+      "degenerate": false,
+      "mixPattern": "walk-index-coupled",
+      "featureCommitment": "ede9cc53ef38d52e46321e09808f009c7da7493faedad01f8a030b3caad70dd7",
+      "summary": {
+        "pointOrderSensitive": true,
+        "sourceFeatureFamilies": ["points", "edges", "triangle", "context"]
+      }
+    },
+    {
+      "recordIndex": 1,
+      "angleBucket": "obtuse",
+      "degenerate": false,
+      "mixPattern": "centroid-coupled",
+      "featureCommitment": "7f5d8d13e3a25f78eee1822f9a3ec4115f04d817798814fb291ec270b888091b",
+      "summary": {
+        "pointOrderSensitive": true,
+        "sourceFeatureFamilies": ["points", "edges", "triangle", "context"]
+      }
+    }
+  ],
+  "instructionChannels": [
+    {
+      "recordIndex": 0,
+      "rotate": {
+        "delta": 4,
+        "direction": "up",
+        "ring": 16,
+        "mixPattern": "walk-index-coupled"
+      },
+      "position": {
+        "a": 2,
+        "b": 6,
+        "span": 8,
+        "seed": 274315737940354
+      },
+      "rule": {
+        "angleBucket": "acute",
+        "degenerate": false,
+        "mixPattern": "walk-index-coupled"
+      },
+      "instructionCommitment": "9c68cea4d5e6b9a5ad6cb3572371f471f199f020563d020bf90d1625063ea594"
+    },
+    {
+      "recordIndex": 1,
+      "rotate": {
+        "delta": 4,
+        "direction": "up",
+        "ring": 16,
+        "mixPattern": "centroid-coupled"
+      },
+      "position": {
+        "a": 6,
+        "b": 3,
+        "span": 8,
+        "seed": 239481652153654
+      },
+      "rule": {
+        "angleBucket": "obtuse",
+        "degenerate": false,
+        "mixPattern": "centroid-coupled"
+      },
+      "instructionCommitment": "a523f9c83fe18ae42169de9a554e978d79844e1dc8e7d1f9eb8712b6a6d4aa45"
+    }
+  ],
+  "triadStream": {
+    "format": "UN-TRIAD-MIX-STREAM",
+    "version": 1,
+    "recordCount": 2,
+    "context": {
+      "payloadLength": 8,
+      "ring": 16,
+      "walkIndex": 0
+    },
+    "streamCommitment": "f7f696e8fd7cdc595fa0be89829b3c731c13d645787f71f2d0c01928f0a5b5f6"
+  },
+  "adapterPlan": {
+    "format": "UN-TRIAD-MIX-ADAPTER",
+    "version": 1,
+    "sourceStreamCommitment": "f7f696e8fd7cdc595fa0be89829b3c731c13d645787f71f2d0c01928f0a5b5f6",
+    "rotateInstructionCount": 2,
+    "swapInstructionCount": 2,
+    "skippedRecordCount": 0,
+    "adapterCommitment": "934787394af94d604005f39589e9c72fa14edcc28e2dac2f2e62892b9515b008"
+  },
+  "transformProofSummary": {
+    "format": "UN-TRIAD-MIX-TRANSFORM-PROOF",
+    "version": 1,
+    "mode": "apply",
+    "sourcePlanCommitment": "934787394af94d604005f39589e9c72fa14edcc28e2dac2f2e62892b9515b008",
+    "inputPayloadCommitment": "cf40c62e25d009cd834e1924487df9b52658f9f9de88b62256b395f33c0925b1",
+    "outputPayloadCommitment": "20db32449c438d9805f7880b54d92f7bfcd0b007981813d4952113adb453c517",
+    "appliedOperationCount": 4,
+    "skippedRecordCount": 0,
+    "warningCount": 0,
+    "proofCommitment": "299f395de81aeb47da787a23c6bdcd6ea5d2f38309ac8b86c82167a684833ef6",
+    "note": "The payload commitments summarize an isolated helper proof; the fixture intentionally omits raw payload bytes and .un output."
+  },
+  "gwmV2Descriptor": {
+    "format": "UN-GWM-V2-DESCRIPTOR",
+    "version": 1,
+    "mode": "UN-GWM-V2",
+    "sourcePointCommitment": "9a2d07e2c6b9506f73e20c779ffa0ed2a0a6f2069878b1a638d429ad3dd335b6",
+    "triadStreamCommitment": "f7f696e8fd7cdc595fa0be89829b3c731c13d645787f71f2d0c01928f0a5b5f6",
+    "adapterPlanCommitment": "934787394af94d604005f39589e9c72fa14edcc28e2dac2f2e62892b9515b008",
+    "transformProofCommitment": "299f395de81aeb47da787a23c6bdcd6ea5d2f38309ac8b86c82167a684833ef6",
+    "descriptorCommitment": "bf55fb675703b8caef995f50721d257fd34f0a794379685e59dfbab126acfe4d"
+  },
+  "gwmV2Mode": {
+    "format": "UN-GWM-V2-MODE",
+    "version": 1,
+    "mode": "UN-GWM-V2",
+    "adapterBindingCommitment": "10ec5161c3c904469ad38fb7ec1841f673657ba733d106362bc0a9d68cfa0bfb",
+    "proofBindingCommitment": "8aae7b70fe780dbd976dfafeae6c7fbc78bd08ae51989aa0c64113a850f2e9be",
+    "modeCommitment": "633d07f5e7d638fc64d1ac6dcdeb4dc37dad1e0d5b29d4830420ecbff52a9cfa"
+  },
+  "notes": [
+    "This is small static mock data for future JSON-driven panels, not browser code.",
+    "The commitments were generated from existing helper APIs on 2026-07-01 and are included as deterministic check artifacts.",
+    "Future demos may replace or extend this fixture, but should keep raw inputs, derived descriptors, commitments, and explanatory summaries visibly separate.",
+    "File import, STL import, WebGL/canvas, static HTML panels, and browser integration remain future scope."
+  ],
+  "securityFraming": {
+    "notProductionCryptography": true,
+    "notSecureEncryption": true,
+    "commitmentsAreIntegrityCheckArtifactsOnly": true,
+    "visualizationExplainsDeterministicMachineryOnly": true,
+    "mustNotClaim": [
+      "authenticated encryption",
+      "asymmetric cryptography",
+      "identity proof",
+      "ownership proof",
+      "secure redaction",
+      "compression",
+      "steganography",
+      "tamper-proofing",
+      "homomorphic behavior",
+      "production authentication"
+    ]
+  }
+}

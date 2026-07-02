@@ -1,6 +1,6 @@
 # UN-TRIAD-MIX / UN-GWM-V2 Ideas
 
-Status: Sprint 45 consolidation and commit-readiness checkpoint after the Sprint 31-35 triad pipeline work, Sprint 38 `UN-GWM-V2` design specification, Sprint 39 pure `UN-GWM-V2` descriptor utilities, Sprint 40 source point commitment plus opt-in triad stream generation utilities, Sprint 41 supplied adapter-plan binding utilities, Sprint 42 supplied transform-proof binding utilities, Sprint 43 `UN-GWM-V2` consolidation/readiness checks, and Sprint 44 true opt-in `UN-GWM-V2` mode wrapper. `UN-TRIAD-MIX` now has pure feature extraction utilities, pure multi-channel instruction emission utilities, an opt-in triad instruction stream descriptor under `packages/core/src/triad-mix.js`, an opt-in adapter under `packages/core/src/triad-adapter.js` that translates stream records into rotate/swap descriptor objects, and an isolated proof helper under `packages/core/src/triad-transform-proof.js` that can apply supported adapter descriptors through existing reversible transform helpers when explicitly called. `packages/core/src/gwm-v2.js` assembles descriptor/source/stream/binding/proof-binding relationships into an explicit opt-in mode wrapper only. Sprint 45 adds no default runtime feature behavior and does not replace or modify existing `UN-GWM`; existing `UN-GWM` behavior remains unchanged. It does not change legacy runtime behavior, existing instruction streams, stack/cascade/cert/cutout integration, CLI behavior, browser behavior, or file behavior.
+Status: Sprint 47 static mock-data/demo architecture checkpoint after the Sprint 31-35 triad pipeline work, Sprint 38 `UN-GWM-V2` design specification, Sprint 39 pure `UN-GWM-V2` descriptor utilities, Sprint 40 source point commitment plus opt-in triad stream generation utilities, Sprint 41 supplied adapter-plan binding utilities, Sprint 42 supplied transform-proof binding utilities, Sprint 43 `UN-GWM-V2` consolidation/readiness checks, Sprint 44 true opt-in `UN-GWM-V2` mode wrapper, Sprint 45 commit-readiness consolidation, and Sprint 46 visual/demo bridge planning. `UN-TRIAD-MIX` now has pure feature extraction utilities, pure multi-channel instruction emission utilities, an opt-in triad instruction stream descriptor under `packages/core/src/triad-mix.js`, an opt-in adapter under `packages/core/src/triad-adapter.js` that translates stream records into rotate/swap descriptor objects, and an isolated proof helper under `packages/core/src/triad-transform-proof.js` that can apply supported adapter descriptors through existing reversible transform helpers when explicitly called. `packages/core/src/gwm-v2.js` assembles descriptor/source/stream/binding/proof-binding relationships into an explicit opt-in mode wrapper only. Sprint 47 adds static fixture/data-shape architecture only. It adds no default runtime feature behavior and does not replace or modify existing `UN-GWM`; existing `UN-GWM` behavior remains unchanged. It does not change legacy runtime behavior, existing instruction streams, stack/cascade/cert/cutout integration, CLI behavior, browser behavior, or file behavior.
 
 `UN-TRIAD-MIX` is experimental deterministic feature extraction and instruction-channel description. It is not production cryptography, not cryptographic randomness, not authenticated encryption, not asymmetric cryptography, not secure redaction, not compression, not steganography, not tamper-proofing, and not a production-safe cipher claim.
 
@@ -137,6 +137,18 @@ Active swap descriptors must be bounded. If a position channel was unbounded, th
 
 Sprint 35 does not create a production cipher mode. It does not replace or modify existing `UN-GWM`; existing `UN-GWM` behavior remains unchanged. It does not integrate with `UNSTACK`, `UN-CASCADE`, `UN-CERT`, `UN-CUTOUT`, CLI/file wrappers, browser paths, or legacy runtime. Future default integration would require a separate explicit versioned mode and tests.
 
+## Sprint 46 Visual/Demo Bridge Plan
+
+Sprint 46 adds `docs/specs/UN-GWM-V2_VISUAL_DEMO_IDEAS.md` as a docs-only plan for a future explanatory bridge over the `UN-TRIAD-MIX` / `UN-GWM-V2` pipeline. The plan suggests storyboard panels for ordered point clouds, selected triads, edge/triangle features, angle buckets, rotate and position channels, triad stream records, adapter plans, isolated proof roundtrips, and GWM-V2 descriptor/mode commitments.
+
+The future demo is framed as a local explanatory playground for the "3D hex Enigma-like" thought experiment, not as production cryptography. It should show deterministic feature extraction, descriptor mechanics, and commitment boundaries without claiming secure encryption, secure redaction, ownership proof, identity proof, asymmetric cryptography, compression, steganography, homomorphic behavior, or production authentication. Sprint 46 does not implement browser code, CLI code, file wrappers, WebGL/canvas code, new transform behavior, or runtime integration.
+
+## Sprint 47 Static Demo Fixture Plan
+
+Sprint 47 adds `docs/examples/gwm-v2-visual-demo-fixture.json` as a small deterministic fixture for future visual-demo panels. The fixture maps raw `points` and `walkOptions` into selected triads, feature summaries, rotate/position/rule channel summaries, a triad stream summary, an adapter plan summary, a transform proof summary, and `UN-GWM-V2` descriptor/mode commitments.
+
+This is mock-data architecture only. The fixture is useful because future UI work can design panels against stable, readable JSON without introducing browser code, WebGL/canvas rendering, file import, STL import, CLI behavior, or new runtime integration. Commitments in the fixture are integrity/check artifacts and panel anchors, not secrecy claims or production authentication. The fixture must not be treated as a default transform path, a production security example, or evidence that more triadic feature mixing automatically improves security.
+
 ## Sprint 38 UN-GWM-V2 Mode Spec
 
 Sprint 38 adds a separate docs-only `UN-GWM-V2` mode specification in `docs/specs/UN-GWM-V2_IDEAS.md`. That document narrows the future mode boundary: `UN-GWM-V2` would be an explicit opt-in geometric walk mask mode powered by the existing `UN-TRIAD-MIX` pipeline, not a replacement for existing `UN-GWM`.
@@ -264,6 +276,8 @@ If future work wants production safety, it should define a sealed construction w
 - Sprint 43 is consolidation and mode-readiness only.
 - Sprint 44 implements a true opt-in `UN-GWM-V2` mode wrapper only.
 - Sprint 45 is consolidation and commit-readiness only.
+- Sprint 46 is docs/spec planning for a future visual/demo bridge only.
+- Sprint 47 is static mock-data/demo architecture only.
 - No changes to legacy runtime.
 - No changes to root package export behavior.
 - No changes to existing `UN-GWM` behavior.
@@ -285,6 +299,7 @@ If future work wants production safety, it should define a sealed construction w
 - No CLI work.
 - No file wrapper work.
 - No browser work.
+- No visual/demo implementation.
 - No default transform integration.
 - No new runtime feature behavior.
 - No cryptographic security claims.
@@ -306,6 +321,8 @@ Suggested future slices only:
 - Sprint 43: consolidated GWM-V2 exports, result shapes, descriptor-chain checks, and docs for mode-readiness only.
 - Sprint 44: added a true explicit opt-in `UN-GWM-V2` mode wrapper that assembles and verifies committed descriptor, supplied adapter binding, and optional supplied proof binding relationships without applying `UN-ROTATE`, `UN-SWAP`, or permutation transforms.
 - Sprint 45: verifies the Sprint 38-44 `UN-GWM-V2` descriptor/source/stream/binding/proof-binding/mode-wrapper arc for exports, result shapes, docs, tests, and repo hygiene without adding runtime behavior.
+- Sprint 46: adds a docs-only visual/demo bridge plan for explaining ordered points, triads, instruction channels, stream descriptors, adapter descriptors, proof roundtrips, and mode commitments without implementing a demo or changing runtime behavior.
+- Sprint 47: adds static mock-data/demo architecture documentation and a small JSON fixture for future visual panels, without implementing UI, CLI/file wrappers, WebGL/canvas, transform behavior, runtime integration, or existing `UN-GWM` changes.
 - Later: explicit transform application and stack integration only if requested. Default transform integration, N-dimensional angles, matrix mutation integration, CLI/file wrappers, and browser playground work remain separate future scopes.
 
 These suggestions should be revisited against the repository state at the start of each sprint.

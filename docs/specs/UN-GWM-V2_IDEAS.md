@@ -1,6 +1,6 @@
 # UN-GWM-V2 Ideas
 
-Status: Sprint 45 consolidation and commit-readiness checkpoint. `UN-GWM-V2` is an explicit experimental wrapper around the existing descriptor, source-point commitment, triad stream commitment, supplied adapter-plan binding, optional supplied transform-proof binding, and opt-in mode wrapper utilities. Sprint 45 verifies the Sprint 38-44 arc for export/API shape, verification result shape, documentation, tests, and repo hygiene only. It does not implement default `UN-GWM-V2` behavior, does not add a default migration from `UN-GWM`, does not change existing `UN-GWM`, does not change legacy runtime behavior, and does not add runtime feature behavior.
+Status: Sprint 47 static mock-data/demo architecture checkpoint. `UN-GWM-V2` is an explicit experimental wrapper around the existing descriptor, source-point commitment, triad stream commitment, supplied adapter-plan binding, optional supplied transform-proof binding, and opt-in mode wrapper utilities. Sprint 46 added a future visual/demo bridge plan in `docs/specs/UN-GWM-V2_VISUAL_DEMO_IDEAS.md`; Sprint 47 adds static fixture/data-shape architecture and `docs/examples/gwm-v2-visual-demo-fixture.json` only. It does not implement default `UN-GWM-V2` behavior, does not add a default migration from `UN-GWM`, does not change existing `UN-GWM`, does not change legacy runtime behavior, and does not add runtime feature behavior.
 
 `UN-GWM-V2` is experimental deterministic transformation machinery. It is not production cryptography, not authenticated encryption, not asymmetric cryptography, not identity proof, not ownership proof, not secure redaction, not compression, not steganography, not tamper-proofing, and not production-safe cryptography.
 
@@ -16,6 +16,20 @@ The mode should make the future boundary clear:
 - No existing instruction stream, stack, cascade, certificate, cutout, CLI/file, browser, or legacy runtime path should silently start using triad transforms.
 
 The research purpose is key-as-mechanism exploration: ordered geometry, deterministic walks, triadic instruction/control machinery, and committed transformation descriptions. It is not a claim that raw geometric masks are safe for production security use.
+
+## Sprint 46 Visual/Demo Bridge Plan
+
+Sprint 46 adds a docs-only plan for a future explanatory visual/demo bridge in `docs/specs/UN-GWM-V2_VISUAL_DEMO_IDEAS.md`. The planned bridge is a playground for showing the "3D hex Enigma-like" thought experiment and making key-as-mechanism visible through ordered points, walk options, selected triads, feature extraction, instruction channels, stream descriptors, adapter descriptors, isolated proof roundtrips, and explicit mode commitments.
+
+The plan is not an implementation. It does not add browser code, CLI code, file wrappers, WebGL/canvas code, transform behavior, stack/cascade/cert/cutout integration, or changes to `UN-GWM`. Any future demo must describe deterministic mechanics and commitments rather than promise secrecy, must label raw modes as experimental, and must not present more geometry, triads, channels, or dimensions as automatic security.
+
+## Sprint 47 Static Demo Fixture Plan
+
+Sprint 47 adds a static mock-data architecture layer for the future visual bridge. The fixture at `docs/examples/gwm-v2-visual-demo-fixture.json` defines a compact future demo state with `points`, `walkOptions`, `selectedTriads`, `triadFeatures`, `instructionChannels`, `triadStream`, `adapterPlan`, `transformProofSummary`, `gwmV2Descriptor`, `gwmV2Mode`, `notes`, and `securityFraming`.
+
+The fixture separates raw inputs from derived descriptors, commitments, and explanatory summaries. It gives a future local demo stable panel inputs before any UI, browser, canvas/WebGL, file import, STL import, CLI wrapper, or runtime integration exists. The commitments are deterministic integrity/check artifacts generated from existing helper APIs; they are not proof of secrecy, production authentication, ownership, identity, secure redaction, compression, steganography, tamper-proofing, or production-safe cryptography.
+
+Future browser work should remain local-first and opt-in. Static HTML or JSON-driven panels may come later, but the fixture itself must not become a runtime path, default `UN-GWM-V2` trigger, stack/cascade/cert/cutout integration, or migration path from existing `UN-GWM`.
 
 ## Relationship to Existing UN-GWM
 
@@ -280,6 +294,8 @@ Suggested future slices:
 - Sprint 43: consolidated exports, result shapes, descriptor-chain tests, and docs for mode-readiness only.
 - Sprint 44: added a true explicit opt-in `UN-GWM-V2` mode wrapper that assembles and verifies committed descriptor, adapter-binding, and optional proof-binding relationships without applying transforms or adding runtime integration.
 - Sprint 45: verifies the Sprint 38-44 descriptor/source/stream/binding/proof-binding/mode-wrapper arc for exports, result shapes, docs, tests, and repo hygiene without adding runtime behavior.
+- Sprint 46: adds `docs/specs/UN-GWM-V2_VISUAL_DEMO_IDEAS.md` as a docs-only plan for a future local explanatory visual/demo bridge, without browser implementation, CLI/file wrappers, transform behavior, GWM behavior changes, or runtime integration.
+- Sprint 47: adds static mock-data/demo architecture documentation plus `docs/examples/gwm-v2-visual-demo-fixture.json`, without UI, CLI/file wrappers, WebGL/canvas, new transform behavior, runtime integration, or existing `UN-GWM` changes.
 - Later: explicit transform application and stack integration only if requested.
 
 Each future slice should preserve legacy runtime behavior, keep `UN-GWM` unchanged unless explicitly requested, and keep security framing conservative.
