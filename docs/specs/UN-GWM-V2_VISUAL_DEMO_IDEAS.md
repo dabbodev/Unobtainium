@@ -1,6 +1,6 @@
 # UN-GWM-V2 Visual Demo Ideas
 
-Status: Sprint 47 static mock-data/demo architecture checkpoint. This document sketches a future explanatory visual/demo bridge for the `UN-GWM-V2` / `UN-TRIAD-MIX` pipeline and defines a small static fixture at `docs/examples/gwm-v2-visual-demo-fixture.json`. It does not implement browser code, CLI code, file wrappers, WebGL/canvas code, transform behavior, stack/cascade/cert/cutout integration, or changes to existing `UN-GWM`.
+Status: Sprint 48 static fixture validation checkpoint. This document sketches a future explanatory visual/demo bridge for the `UN-GWM-V2` / `UN-TRIAD-MIX` pipeline and defines a small static fixture at `docs/examples/gwm-v2-visual-demo-fixture.json`. Sprint 48 validates that the fixture remains tracked, parseable, small, and structurally useful. It does not implement browser code, CLI code, file wrappers, WebGL/canvas code, transform behavior, stack/cascade/cert/cutout integration, or changes to existing `UN-GWM`.
 
 ## Purpose
 
@@ -12,9 +12,9 @@ This bridge should explain how `UN-TRIAD-MIX` feeds `UN-GWM-V2` without replacin
 
 ## Sprint 47 Static Fixture Architecture
 
-Sprint 47 adds static mock-data architecture only. The fixture is intentionally small, deterministic, readable, and JSON-driven so a later demo can build panels against a stable state shape before any browser surface exists. Static data helps separate information architecture from rendering choices: the project can decide what a point panel, triad panel, channel panel, adapter panel, proof panel, and mode-wrapper panel need to display before adding HTML, canvas, WebGL, file import, or runtime integration.
+Sprint 47 added static mock-data architecture only, and Sprint 48 adds a lightweight validation checkpoint around that fixture shape. The fixture is intentionally small, deterministic, readable, and JSON-driven so a later demo can build panels against a stable state shape before any browser surface exists. Static data helps separate information architecture from rendering choices: the project can decide what a point panel, triad panel, channel panel, adapter panel, proof panel, and mode-wrapper panel need to display before adding HTML, canvas, WebGL, file import, or runtime integration.
 
-The fixture is explanatory, not a security example. It is not a `.un` output, does not include generated binary blobs, and does not ask the test suite to depend on long prose or fragile generated artifacts. Its commitments are helper-generated deterministic integrity/check artifacts for describing relationships between supplied points, stream descriptors, adapter plans, proof summaries, and mode wrappers.
+The fixture is explanatory, not a security example or security test vector. It is not a `.un` output, does not include generated binary blobs, and does not ask the test suite to depend on long prose or fragile generated artifacts. Its commitments are helper-generated deterministic integrity/check artifacts for describing relationships between supplied points, stream descriptors, adapter plans, proof summaries, and mode wrappers.
 
 ### Demo Data Model
 
@@ -259,9 +259,10 @@ Any future demo must:
 Suggested future slices only:
 
 - Sprint 47: adds static mock-data/demo architecture documentation and a small JSON fixture only.
-- Sprint 48: minimal static HTML/demo scaffold, if explicitly requested.
-- Sprint 49: point/triad visualization panel.
-- Sprint 50: stream/adapter/proof visualization panel.
+- Sprint 48: validates the static fixture shape only; no browser demo, CLI/file wrapper, WebGL/canvas code, runtime integration, or new transform behavior.
+- Sprint 49: minimal static HTML/demo scaffold only if explicitly requested.
+- Sprint 50: point/triad visualization panel.
+- Sprint 51: stream/adapter/proof visualization panel.
 
 These suggestions are not commitments. A later sprint should re-check repository state, acceptance criteria, and safety framing before implementing any demo surface.
 
