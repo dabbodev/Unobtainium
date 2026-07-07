@@ -171,7 +171,7 @@
     "Sprint 48 validates only the fixture shape; this fixture is not a security test vector.",
     "The commitments were generated from existing helper APIs on 2026-07-01 and are included as deterministic check artifacts.",
     "Future demos may replace or extend this fixture, but should keep raw inputs, derived descriptors, commitments, and explanatory summaries visibly separate.",
-    "File import, STL import, WebGL/canvas, static HTML panels, and browser integration remain future scope."
+    "Live generated-data bridges, file import, STL import, WebGL/canvas, CLI/file wrappers, and runtime integration remain future scope."
   ],
   "securityFraming": {
     "notProductionCryptography": true,

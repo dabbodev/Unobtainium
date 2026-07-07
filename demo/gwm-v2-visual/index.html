@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>UN-GWM-V2 Static Visual Demo</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="demo.js" defer></script>
+  </head>
+  <body>
+    <header class="page-header">
+      <p class="kicker">UN-GWM-V2 / UN-TRIAD-MIX visual demo</p>
+      <h1>Static fixture viewer</h1>
+      <p>
+        This local page renders checked-in fixture data only. It does not run
+        core transform logic, generate commitments, import files, upload data,
+        or perform live encryption.
+      </p>
+      <ul class="labels" aria-label="Safety labels">
+        <li>Experimental</li>
+        <li>Not production cryptography</li>
+        <li>Deterministic demonstration</li>
+        <li>No security guarantee</li>
+        <li>Local/static fixture</li>
+        <li>No file upload</li>
+      </ul>
+      <p id="load-status" class="status" role="status">Loading local fixture...</p>
+    </header>
+
+    <main class="panel-grid" aria-live="polite">
+      <section class="panel" id="overview-panel">
+        <h2>Overview / safety framing</h2>
+        <div data-panel="overview"></div>
+      </section>
+
+      <section class="panel" id="points-panel" aria-labelledby="points-heading">
+        <h2 id="points-heading">Ordered point list</h2>
+        <div data-panel="points"></div>
+      </section>
+
+      <section class="panel" id="walk-panel" aria-labelledby="walk-heading">
+        <h2 id="walk-heading">Walk options</h2>
+        <div data-panel="walk"></div>
+      </section>
+
+      <section class="panel" id="triads-panel" aria-labelledby="triads-heading">
+        <h2 id="triads-heading">Selected triads</h2>
+        <div data-panel="triads"></div>
+      </section>
+
+      <section class="panel wide" id="features-panel" aria-labelledby="features-heading">
+        <h2 id="features-heading">Triad features</h2>
+        <div data-panel="features"></div>
+      </section>
+
+      <section class="panel" id="rotate-panel">
+        <h2>Rotate channel</h2>
+        <div data-panel="rotate"></div>
+      </section>
+
+      <section class="panel" id="position-panel">
+        <h2>Position channel</h2>
+        <div data-panel="position"></div>
+      </section>
+
+      <section class="panel" id="rule-panel">
+        <h2>Rule/mix channel</h2>
+        <div data-panel="rule"></div>
+      </section>
+
+      <section class="panel" id="stream-panel">
+        <h2>Triad stream</h2>
+        <div data-panel="stream"></div>
+      </section>
+
+      <section class="panel" id="adapter-panel">
+        <h2>Adapter plan</h2>
+        <div data-panel="adapter"></div>
+      </section>
+
+      <section class="panel" id="proof-panel">
+        <h2>Transform proof summary</h2>
+        <div data-panel="proof"></div>
+      </section>
+
+      <section class="panel" id="descriptor-panel">
+        <h2>GWM-V2 descriptor/mode commitment summary</h2>
+        <div data-panel="descriptor"></div>
+      </section>
+    </main>
+
+    <noscript>
+      <p class="fallback">JavaScript is required to fetch and render the local JSON fixture.</p>
+    </noscript>
+  </body>
+</html>
