@@ -26,17 +26,22 @@ Status: planning document for an experimental cipher lab. Raw v3 modes are not p
 - Sprint 19: added first-pass `UN-MATRIX` pure utilities for matrix validation, descriptors, commitments, copied accessors, basic transforms, and row-as-point flattening.
 - Sprint 20: added first-pass `UN-MATRIX-MUTATE` pure committed mutation recipes for explicit deterministic bounded matrix transitions.
 - Sprint 21: added first-pass `UN-MATRIX-MUTATE-SIGNED` envelopes for signer intent over explicit committed matrix mutation recipes.
+- Sprint 22: aligned package metadata, license, and repository hygiene without changing the package API or runtime behavior.
+- Sprint 23: removed tracked dependency trees and generated `.un` artifacts and added repository hygiene checks and ignore rules to prevent their return.
 - Sprint 24: added first-pass `UN-MATRIX-COMBINE` pure committed combine recipes for deterministic tiled matrix assembly.
 - Sprint 25: added first-pass `UN-MATRIX-COMBINE-SIGNED` envelopes for signer intent over explicit committed matrix combine recipes.
 - Sprint 26: added first-pass `UN-CERT` split validation certificate objects.
 - Sprint 27: added first-pass `UN-CUTOUT` / `UN-STENCIL` committed region descriptors for byte-like payloads.
 - Sprint 28: extended `UN-CERT` with validation-only bindings for `UN-CUTOUT` descriptors and cutout commitments.
+- Sprint 29: consolidated the Sprint 19-28 matrix/certificate/cutout arc and verified core exports, docs, tests, and legacy/runtime boundaries without adding feature behavior.
 - Sprint 30: added a docs-only `UN-TRIAD-MIX` / `UN-GWM-V2` design specification for triad-as-instruction-cell mask generation.
 - Sprint 31: added pure `UN-TRIAD-MIX` feature extraction utilities for ordered point triads, including point, edge, whole-triangle, optional walk-context features, and deterministic commitments, without transform instruction emission or runtime integration.
 - Sprint 32: added pure `UN-TRIAD-MIX` multi-channel instruction emission descriptors for rotate/value, position, rule/mix, and explain/debug channels, without transform application or runtime integration.
 - Sprint 33: added pure opt-in `UN-TRIAD-MIX-STREAM` descriptors for ordered triad instruction-channel records, without transform application, existing `UN-GWM` changes, or runtime integration.
 - Sprint 34: added a pure opt-in `UN-TRIAD-MIX-ADAPTER` descriptor that translates triad stream records to rotate/swap instruction descriptor objects only, without applying `UN-ROTATE` or `UN-SWAP`, changing existing `UN-GWM`, or adding runtime integration.
 - Sprint 35: added an isolated opt-in `UN-TRIAD-MIX-TRANSFORM-PROOF` helper that applies supported triad adapter rotate/swap descriptors through existing reversible helpers and proves reverse roundtrip, without changing existing `UN-GWM`, legacy runtime behavior, or default transform integration.
+- Sprint 36: consolidated the Sprint 30-35 triad pipeline checkpoint, verifying docs, public exports, and tests while keeping default integration as future scope.
+- Sprint 37: consolidated the Sprint 19-36 arc for commit readiness and added checkpoint/release-note documentation without adding runtime feature behavior.
 - Sprint 38: added a docs-only `UN-GWM-V2` design specification for a future explicit opt-in geometric walk mask mode powered by the existing `UN-TRIAD-MIX` pipeline, without implementation, `UN-GWM` changes, or runtime integration.
 - Sprint 39: added pure committed `UN-GWM-V2` descriptor utilities for future explicit opt-in mode metadata only, without creating triad streams, adapter plans, transform proofs, applying transforms, changing existing `UN-GWM`, or adding runtime integration.
 - Sprint 40: added opt-in `UN-GWM-V2` source point commitments and triad stream generation from supplied ordered points and validated walk options, without generating adapter plans, applying transform proofs, applying transforms, changing existing `UN-GWM`, or adding runtime integration.

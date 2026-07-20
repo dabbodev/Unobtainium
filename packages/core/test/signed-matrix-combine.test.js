@@ -1,9 +1,9 @@
 'use strict';
 
 const assert = require('node:assert/strict');
-const { execFileSync } = require('node:child_process');
-const path = require('node:path');
 const test = require('node:test');
+
+const { assertNoTrackedArtifacts } = require('../test-support/git-hygiene');
 
 const {
   SIGNED_MATRIX_COMBINE_ALGORITHM,
@@ -356,17 +356,6 @@ test('root legacy export remains unchanged', () => {
   assert.equal(Unobtainium.name, 'Unobtainium');
 });
 
-test('tracked node_modules and generated .un files are not reintroduced', () => {
-  const cwd = path.resolve(__dirname, '../../..');
-  const trackedNodeModules = execFileSync('git', ['ls-files', 'node_modules'], {
-    cwd,
-    encoding: 'utf8',
-  }).trim();
-  const trackedGeneratedUn = execFileSync('git', ['ls-files', 'out/*.un'], {
-    cwd,
-    encoding: 'utf8',
-  }).trim();
-
-  assert.equal(trackedNodeModules, '');
-  assert.equal(trackedGeneratedUn, '');
+test('tracked node_modules and generated .un files are not reintroduced', (t) => {
+  assertNoTrackedArtifacts(t);
 });

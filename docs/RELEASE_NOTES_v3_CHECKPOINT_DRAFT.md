@@ -1,8 +1,8 @@
 # Unobtainium v3 Checkpoint Draft
 
-Status: Sprint 53 static visual demo consolidation checkpoint for future `UN-GWM-V2` / `UN-TRIAD-MIX` visual demo planning.
+Status: Sprint 54 checkpoint reproducibility and release hygiene for the Sprint 0-53 experimental lab history.
 
-This checkpoint covers the current v3 lab modules under `packages/core`, the supporting docs, and a minimal static fixture viewer. Sprint 53 consolidates the Sprint 46-52 static visual demo arc for commit readiness only. It does not change the legacy root runtime, does not replace existing `UN-GWM`, does not add default runtime integration for the triad pipeline, does not add a default `UN-GWM-V2` mode, and does not implement live core execution, CLI/file wrappers, WebGL/canvas surfaces, file upload/import, generated-data bridges, dependencies, or new transform behavior.
+This checkpoint covers the current v3 lab modules under `packages/core`, the supporting docs, and a minimal static fixture viewer. Sprint 54 corrects the Sprint 0-53 history, strengthens non-production framing, makes Git-index tests context-aware, and repairs the dependency lockfile within the existing declared ranges. It is cleanup and validation work only. It does not change the legacy root runtime, replace existing `UN-GWM`, add default runtime integration for the triad pipeline, add a default `UN-GWM-V2` mode, or implement live core execution, CLI/file wrappers, WebGL/canvas surfaces, file upload/import, generated-data bridges, dependencies, or new transform behavior.
 
 ## Matrix, Certificate, and Cutout Work
 
@@ -40,19 +40,32 @@ This checkpoint covers the current v3 lab modules under `packages/core`, the sup
 
 ## Repo Hygiene and Framing
 
-- Sprint 22-23 aligned package metadata, license framing, and generated/dependency artifact hygiene.
+- Sprint 22 aligned package metadata, license framing, and repository hygiene.
+- Sprint 23 removed tracked dependency trees and generated `.un` artifacts and added checks intended to prevent their return.
+- Sprint 54 makes those Git-index checks explicit about whether tracked state can actually be determined.
 - Root package import still returns the legacy `Unobtainium` constructor.
 - Existing `UN-GWM` behavior remains unchanged.
 - Default `UN-GWM-V2` behavior, default migration from `UN-GWM`, default triad integration, transform application, CLI/file wrappers, browser playground state management, WebGL/canvas implementation, file import, STL import, stack/cascade/cert/cutout integration for triad proof output, and `UN-ND` remain future scope.
-- A local generated-data bridge remains future scope and is not part of Sprint 53.
+- A local generated-data bridge remains future scope and is not part of this checkpoint.
+- `mustache` remains declared and locked for this checkpoint. No checked-in use was found outside package metadata, so removal is deferred to a future package-cleanup sprint.
 
 ## Security Framing
 
 Unobtainium v3 is an experimental geometry-key transformation lab and computational thought experiment. The future visual/demo bridge, Sprint 47 fixture, Sprint 50 static scaffold, Sprint 51-52 panel refinements, and Sprint 53 consolidation are explanatory playground material for the "3D hex Enigma-like" idea, not production tools. Sprint 53 keeps the demo static and fixture-only; the fixture is not a security test vector. Raw v3 modes are not production cryptography, secure encryption, authenticated encryption, asymmetric cryptography, identity proof, ownership proof, secure redaction, compression, steganography, tamper-proofing, homomorphic behavior, or production authentication. Fixture commitments are integrity/check artifacts, not proof of secrecy.
 
-## Validation Snapshot
+## Validation Context
 
-- `npm test`: 783 passing tests on 2026-07-05 after refining the second-half static visual demo panels.
-- Acceptance floor: at least 783 tests.
-- Legacy runtime files `unobtainium.js` and root `index.js` are intentionally unchanged for this checkpoint.
-- Generated `.un` outputs, `out/*.un`, dependency trees, logs, temp files, and `node_modules/` should remain untracked.
+### Full Git Checkout
+
+- On 2026-07-11, `npm ci --ignore-scripts` completed, `npm audit --omit=dev` reported zero known vulnerabilities, and `npm ls --depth=0` reported a clean top-level dependency tree.
+- `npm test` discovered 788 tests: 788 passed, none failed, and none were skipped. The Git-index hygiene assertions ran in this context.
+- The root import returned `function Unobtainium`.
+- `git ls-files node_modules`, `git ls-files 'out/*.un'`, and `git ls-files '*.un'` returned no tracked paths.
+- Staged and unstaged diffs for legacy runtime files `unobtainium.js` and root `index.js` were empty.
+
+### Source Archive Without `.git`
+
+- In an external archive-like copy with no `.git` metadata, `npm ci --ignore-scripts` completed and `npm test` discovered 788 tests: 785 passed, none failed, and 3 were skipped.
+- The only skips were the three Git-index assertions. Each reported: `Git-index assertion skipped: tracked state cannot be verified without Git metadata.`
+- All normal legacy runtime, v3 core, package metadata, fixture, and static-demo tests still ran.
+- A source archive can validate its included files and runtime behavior, but it cannot establish tracked-file state, staged state, or commit-relative diffs.

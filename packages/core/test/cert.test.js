@@ -1,9 +1,9 @@
 'use strict';
 
 const assert = require('node:assert/strict');
-const { execFileSync } = require('node:child_process');
-const path = require('node:path');
 const test = require('node:test');
+
+const { assertNoTrackedArtifacts } = require('../test-support/git-hygiene');
 
 const {
   CERT_FORMAT,
@@ -459,17 +459,6 @@ test('root legacy export remains unchanged after certificate export update', () 
   assert.equal(Unobtainium.name, 'Unobtainium');
 });
 
-test('tracked node_modules and generated .un files are not reintroduced by certificate work', () => {
-  const cwd = path.resolve(__dirname, '../../..');
-  const trackedNodeModules = execFileSync('git', ['ls-files', 'node_modules'], {
-    cwd,
-    encoding: 'utf8',
-  }).trim();
-  const trackedGeneratedUn = execFileSync('git', ['ls-files', 'out/*.un'], {
-    cwd,
-    encoding: 'utf8',
-  }).trim();
-
-  assert.equal(trackedNodeModules, '');
-  assert.equal(trackedGeneratedUn, '');
+test('tracked node_modules and generated .un files are not reintroduced by certificate work', (t) => {
+  assertNoTrackedArtifacts(t);
 });
