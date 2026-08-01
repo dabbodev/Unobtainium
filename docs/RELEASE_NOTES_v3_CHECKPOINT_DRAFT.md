@@ -1,8 +1,8 @@
 # Unobtainium v3 Checkpoint Draft
 
-Status: Sprint 54 checkpoint reproducibility and release hygiene for the Sprint 0-53 experimental lab history.
+Status: Sprint 55 reproducible GWM-V2 visual-demo fixture generation checkpoint for the Sprint 0-54 experimental lab history.
 
-This checkpoint covers the current v3 lab modules under `packages/core`, the supporting docs, and a minimal static fixture viewer. Sprint 54 corrects the Sprint 0-53 history, strengthens non-production framing, makes Git-index tests context-aware, and repairs the dependency lockfile within the existing declared ranges. It is cleanup and validation work only. It does not change the legacy root runtime, replace existing `UN-GWM`, add default runtime integration for the triad pipeline, add a default `UN-GWM-V2` mode, or implement live core execution, CLI/file wrappers, WebGL/canvas surfaces, file upload/import, generated-data bridges, dependencies, or new transform behavior.
+This checkpoint covers the current v3 lab modules under `packages/core`, the supporting docs, and a minimal static fixture viewer. Sprint 54 corrected the Sprint 0-53 history, strengthened non-production framing, made Git-index tests context-aware, and repaired the dependency lockfile within the existing declared ranges. Sprint 55 adds private offline Node tooling that deterministically rebuilds and checks the checked-in GWM-V2 visual-demo fixture through existing public helpers. The browser remains a static read-only fixture viewer. This checkpoint does not change the legacy root runtime, replace existing `UN-GWM`, add default runtime integration for the triad pipeline, add a default `UN-GWM-V2` mode, add public core/root exports, or implement live browser core execution, CLI/file wrappers, WebGL/canvas surfaces, file upload/import, remote network behavior, dependencies, or new transform primitives.
 
 ## Matrix, Certificate, and Cutout Work
 
@@ -37,6 +37,8 @@ This checkpoint covers the current v3 lab modules under `packages/core`, the sup
 - Sprint 51 refines the existing static fixture viewer's ordered point list, walk option, selected triad, and triad feature panels. It makes source point order, deterministic walk inputs, ordered `A`/`B`/`C` triad records, source point references, and single-point/pairwise-edge/whole-triangle feature summaries easier to inspect while remaining fixture-only.
 - Sprint 52 refines the existing static fixture viewer's triad stream, adapter plan, transform proof, and GWM-V2 descriptor/mode commitment panels. It makes record order, feature/instruction commitments, rotate/position/rule summaries, adapter rotate/swap descriptor summaries, skipped/warning fields, isolated proof commitments, and explicit opt-in wrapper commitments easier to inspect while remaining fixture-only.
 - Sprint 53 verifies the visual demo scaffold, fixture, lightweight tests, docs, and staging state for commit readiness. It keeps the demo static, local, fixture-only, and non-production.
+- Sprint 55 replaces the Sprint 47 hand-curated fixture with canonical format-v2 output from a private Node-only builder. The builder uses the existing triad stream, adapter, reversible transform-proof, descriptor, mode, and verification helpers for a fixed non-secret eight-byte sample; it fails unless the reverse roundtrip succeeds and the resulting mode verifies.
+- The generated fixture projects ordered points, walk selections, compact feature/channel records, operation counts, proof commitments, descriptor commitments, mode commitments, and safety framing. It omits raw input, transformed, and restored bytes and full runtime proof objects.
 
 ## Repo Hygiene and Framing
 
@@ -46,16 +48,26 @@ This checkpoint covers the current v3 lab modules under `packages/core`, the sup
 - Root package import still returns the legacy `Unobtainium` constructor.
 - Existing `UN-GWM` behavior remains unchanged.
 - Default `UN-GWM-V2` behavior, default migration from `UN-GWM`, default triad integration, transform application, CLI/file wrappers, browser playground state management, WebGL/canvas implementation, file import, STL import, stack/cascade/cert/cutout integration for triad proof output, and `UN-ND` remain future scope.
-- A local generated-data bridge remains future scope and is not part of this checkpoint.
+- `npm run demo:gwm-v2:generate` regenerates only `docs/examples/gwm-v2-visual-demo-fixture.json` after construction and verification succeed.
+- `npm run demo:gwm-v2:check` performs a no-write drift check and exits nonzero when the checked-in fixture differs from canonical output.
+- Live browser-generated state and public/default runtime integration remain future scope. The Sprint 55 bridge is private offline developer tooling and is not called by the browser.
 - `mustache` remains declared and locked for this checkpoint. No checked-in use was found outside package metadata, so removal is deferred to a future package-cleanup sprint.
 
 ## Security Framing
 
-Unobtainium v3 is an experimental geometry-key transformation lab and computational thought experiment. The future visual/demo bridge, Sprint 47 fixture, Sprint 50 static scaffold, Sprint 51-52 panel refinements, and Sprint 53 consolidation are explanatory playground material for the "3D hex Enigma-like" idea, not production tools. Sprint 53 keeps the demo static and fixture-only; the fixture is not a security test vector. Raw v3 modes are not production cryptography, secure encryption, authenticated encryption, asymmetric cryptography, identity proof, ownership proof, secure redaction, compression, steganography, tamper-proofing, homomorphic behavior, or production authentication. Fixture commitments are integrity/check artifacts, not proof of secrecy.
+Unobtainium v3 is an experimental geometry-key transformation lab and computational thought experiment. The Sprint 47 fixture, Sprint 50 static scaffold, Sprint 51-52 panel refinements, Sprint 53 consolidation, Sprint 54 framing cleanup, and Sprint 55 reproducible fixture bridge are explanatory playground material for the "3D hex Enigma-like" idea, not production tools. The browser remains static and fixture-only. The fixed sample is synthetic and non-secret, and the fixture is not a security test vector. Raw v3 modes are not production cryptography, secure encryption, authenticated encryption, asymmetric cryptography, identity proof, ownership proof, secure redaction, compression, steganography, tamper-proofing, homomorphic behavior, or production authentication. Fixture commitments, roundtrip success, and mode verification are integrity, consistency, and deterministic reversibility checks only; they are not proof of secrecy or security.
 
 ## Validation Context
 
-### Full Git Checkout
+### Sprint 55 — Full Git Checkout
+
+- On 2026-08-01 with Node v24.13.0 and npm 11.12.1, `npm run demo:gwm-v2:generate` reported the canonical fixture already current and left its SHA-256 hash unchanged.
+- `npm run demo:gwm-v2:check` passed against the checked-in canonical bytes without writing the fixture.
+- `npm test` discovered 794 tests: 794 passed, none failed, and none were skipped or marked todo. The root import, legacy behavior, existing `UN-GWM`, core export boundary, Git-index hygiene, generated fixture, and static-browser boundary assertions all ran in this context.
+
+The Sprint 54 results below are retained as a historical baseline and are not presented as current Sprint 55 verification.
+
+### Sprint 54 Baseline — Full Git Checkout
 
 - On 2026-07-11, `npm ci --ignore-scripts` completed, `npm audit --omit=dev` reported zero known vulnerabilities, and `npm ls --depth=0` reported a clean top-level dependency tree.
 - `npm test` discovered 788 tests: 788 passed, none failed, and none were skipped. The Git-index hygiene assertions ran in this context.
@@ -63,7 +75,7 @@ Unobtainium v3 is an experimental geometry-key transformation lab and computatio
 - `git ls-files node_modules`, `git ls-files 'out/*.un'`, and `git ls-files '*.un'` returned no tracked paths.
 - Staged and unstaged diffs for legacy runtime files `unobtainium.js` and root `index.js` were empty.
 
-### Source Archive Without `.git`
+### Sprint 54 Baseline — Source Archive Without `.git`
 
 - In an external archive-like copy with no `.git` metadata, `npm ci --ignore-scripts` completed and `npm test` discovered 788 tests: 785 passed, none failed, and 3 were skipped.
 - The only skips were the three Git-index assertions. Each reported: `Git-index assertion skipped: tracked state cannot be verified without Git metadata.`

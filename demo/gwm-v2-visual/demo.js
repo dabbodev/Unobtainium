@@ -145,9 +145,14 @@
     target.append(keyValueList([
       ['format', fixture.fixture.format],
       ['version', fixture.fixture.version],
-      ['source sprint', fixture.fixture.sprint],
+      ['introduced in sprint', fixture.fixture.introducedInSprint],
+      ['generated in sprint', fixture.fixture.generatedInSprint],
+      ['generation context', fixture.fixture.generationContextId],
+      ['fixed sample payload length (bytes)', fixture.fixture.fixedSamplePayloadLength],
       ['purpose', fixture.fixture.purpose],
       ['generated from helpers', fixture.fixture.generatedFromExistingHelpers],
+      ['mode wrapper verified', fixture.fixture.modeVerified],
+      ['raw payload bytes included', fixture.fixture.rawPayloadBytesIncluded],
       ['not production cryptography', fixture.securityFraming.notProductionCryptography],
       ['no security guarantee', 'commitments are deterministic integrity/check artifacts only']
     ]));

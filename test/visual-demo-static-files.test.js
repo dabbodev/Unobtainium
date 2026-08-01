@@ -38,6 +38,9 @@ test('visual demo scaffold keeps required safety labels and fixture-only path', 
   });
 
   assert.match(js, /\.\.\/\.\.\/docs\/examples\/gwm-v2-visual-demo-fixture\.json/);
+  assert.match(js, /fixture\.fixture\.introducedInSprint/);
+  assert.match(js, /fixture\.fixture\.generatedInSprint/);
+  assert.doesNotMatch(js, /fixture\.fixture\.sprint\b/);
   assert.doesNotMatch(html, /<input\b[^>]*\btype=["']?file/i);
 });
 
@@ -69,6 +72,7 @@ test('visual demo scaffold avoids external resources and core/runtime imports', 
 
   assert.doesNotMatch(html, /https?:\/\//i);
   assert.doesNotMatch(html, /cdn/i);
+  assert.doesNotMatch(html, /fixture-generator\.js/i);
   assert.doesNotMatch(html, /<canvas\b/i);
   assert.doesNotMatch(html, /webgl/i);
   assert.doesNotMatch(html, /<input\b[^>]*\btype=["']?file/i);

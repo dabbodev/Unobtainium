@@ -28,6 +28,7 @@ test('visual demo fixture is parseable and structurally framed', () => {
   const raw = fs.readFileSync(fixturePath, 'utf8');
   const fixture = JSON.parse(raw);
   const expectedTopLevelKeys = [
+    'fixture',
     'points',
     'walkOptions',
     'selectedTriads',
@@ -52,8 +53,20 @@ test('visual demo fixture is parseable and structurally framed', () => {
   assert.ok(Array.isArray(fixture.instructionChannels));
   assert.ok(Array.isArray(fixture.notes));
 
+  assert.equal(fixture.fixture.format, 'UN-GWM-V2-VISUAL-DEMO-FIXTURE');
+  assert.equal(fixture.fixture.version, 2);
+  assert.equal(fixture.fixture.introducedInSprint, 47);
+  assert.equal(fixture.fixture.generatedInSprint, 55);
+  assert.equal(fixture.fixture.generationContextId, 'gwm-v2-visual-demo-v2');
+  assert.equal(fixture.fixture.fixedSamplePayloadLength, 8);
+  assert.equal(fixture.fixture.rawPayloadBytesIncluded, false);
+  assert.equal(fixture.fixture.modeVerified, true);
+
   assert.equal(fixture.securityFraming.notProductionCryptography, true);
   assert.equal(fixture.securityFraming.visualizationExplainsDeterministicMachineryOnly, true);
+  assert.equal(fixture.securityFraming.generatedLocallyWithoutNetwork, true);
+  assert.equal(fixture.securityFraming.fixedSamplePayloadIsNonSecret, true);
+  assert.equal(fixture.securityFraming.rawPayloadBytesAreOmitted, true);
 
   const strings = collectStrings(fixture);
   const unOutputPathPattern = /(^|[\\/])[^"'`\s]+\.un(?:\b|$)|\bout[\\/][^"'`\s]+\.un(?:\b|$)/i;

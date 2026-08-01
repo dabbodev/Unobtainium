@@ -1,7 +1,7 @@
 # UN-GWM-V2 Static Visual Demo
 
 This is a minimal static local fixture viewer for the `UN-GWM-V2` /
-`UN-TRIAD-MIX` visual explanation. It renders the checked-in fixture at
+`UN-TRIAD-MIX` visual explanation. It renders the canonical generated fixture at
 `docs/examples/gwm-v2-visual-demo-fixture.json` and highlights ordered source
 points, deterministic walk options, selected ordered triads, and deterministic
 feature summaries. It also displays fixture-backed stream records, adapter
@@ -30,6 +30,26 @@ root keeps the relative fixture path available:
 ../../docs/examples/gwm-v2-visual-demo-fixture.json
 ```
 
+## Regenerate or Check the Fixture
+
+From the repository root, the private offline Node generator can rebuild the
+canonical fixture through the existing public core helpers:
+
+```text
+npm run demo:gwm-v2:generate
+```
+
+That command writes only `docs/examples/gwm-v2-visual-demo-fixture.json` after
+the fixed-sample roundtrip and GWM-V2 mode verification succeed. To check for
+drift without writing any file, run:
+
+```text
+npm run demo:gwm-v2:check
+```
+
+The check exits nonzero when the checked-in fixture differs from canonical
+output. Neither command is called by the browser viewer.
+
 ## Scope
 
 - Uses static fixture data only.
@@ -42,8 +62,10 @@ root keeps the relative fixture path available:
 - Does not provide file import controls.
 - Does not provide CLI/file wrappers.
 - Does not perform live encryption or run core transform logic.
-- Does not generate commitments or `.un` artifacts.
+- The browser does not generate commitments or `.un` artifacts; the offline
+  developer command generates fixture commitments from a fixed non-secret sample.
 - Does not use external CDN resources, WebGL, canvas, or build tooling.
 
-Live generated-data bridges, STL import, file import, WebGL/canvas views,
-and a browser playground remain future scope.
+Live browser-generated state, STL import, file import, WebGL/canvas views, and a
+browser playground remain future scope. The generated fixture omits raw input,
+transformed, and restored payload bytes and is not a security test vector.

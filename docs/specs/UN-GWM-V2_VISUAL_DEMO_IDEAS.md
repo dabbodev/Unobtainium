@@ -1,26 +1,26 @@
 # UN-GWM-V2 Visual Demo Ideas
 
-Status: Sprint 53 static visual demo consolidation checkpoint. This document sketches an explanatory local/static visual demo for the `UN-GWM-V2` / `UN-TRIAD-MIX` pipeline and references the small static fixture at `docs/examples/gwm-v2-visual-demo-fixture.json`. Sprint 50 added a minimal static fixture viewer under `demo/gwm-v2-visual/`. Sprint 51 refined the ordered point, walk option, selected triad, and feature-summary panels. Sprint 52 refined the triad stream, adapter plan, transform proof, and descriptor/mode commitment panels while continuing to render checked-in JSON fixture data only. Sprint 53 verifies that scaffold, fixture, tests, docs, and repo hygiene are coherent for commit readiness. It does not add CLI code, file wrappers, WebGL/canvas code, transform behavior, runtime integration, stack/cascade/cert/cutout integration, live generated-data bridges, dependencies, or changes to existing `UN-GWM`.
+Status: Sprint 55 reproducible generated-fixture checkpoint. This document describes the explanatory local/static visual demo for the `UN-GWM-V2` / `UN-TRIAD-MIX` pipeline and the canonical fixture at `docs/examples/gwm-v2-visual-demo-fixture.json`. Sprint 50 added the minimal static viewer under `demo/gwm-v2-visual/`; Sprint 51-52 refined its fixture-backed panels; Sprint 53 consolidated the static demo arc; and Sprint 54 reconciled checkpoint history and reproducibility framing. Sprint 55 replaces the hand-curated fixture with deterministic format-v2 output from private offline Node tooling while the browser continues to render checked-in JSON only. It does not add public APIs, browser core execution, file wrappers, WebGL/canvas code, default/runtime integration, stack/cascade/cert/cutout integration, dependencies, or changes to existing `UN-GWM`.
 
 ## Purpose
 
-The future visual/demo bridge should be an explanatory local/static visualization, not production tooling. Its purpose is to make key-as-mechanism visible: ordered points, walks, selected triads, feature extraction, instruction channels, stream descriptors, adapter descriptors, proof descriptors, and opt-in `UN-GWM-V2` mode commitments should be inspectable as deterministic machinery.
+The visual/demo bridge is an explanatory local/static visualization, not production tooling. Its purpose is to make key-as-mechanism visible: ordered points, walks, selected triads, feature extraction, instruction channels, stream descriptors, adapter descriptors, proof descriptors, and opt-in `UN-GWM-V2` mode commitments should be inspectable as deterministic machinery.
 
 The demo can frame Unobtainium v3 as a "3D hex Enigma-like" thought experiment: a software lab asking what it might look like if ordered 3D geometry acted like a visible mechanism for deriving deterministic instructions. The visual should emphasize the mechanism, not promise secrecy.
 
 This bridge should explain how `UN-TRIAD-MIX` feeds `UN-GWM-V2` without replacing legacy `UN-GWM`. It should show what is committed, what is merely descriptive, and what remains future-only.
 
-The first scaffold loads fixed mock fixture data before any live generated data. It does not include user file import, STL import, encryption claims, production-security claims, generated `.un` artifacts, runtime integration, or remote network behavior.
+The browser scaffold loads the checked-in fixture and never performs live generation. Sprint 55 generation is an offline developer step over a fixed non-secret sample. Neither path includes user file import, STL import, encryption claims, production-security claims, generated `.un` artifacts, runtime integration, or remote network behavior.
 
 ## Sprint 47 Static Fixture Architecture
 
-Sprint 47 added static mock-data architecture only, and Sprint 48 adds a lightweight validation checkpoint around that fixture shape. The fixture is intentionally small, deterministic, readable, and JSON-driven so a later demo can build panels against a stable state shape before any browser surface exists. Static data helps separate information architecture from rendering choices: the project can decide what a point panel, triad panel, channel panel, adapter panel, proof panel, and mode-wrapper panel need to display before adding HTML, canvas, WebGL, file import, or runtime integration.
+Sprint 47 added static mock-data architecture, and Sprint 48 added a lightweight validation checkpoint around that fixture shape. Sprint 55 retains the small, readable, JSON-driven panel contract but replaces the hand-curated format-v1 file with canonical format-v2 output. The fixture records `introducedInSprint: 47`, `generatedInSprint: 55`, the stable generation context, the fixed sample length, and successful mode verification without adding volatile timestamps.
 
-The fixture is explanatory, not a security example or security test vector. It is not a `.un` output, does not include generated binary blobs, and does not ask the test suite to depend on long prose or fragile generated artifacts. Its commitments are helper-generated deterministic integrity/check artifacts for describing relationships between supplied points, stream descriptors, adapter plans, proof summaries, and mode wrappers.
+The fixture is explanatory, not a security example or security test vector. It is not a `.un` output and does not include raw input, transformed, or restored payload bytes or full runtime proof objects. Its commitments are helper-generated deterministic integrity/check artifacts for describing relationships between supplied points, stream descriptors, adapter plans, proof summaries, and mode wrappers.
 
 ### Demo Data Model
 
-The future visual demo state should keep these categories visibly separate:
+The visual demo state keeps these categories visibly separate:
 
 - Raw inputs: `points` and `walkOptions`.
 - Selected raw/derived bridge state: `selectedTriads`, which records ordered `A`, `B`, and `C` samples and point indexes for display.
@@ -28,7 +28,7 @@ The future visual demo state should keep these categories visibly separate:
 - Commitments/check artifacts: source point, feature, instruction, stream, adapter, proof, descriptor, binding, and mode commitments.
 - Explanatory summaries: `notes` and `securityFraming`.
 
-The fixture fields are expected to be stable panel inputs, not executable instructions for a default runtime. Future demos may regenerate them through explicit helpers, but should not silently use them to alter legacy `UN-GWM`, stacks, cascade reports, certificate/cutout paths, CLI behavior, browser behavior, or file wrappers.
+The fixture fields are stable panel inputs, not executable instructions for a default runtime. Sprint 55 regenerates them only through explicit private offline tooling. Neither the generator nor the viewer may silently alter legacy `UN-GWM`, stacks, cascade reports, certificate/cutout paths, CLI behavior, browser behavior, or file wrappers.
 
 ### Sprint 50 Static Scaffold
 
@@ -63,6 +63,16 @@ Sprint 52 keeps the same static fixture-only implementation and improves the exi
 
 Sprint 52 does not import package core modules, run live transform logic, generate commitments, mutate fixture data, add file input, add dependencies, add network behavior beyond loading the local fixture, or create CLI/file/WebGL/canvas/runtime behavior.
 
+### Sprint 55 Reproducible Fixture Bridge
+
+Sprint 55 adds a private Node-only `buildGwmV2VisualDemoFixture(scenario)` path outside the root and core public APIs. Its canonical scenario uses the existing four ordered points and walk options, fixed bytes `[0,1,2,3,4,5,6,7]`, context ID `gwm-v2-visual-demo-v2`, and matching metadata.
+
+The builder composes existing public helpers in this order: GWM-V2 triad stream generation, triad adapter-plan generation, reversible plan roundtrip, GWM-V2 descriptor/mode assembly, and mode verification. It derives selected point indexes through the existing distinct-walk helpers and rejects any mismatch with the generated stream triads. Generation fails unless the payload is restored and the mode verifies.
+
+The output projects only the fields needed by the static viewer: points, walk options, selected triads, compact feature/channel summaries, stream and adapter counts, proof summary and commitments, descriptor commitments, mode commitments, provenance notes, and security framing. It omits raw payload bytes, transformed/restored bytes, applied operation bodies, full adapter instructions, and full runtime proof objects.
+
+From the repository root, `npm run demo:gwm-v2:generate` rewrites only the canonical fixture after successful construction. `npm run demo:gwm-v2:check` performs no writes and exits nonzero when checked-in bytes differ from canonical two-space JSON with LF endings and a final newline. The browser calls neither command and continues to fetch the checked-in JSON fixture only.
+
 ### Panel Mapping
 
 - Overview / safety framing panel: explains the local/static fixture scope and displays safety labels.
@@ -79,9 +89,9 @@ Sprint 52 does not import package core modules, run live transform logic, genera
 
 ### Fixture Mapping
 
-| Fixture field | Future panel use |
+| Fixture field | Panel use |
 | --- | --- |
-| `fixture` | Overview / safety framing panel: fixture format, version, sprint provenance, purpose, and helper-generated status. |
+| `fixture` | Overview / safety framing panel: fixture format/version, Sprint 47 introduction, Sprint 55 generation, stable generation context, fixed sample length, raw-byte omission, purpose, and verified status. |
 | `points` | Ordered point list panel: source point rows and visible order. |
 | `walkOptions` | Ordered point list panel and triad selection panel: point/shift/gap/horizon/ring walk context. |
 | `selectedTriads` | Triad selection panel: ordered triad samples and point indexes. |
@@ -95,7 +105,7 @@ Sprint 52 does not import package core modules, run live transform logic, genera
 | `notes` | Overview / safety framing panel: explanatory scope notes. |
 | `securityFraming` | Overview / safety framing panel: non-production flags and disallowed claim categories. |
 
-The spec intentionally does not require exact generated commitment values in prose. Future implementation should display fixture-provided values as data, not copy them into narrative documentation.
+The spec intentionally does not require exact generated commitment values in prose. The viewer displays fixture-provided values as data instead of copying them into narrative documentation.
 
 ### Safety Labels
 
@@ -116,14 +126,14 @@ This scaffold should:
 - avoid network calls except loading the local fixture;
 - avoid uploading user data;
 - avoid bundling generated `.un` artifacts;
-- use fixture data before live generated data;
+- use the checked-in fixture rather than live browser-generated data;
 - not modify legacy runtime behavior;
 - not replace or silently alter existing `UN-GWM`;
 - not add CLI/file wrapper behavior as part of the scaffold.
 
 ### Future Implementation Notes
 
-Future browser work should remain local-first. File import remains future scope. STL import remains future scope. WebGL/canvas remains future scope. Live generated-data bridges remain future scope. Later implementations should treat the JSON fixture as read-only explanatory state unless that sprint explicitly adds a new opt-in helper or fixture generation path.
+Future browser work should remain local-first. File import remains future scope. STL import remains future scope. WebGL/canvas remains future scope. Live browser-generated state remains future scope. Sprint 55's generated-data bridge is private offline Node tooling; the browser continues to treat the JSON fixture as read-only explanatory state.
 
 ## Non-Production Framing
 
@@ -335,9 +345,9 @@ Any future demo must:
 - use fixture data or explicit opt-in helpers when showing adapter plans and proof objects;
 - keep raw debug details out of any future production-looking artifact.
 
-## Future Implementation Roadmap
+## Implementation History and Future Work
 
-Suggested future slices only:
+Completed visual-demo slices and remaining future work:
 
 - Sprint 47: added static mock-data/demo architecture documentation and a small JSON fixture only.
 - Sprint 48: validated the static fixture shape only; no browser demo, CLI/file wrapper, WebGL/canvas code, runtime integration, or new transform behavior.
@@ -345,16 +355,18 @@ Suggested future slices only:
 - Sprint 50: created minimal static scaffold files with fixture rendering only.
 - Sprint 51: refined point, walk, triad, and feature presentation in the static fixture viewer only.
 - Sprint 52: refined stream, adapter, proof, and descriptor/mode commitment presentation in the static fixture viewer only.
-- Sprint 53: consolidate the Sprint 46-52 static visual demo files, fixture, tests, docs, and staging hygiene for commit readiness only.
-- Future: optionally add a local generated-data bridge only if a later sprint explicitly requests it.
+- Sprint 53: consolidated the Sprint 46-52 static visual demo files, fixture, tests, docs, and staging hygiene for commit readiness only.
+- Sprint 54: reconciled checkpoint history, non-production framing, lockfile reproducibility, and Git/source-archive validation context without adding demo behavior.
+- Sprint 55: added deterministic private offline generation and no-write drift checking for the canonical format-v2 fixture while preserving the static read-only browser viewer.
+- Future: optionally add live browser-generated state only through a separately specified opt-in sprint.
 
 These suggestions are not commitments. A later sprint should re-check repository state, acceptance criteria, and safety framing before implementing any demo surface.
 
 ## Non-Goals
 
-- No live browser playground state management in Sprint 53.
-- No generated-data bridge in Sprint 53.
-- No file import or STL import in Sprint 53.
+- No live browser playground state management in Sprint 55.
+- No live browser or public runtime generated-data bridge; Sprint 55 generation is private offline developer tooling for the fixed fixture only.
+- No file import or STL import in Sprint 55.
 - No CLI implementation.
 - No file wrappers.
 - No WebGL or canvas implementation.
